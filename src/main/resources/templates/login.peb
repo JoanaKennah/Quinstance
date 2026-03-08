@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        h1 {
+            color: black;
+            font-weight: bold;
+        }
+
+        label {
+            color: green;
+            font-weight: bold;
+            display: block;
+            margin-top: 20px;
+        }
+
+        input {
+            width: 250px;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .forgot {
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .forgot a {
+            color: green;
+            text-decoration: underline;
+        }
+
+        .forgot a:hover {
+            color: darkgreen;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 10px 25px;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: darkgreen;
+        }
+    
+    </style>
+</head>
+
+<body>
+
+<h1>Welcome Back!<h1>
+
+<form method="post" action="/login">
+
+    <label>Username:</label>
+    <input type="text" name="username" required>
+
+    <label>Password:</label>
+    <input type="password" name="password" required>
+
+    <div class="forgot">
+        <a href="#">Forgot Password?</a>
+    </div>
+
+    <button type="submit">Enter</button>
+
+</form>
+
+</body>
+</html>

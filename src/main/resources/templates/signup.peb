@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up</title>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        h1 {
+            color: black;
+            font-weight: bold;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        label {
+            color: green;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 200px;
+            margin-top: 5px;
+        }
+
+        .full-width input {
+            width: 440px;
+        }
+
+        .single {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 10px 25px;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: darkgreen;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<h1>Join Us!</h1>
+
+<form method="post" action="/signup">
+    
+    <div class="row">
+    <div class="field">
+    <label>First Name:</label>
+    <input type="text" name="firstname" required>
+    </div>
+    <div class="field">
+    <label>Last Name:</label>
+    <input type="text" name="lastname" required>
+    </div>
+    </div>
+
+    <div class="single">
+    <div class="field full-width" style="align-items:center;">
+    <label>Email Address:</label>
+    <input type="email" name="email" required>
+    </div>
+    </div>
+
+    <div class="row">
+    <div class="field">
+    <label>Key Stage:</label>
+    <select name="keystage">
+    <option value="keystageone">KS1</option>
+    <option value="keystagetwo">KS2</option>
+    <option value="keystagethree">KS3</option>
+    <option value="keystagefour">KS4</option>
+    <option value="keystagefive">KS5</option>
+    <option value="furthereducation">Further Education</option>
+    <option value="nonapplicable">N/A</option>
+    </select>
+    </div>
+    <div class="field">
+    <label>Role:</label>
+    <select name="role">
+    <option value="student">Student</option>
+    <option value="teacher">Teacher</option>
+    </select>
+    </div>
+    </div>
+
+    <div class="single">
+    <div class="field full-width" style="align-items:center;">
+    <label>Username:</label>
+    <input type="text" name="username" required>
+    </div>
+    </div>
+
+    <div class="row">
+    <div class="field">
+    <label>Password:</label>
+    <input type="password" name="password" required>
+    </div>
+    <div class="field">
+    <label>Confirm Password:</label>
+    <input type="password" name="confirmpassword" required>
+    </div>
+    </div>
+
+    <button type="submit">Enter</button>
+
+</form>
+
+</body>
+</html>
