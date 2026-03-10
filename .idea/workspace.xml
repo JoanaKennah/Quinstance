@@ -4,67 +4,93 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ecbec13f-0d29-42dc-b9e1-3f5e197a37c5" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/151ff8c9-b0a7-453a-9afb-ed5f842a6caa.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/151ff8c9-b0a7-453a-9afb-ed5f842a6caa/storage_v2/_src_/database/DATA.qucfAA.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/151ff8c9-b0a7-453a-9afb-ed5f842a6caa/storage_v2/_src_/database/DATA.qucfAA/schema/INFORMATION_SCHEMA.NBgcMw.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/151ff8c9-b0a7-453a-9afb-ed5f842a6caa/storage_v2/_src_/database/DATA.qucfAA/schema/PUBLIC.aaZQjQ.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/3610c403-1ba6-4ceb-a624-346cf90ff7b5.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/3610c403-1ba6-4ceb-a624-346cf90ff7b5/storage_v2/_src_/database/DATA.qucfAA.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/3610c403-1ba6-4ceb-a624-346cf90ff7b5/storage_v2/_src_/database/DATA.qucfAA/schema/INFORMATION_SCHEMA.NBgcMw.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources/3610c403-1ba6-4ceb-a624-346cf90ff7b5/storage_v2/_src_/database/DATA.qucfAA/schema/PUBLIC.aaZQjQ.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data.mv.db" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data.trace.db" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/Application.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/Database.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/Routing.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/Serialization.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/Templating.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/UsersSchema.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/ProjectDatabase.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/TestDatabase.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/Answer.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/InUseCode.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/Question.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/Quinstance.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/Quiz.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/Session.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/User.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/UserScore.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/AnswerTable.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/InUseTable.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/QuestionTable.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/QuinstanceTable.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/QuizTable.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/SessionTable.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/UserScoreTable.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/UserTable.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/application.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/logback.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/psw4j.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/templates/pebble-index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/kotlin/ApplicationTest.kt" afterDir="false" />
+    <list default="true" id="ecbec13f-0d29-42dc-b9e1-3f5e197a37c5" name="Changes" comment="Merge branch 'main' of https://github.com/JoanaKennah/Group-Project into ethan-database-v2&#10;&#10;# Conflicts:&#10;#&#9;.idea/misc.xml&#10;#&#9;.idea/workspace.xml&#10;#&#9;build.gradle.kts&#10;#&#9;gradle/libs.versions.toml&#10;#&#9;src/main/kotlin/Application.kt&#10;#&#9;src/main/kotlin/Routing.kt&#10;#&#9;src/main/kotlin/Serialization.kt&#10;#&#9;src/main/kotlin/Templating.kt&#10;#&#9;src/main/kotlin/UsersSchema.kt">
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__ch_qos_logback_logback_classic_1_4_14.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__ch_qos_logback_logback_core_1_4_14.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_charleskorn_kaml_kaml_jvm_0_79_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_h2database_h2_2_4_240.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_password4j_password4j_1_8_4.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_squareup_okio_okio_jvm_3_12_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__com_typesafe_config_1_4_5.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_client_apache5_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_client_cio_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_client_core_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_events_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_http_cio_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_http_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_io_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_network_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_network_tls_certificates_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_network_tls_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_serialization_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_serialization_kotlinx_json_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_serialization_kotlinx_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_server_call_logging_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_server_config_yaml_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_server_content_negotiation_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_server_core_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_server_netty_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_server_pebble_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_server_test_host_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_server_websockets_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_sse_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_test_dispatcher_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_utils_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_websocket_serialization_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_ktor_ktor_websockets_jvm_3_4_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_buffer_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_codec_base_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_codec_compression_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_codec_http2_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_codec_http_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_common_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_handler_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_resolver_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_transport_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_transport_classes_epoll_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_transport_classes_kqueue_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_transport_native_epoll_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_transport_native_kqueue_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_netty_netty_transport_native_unix_common_4_2_9_Final.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__io_pebbletemplates_pebble_4_1_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__it_krzeminski_snakeyaml_engine_kmp_jvm_3_1_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__junit_junit_4_13_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_bytebuddy_byte_buddy_1_10_9.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_bytebuddy_byte_buddy_agent_1_10_9.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_java_dev_jna_jna_5_9_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_java_dev_jna_jna_platform_5_9_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_mamoe_yamlkt_yamlkt_jvm_0_13_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__net_thauvin_erik_urlencoder_urlencoder_lib_jvm_1_6_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_apache_httpcomponents_client5_httpclient5_5_5_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_apache_httpcomponents_core5_httpcore5_5_3_6.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_apache_httpcomponents_core5_httpcore5_h2_5_3_6.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_eclipse_jetty_alpn_alpn_api_1_1_3_v20160715.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_fusesource_jansi_jansi_2_4_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_hamcrest_hamcrest_core_1_3.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_annotations_23_0_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_exposed_exposed_core_1_1_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_exposed_exposed_dao_1_1_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_exposed_exposed_jdbc_1_1_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_reflect_2_3_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_stdlib_2_3_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_stdlib_jdk7_1_8_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_stdlib_jdk8_1_8_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_test_2_3_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlin_kotlin_test_junit_2_3_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlinx_kotlinx_coroutines_core_jvm_1_10_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlinx_kotlinx_coroutines_debug_1_10_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlinx_kotlinx_coroutines_slf4j_1_10_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlinx_kotlinx_coroutines_test_jvm_1_10_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlinx_kotlinx_datetime_jvm_0_7_1_0_6_x_compat.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlinx_kotlinx_io_bytestring_jvm_0_8_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlinx_kotlinx_io_core_jvm_0_8_2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlinx_kotlinx_serialization_core_jvm_1_9_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlinx_kotlinx_serialization_json_io_jvm_1_9_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jetbrains_kotlinx_kotlinx_serialization_json_jvm_1_9_0.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_slf4j_slf4j_api_2_0_17.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__org_unbescape_unbescape_1_1_6_RELEASE.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,43 +127,43 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;linguin0&quot;
-  }
-}</component>
+        &quot;lastFilter&quot;: {
+        &quot;state&quot;: &quot;OPEN&quot;,
+        &quot;assignee&quot;: &quot;linguin0&quot;
+        }
+        }</component>
   <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/JoanaKennah/Group-Project.git&quot;,
-    &quot;accountId&quot;: &quot;554d8484-840d-4819-b96a-b1c573d2efe1&quot;
-  }
-}</component>
+        &quot;selectedUrlAndAccountId&quot;: {
+        &quot;url&quot;: &quot;https://github.com/JoanaKennah/Group-Project.git&quot;,
+        &quot;accountId&quot;: &quot;554d8484-840d-4819-b96a-b1c573d2efe1&quot;
+        }
+        }</component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\Cutie\.gradle\wrapper\dists\gradle-9.3.0-bin\79n14ral3mx1ozqr3csh2u872\gradle-9.3.0" javaHome="C:\Users\Cutie\.jdks\openjdk-25.0.2" gradleVersion="9.3.0" />
   <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 5
-}</component>
+        &quot;associatedIndex&quot;: 5
+        }</component>
   <component name="ProjectId" id="3AfugzyT1hGLW7WXf3NVku5nVyW" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;ethan-database-v2&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;Template Data Languages&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "ethan-database-v2",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "Template Data Languages",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
       <recent name="database" />
