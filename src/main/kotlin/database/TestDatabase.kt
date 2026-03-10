@@ -32,8 +32,9 @@ object TestDatabase {
                 it[username] = "linguin0"
                 it[password] = hashedPasswordOne.result
                 it[name] = "Ethan Harris"
-                it[email_address] = "ethan@gmail.com"
-                it[type] = "Admin"
+                it[email] = "ethan@gmail.com"
+                it[key_stage] = "Further Education"
+                it[role] = "Admin"
             }
 
             val hashedPasswordTwo = Password.hash("password456").addRandomSalt(8).withScrypt()
@@ -41,8 +42,8 @@ object TestDatabase {
                 it[username] = "JoanaKennah"
                 it[password] = hashedPasswordTwo.result
                 it[name] = "Joana Kennah"
-                it[email_address] = "joana@outlook.com"
-                it[type] = "Admin"
+                it[key_stage] = "Further Education"
+                it[role] = "Admin"
             }
 
             val hashedPasswordThree = Password.hash("password789").addRandomSalt(8).withScrypt()
@@ -50,8 +51,8 @@ object TestDatabase {
                 it[username] = "MinghaoLe123"
                 it[password] = hashedPasswordThree.result
                 it[name] = "Minghao Le"
-                it[email_address] = "minghao@yahoo.com"
-                it[type] = "Admin"
+                it[key_stage] = "Further Education"
+                it[role] = "Admin"
             }
         }
     }

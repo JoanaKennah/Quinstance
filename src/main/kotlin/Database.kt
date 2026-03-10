@@ -39,9 +39,9 @@ fun retrieveUser(username: String) : User? {
 /**
  * Adds a new User to UserTable
  */
-fun addUser(username: String, password: String, name: String, email_address: String, type: String) : User? {
+fun addUser(username: String, password: String, name: String, email: String, key_stage: String, role: String) : User? {
     // Check to ensure all parameters are not empty
-    for (parameter in listOf(username, name, email_address, type)) {
+    for (parameter in listOf(username, name, email, key_stage, role)) {
         require(parameter.isNotEmpty())
     }
     // Check to see if user already exists with the same username
@@ -52,8 +52,9 @@ fun addUser(username: String, password: String, name: String, email_address: Str
             this.username = username
             this.password = hash.result
             this.name = name
-            this.email_address = email_address
-            this.type = type
+            this.email = email
+            this.key_stage = key_stage
+            this.role = role
         }
         return newUser
     }; return null

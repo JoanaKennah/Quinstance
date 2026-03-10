@@ -6,6 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="ecbec13f-0d29-42dc-b9e1-3f5e197a37c5" name="Changes" comment="Merge branch 'main' of https://github.com/JoanaKennah/Group-Project into ethan-database-v2&#10;&#10;# Conflicts:&#10;#&#9;.idea/misc.xml&#10;#&#9;.idea/workspace.xml&#10;#&#9;build.gradle.kts&#10;#&#9;gradle/libs.versions.toml&#10;#&#9;src/main/kotlin/Application.kt&#10;#&#9;src/main/kotlin/Routing.kt&#10;#&#9;src/main/kotlin/Serialization.kt&#10;#&#9;src/main/kotlin/Templating.kt&#10;#&#9;src/main/kotlin/UsersSchema.kt">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data.mv.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data.trace.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/Database.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Database.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/TestDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/TestDatabase.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/objects/User.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/User.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/tables/UserTable.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/UserTable.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
