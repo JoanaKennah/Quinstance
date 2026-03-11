@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            text-align: center;
+        }
+
+        .navbar {
+            background-color: #FFC78A;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            color: black,
+            margin-top: 40px;
+        }
+
+        .button-container {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        button {
+            background-color: white,
+            border: 2px solid #FFC78A;
+            padding: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            color: orange;
+            width: 260px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background-color: #FFC78A;
+            color: white;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+<a href="/profile">Profile</a>
+</div>
+
+<h1>Hello {{ username }}!</h1>
+
+<div class="button-container">
+<button>Join a Lobby</button>
+<button>Create a Quiz</button>
+<button>View Quizzes</button>
+<button>View Statistics</button>
+<button>Create a Student Account</button>
+</div>
+
+</body>
+</html>
