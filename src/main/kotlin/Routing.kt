@@ -30,6 +30,22 @@ fun Application.configureRouting() {
                     val quiz = addQuiz(user, "My Quiz", "yay", "Cool", 1)
                     val question1 = addQuestion(quiz, "What is my name?", "KS1")
                     println("Question 1 ID: ${question1.id}")
+
+                    // test 2
+                    val allQuiz = retrieveUserQuizzes(user.username)
+                    if (allQuiz != null) {
+                        for (quiz in allQuiz) {
+                            println(quiz.quiz_name)
+                        }
+                    }
+
+                    // test3
+                    val question2 = addQuestion(quiz, "How old am I?", "KS1")
+                    val question3 = addQuestion(quiz, "What university do I go to?", "KS1")
+                    val questions = retrieveQuizQuestions(quiz)
+                    for (i in questions) {
+                        println("Question ID: ${i.id}: Question: ${i.question}")
+                    }
                 }
             }
 

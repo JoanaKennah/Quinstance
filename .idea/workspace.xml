@@ -5,14 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ecbec13f-0d29-42dc-b9e1-3f5e197a37c5" name="Changes" comment="database tables set up, database objects set up, signup and login functionality required from the database set up (addUser, retreiveUser), test database initialised but need to discuss tests with team, some of my idea folder has been added, im not sure if this is an issue however&#10;&#10;# Conflicts:&#10;#&#9;.idea/misc.xml&#10;#&#9;.idea/workspace.xml&#10;#&#9;build.gradle.kts&#10;#&#9;gradle/libs.versions.toml&#10;#&#9;src/main/kotlin/Application.kt&#10;#&#9;src/main/kotlin/Routing.kt&#10;#&#9;src/main/kotlin/Serialization.kt&#10;#&#9;src/main/kotlin/Templating.kt&#10;#&#9;src/main/kotlin/UsersSchema.kt">
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data.mv.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data.trace.db" beforeDir="false" afterPath="$PROJECT_DIR$/data.trace.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/Database.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Database.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/Routing.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Routing.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/objects/Quinstance.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/Quinstance.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/objects/Quiz.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/Quiz.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/tables/QuinstanceTable.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/QuinstanceTable.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/tables/QuizTable.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/QuizTable.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,7 +141,7 @@
       <workItem from="1772996066108" duration="66000" />
       <workItem from="1773005802787" duration="20465000" />
       <workItem from="1773157126037" duration="3914000" />
-      <workItem from="1773322842993" duration="3600000" />
+      <workItem from="1773322842993" duration="5508000" />
     </task>
     <servers />
   </component>

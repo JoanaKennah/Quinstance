@@ -4,10 +4,17 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.core.eq
 import com.password4j.Password
+import kotlin.text.isNotEmpty
 import com.example.database.ProjectDatabase
 import com.example.database.tables.*
 import com.example.database.objects.*
-import kotlin.text.isNotEmpty
+
+//  All code here was written by a human :>
+/*  Websites used for debugging/learning
+    - https://kotlinlang.org
+    - https://www.jetbrains.com/help/exposed
+    - https://stackoverflow.com
+ */
 
 /**
  * Creates all required tables if they do not already exist.
@@ -88,6 +95,7 @@ fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
         this.question = question
         this.key_stage = key_stage
     }
+    // Creates Quinstance so we know which Quiz is associated with what Question
     val newQuinstance = Quinstance.new {
         this.quiz = quiz
         this.question = newQuestion
@@ -109,7 +117,28 @@ fun deleteQuestion(question: Question): Boolean {
     return false
 }
 
-// retrieveQuizQuestions would go here ?
+/**
+ * Retrieves all Questions associated with the given Quiz. If there are no questions associated with the quiz,
+ * a null value is returned.
+ */
+fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
+    // Check to see if quiz actually exists
+    require( Quiz.findById(quiz.id) == quiz ) { "Quiz received does not exist" }
+
+    // Find all question ID's associated with the given Quiz
+    val foundQuestionQuinstances = Quinstance.find { QuinstanceTable.quiz eq quiz.id }
+    val questionList = mutableListOf<Question>()
+
+    // Retrieves Question objects from the ID's found and appends them to a list, which is returned.
+    // Can be empty but never null
+    for (questionQuinstance in foundQuestionQuinstances) {
+        val question = Question.findById(questionQuinstance.id)
+        if (question != null) {
+            questionList.add(question)
+        }
+    }
+    return questionList
+}
 
 /**
  * Creates and adds a new Quiz to QuizTable
@@ -124,7 +153,7 @@ fun addQuiz(user: User, quiz_name: String, description: String, category: String
     }
     // Don't need to check if Quiz already exists
     val newQuiz = Quiz.new {
-        this.user = user // this is weird i need to double check it
+        this.user = user
         this.quiz_name = quiz_name
         this.description = description
         this.category = category
