@@ -96,6 +96,9 @@
 
     <button type="submit">Enter</button>
 
+
+<p class="switch-text">Don’t have an account? <a href="/signup" class="switch-link">Sign up</a></p>
+
 </form>
 
 </body>

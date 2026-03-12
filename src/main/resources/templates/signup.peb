@@ -148,6 +148,8 @@
 
     <button type="submit">Enter</button>
 
+<p class="switch-text">Already have an account? <a href="/login" class="switch-link">Log in here</a></p>
+
 </form>
 
 </body>
