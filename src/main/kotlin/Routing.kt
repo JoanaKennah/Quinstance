@@ -46,10 +46,21 @@ fun Application.configureRouting() {
                     for (i in questions) {
                         println("Question ID: ${i.id}: Question: ${i.question}")
                     }
+
+                    // test 4
+                    val answer1 = addAnswer(question1, "Ethan", "Emily", "Joana", "Minghao")
+                    val answer2 = addAnswer(question2, "20", "24", "21")
+                    val answer3 = addAnswer(question3, "Uni of Leeds", "Uni of Sheffield")
+
+                    for (question in questions) {
+                        println("Question: ${question.id}")
+                        val ans = retrieveQuestionAnswer(question)
+                        if (ans != null) {
+                            println("Correct answer: ${ans.correct_answer}")
+                        }
+                    }
                 }
             }
-
-
         }
     }
 }

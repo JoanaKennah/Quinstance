@@ -192,3 +192,44 @@ fun retrieveUserQuizzes(username: String) : MutableList<Quiz>? {
     }
     return quizList
 }
+
+/**
+ * Creates and adds an Answer (to a Question) to AnswerTable
+ */
+fun addAnswer(question: Question, correct_answer: String, option2: String, option3: String? = null, option4: String? = null) : Answer? {
+    // Will need to discuss with team if we want the user to be able to have 2, 3 or 4 answers
+    require(Question.findById(question.id) == question) { "Question given does not exist" }
+    require(correct_answer.isNotEmpty()) { "correct_answer must not be empty" }
+    require(option2.isNotEmpty()) { "option2 must not be empty" }
+
+    // Check to see if an Answer already exists (Question and Answer have 1:1 relationship), return null if Answer
+    // already exists
+    val check = Answer.find {AnswerTable.question eq question.id }
+    if (check.firstOrNull() != null) {
+        return null
+    }
+
+    val newAnswer = Answer.new {
+        this.question = question
+        this.correct_answer = correct_answer
+        this.option2 = option2
+        this.option3 = option3
+        this.option4 = option4
+    }
+    return newAnswer
+}
+
+/**
+ * Retrieves Answer for given Question. Will return null if there is no answer.
+ * NOTE: I was going to create a function to return ALL answers from a quiz, however I believe this may get confusing
+ * unless I was to map each answer to a questionID. Am happy to do this instead but will want to discuss with the team
+ */
+fun retrieveQuestionAnswer(question: Question) : Answer? {
+    // Check to see if quiz given actually exists
+    require(Question.findById(question.id) == question) { "Question given does not exist" }
+
+    val foundAnswer = Answer.find(AnswerTable.question eq question.id)
+    // Return null if there is no Answer to this Question
+    val answer = foundAnswer.firstOrNull() ?: return null
+    return answer
+}

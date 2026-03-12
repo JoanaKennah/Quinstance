@@ -7,9 +7,11 @@
     <list default="true" id="ecbec13f-0d29-42dc-b9e1-3f5e197a37c5" name="Changes" comment="database tables set up, database objects set up, signup and login functionality required from the database set up (addUser, retreiveUser), test database initialised but need to discuss tests with team, some of my idea folder has been added, im not sure if this is an issue however&#10;&#10;# Conflicts:&#10;#&#9;.idea/misc.xml&#10;#&#9;.idea/workspace.xml&#10;#&#9;build.gradle.kts&#10;#&#9;gradle/libs.versions.toml&#10;#&#9;src/main/kotlin/Application.kt&#10;#&#9;src/main/kotlin/Routing.kt&#10;#&#9;src/main/kotlin/Serialization.kt&#10;#&#9;src/main/kotlin/Templating.kt&#10;#&#9;src/main/kotlin/UsersSchema.kt">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data.mv.db" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data.trace.db" beforeDir="false" afterPath="$PROJECT_DIR$/data.trace.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data.trace.db" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/Database.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Database.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/Routing.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Routing.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/objects/Answer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/Answer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/tables/AnswerTable.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/AnswerTable.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,23 +68,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;ethan-database-v2&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;Template Data Languages&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "ethan-database-v2",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "Template Data Languages",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
       <recent name="database" />
@@ -141,7 +144,7 @@
       <workItem from="1772996066108" duration="66000" />
       <workItem from="1773005802787" duration="20465000" />
       <workItem from="1773157126037" duration="3914000" />
-      <workItem from="1773322842993" duration="5508000" />
+      <workItem from="1773322842993" duration="12201000" />
     </task>
     <servers />
   </component>
