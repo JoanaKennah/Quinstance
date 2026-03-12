@@ -12,10 +12,19 @@ import io.ktor.server.routing.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import io.pebbletemplates.pebble.loader.ClasspathLoader
 
+
 fun Application.configureRouting() {
     routing {
         get("/") {
-            call.respondText("Hello World!")
+            call.respond(PebbleContent("homepage.peb", mapOf<String, Any>()))
+        }
+
+        get("/login") {
+            call.respond(PebbleContent("login.peb", mapOf<String, Any>()))
+        }
+
+        get("/signup") {
+            call.respond(PebbleContent("signup.peb", mapOf<String, Any>()))
         }
     }
 }
