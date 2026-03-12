@@ -5,6 +5,6 @@ import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 
 object QuinstanceTable : IntIdTable() {
-    val quizID = reference("quizID", QuizTable.id, ReferenceOption.CASCADE)
-    val questionID = reference("questionID", QuestionTable.id, ReferenceOption.CASCADE)
+    val quiz = reference("quiz", QuizTable, ReferenceOption.CASCADE)
+    val question = reference("question", QuestionTable, ReferenceOption.CASCADE)
 }

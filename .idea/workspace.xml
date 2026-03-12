@@ -4,14 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ecbec13f-0d29-42dc-b9e1-3f5e197a37c5" name="Changes" comment="Merge branch 'main' of https://github.com/JoanaKennah/Group-Project into ethan-database-v2&#10;&#10;# Conflicts:&#10;#&#9;.idea/misc.xml&#10;#&#9;.idea/workspace.xml&#10;#&#9;build.gradle.kts&#10;#&#9;gradle/libs.versions.toml&#10;#&#9;src/main/kotlin/Application.kt&#10;#&#9;src/main/kotlin/Routing.kt&#10;#&#9;src/main/kotlin/Serialization.kt&#10;#&#9;src/main/kotlin/Templating.kt&#10;#&#9;src/main/kotlin/UsersSchema.kt">
+    <list default="true" id="ecbec13f-0d29-42dc-b9e1-3f5e197a37c5" name="Changes" comment="database tables set up, database objects set up, signup and login functionality required from the database set up (addUser, retreiveUser), test database initialised but need to discuss tests with team, some of my idea folder has been added, im not sure if this is an issue however&#10;&#10;# Conflicts:&#10;#&#9;.idea/misc.xml&#10;#&#9;.idea/workspace.xml&#10;#&#9;build.gradle.kts&#10;#&#9;gradle/libs.versions.toml&#10;#&#9;src/main/kotlin/Application.kt&#10;#&#9;src/main/kotlin/Routing.kt&#10;#&#9;src/main/kotlin/Serialization.kt&#10;#&#9;src/main/kotlin/Templating.kt&#10;#&#9;src/main/kotlin/UsersSchema.kt">
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data.mv.db" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data.trace.db" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/Database.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Database.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/TestDatabase.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/TestDatabase.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/objects/User.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/User.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/tables/UserTable.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/UserTable.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/Routing.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Routing.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/objects/Quinstance.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/Quinstance.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/objects/Quiz.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/objects/Quiz.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/tables/QuinstanceTable.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/QuinstanceTable.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/kotlin/database/tables/QuizTable.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/database/tables/QuizTable.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,17 +49,17 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
-        &quot;lastFilter&quot;: {
-        &quot;state&quot;: &quot;OPEN&quot;,
-        &quot;assignee&quot;: &quot;linguin0&quot;
-        }
-        }</component>
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;linguin0&quot;
+  }
+}</component>
   <component name="GithubPullRequestsUISettings">{
-        &quot;selectedUrlAndAccountId&quot;: {
-        &quot;url&quot;: &quot;https://github.com/JoanaKennah/Group-Project.git&quot;,
-        &quot;accountId&quot;: &quot;554d8484-840d-4819-b96a-b1c573d2efe1&quot;
-        }
-        }</component>
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/JoanaKennah/Group-Project.git&quot;,
+    &quot;accountId&quot;: &quot;554d8484-840d-4819-b96a-b1c573d2efe1&quot;
+  }
+}</component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\Cutie\.gradle\wrapper\dists\gradle-9.3.0-bin\79n14ral3mx1ozqr3csh2u872\gradle-9.3.0" javaHome="C:\Users\Cutie\.jdks\openjdk-25.0.2" gradleVersion="9.3.0" />
   <component name="ProjectColorInfo">{
         &quot;associatedIndex&quot;: 5
@@ -142,6 +143,8 @@
       <updated>1772996064873</updated>
       <workItem from="1772996066108" duration="66000" />
       <workItem from="1773005802787" duration="20465000" />
+      <workItem from="1773157126037" duration="3914000" />
+      <workItem from="1773322842993" duration="3600000" />
     </task>
     <servers />
   </component>
@@ -158,6 +161,16 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="java-exception">
+          <properties class="java.lang.reflect.InvocationTargetException" package="java.lang.reflect" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

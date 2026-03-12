@@ -3,13 +3,12 @@ package com.example.database.objects
 import org.jetbrains.exposed.v1.dao.IntEntity
 import org.jetbrains.exposed.v1.dao.IntEntityClass
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
-import com.example.database.tables.UserTable
 import com.example.database.tables.QuizTable
 
 class Quiz(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Quiz>(QuizTable)
 
-    var userID by User referencedOn UserTable.id
+    var user by User referencedOn QuizTable.user // NEW FIX
     var quiz_name by QuizTable.quiz_name
     var num_of_questions by QuizTable.num_of_questions
     var description by QuizTable.description

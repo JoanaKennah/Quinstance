@@ -10,8 +10,8 @@ import com.example.database.tables.QuizTable
 class Quinstance(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Quinstance>(QuinstanceTable)
 
-    var quizID by Quinstance referencedOn QuizTable.id
-    var questionID by Question referencedOn QuestionTable.id
+    var quiz by Quiz referencedOn QuinstanceTable.quiz
+    var question by Question referencedOn QuinstanceTable.question
 
-    override fun toString() = id.toString()
+    override fun toString() = question.question
 }
