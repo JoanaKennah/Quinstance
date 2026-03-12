@@ -7,7 +7,24 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin-top: 80px;
+            margin-top: 0;
+        }
+
+        .navbar {
+            background-color: #cfe9c6;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
         }
 
         h1 {
@@ -29,7 +46,7 @@
         }
 
         label {
-            color: green;
+            color: #a2d192;
             font-weight: bold;
         }
 
@@ -51,20 +68,24 @@
         button {
             margin-top: 25px;
             padding: 10px 25px;
-            background-color: green;
+            background-color: #a2d192;
             color: white;
             border: none;
             cursor: pointer;
         }
 
         button:hover {
-            background-color: darkgreen;
+            background-color: green;
         }
 
     </style>
 </head>
 
 <body>
+
+<div class="navbar">
+<a href="/home">Home</a>
+</div>
 
 <h1>Join Us!</h1>
 
