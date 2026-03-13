@@ -1,6 +1,7 @@
 package com.example
 
 import com.example.database.ProjectDatabase
+import com.example.database.tables.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -11,6 +12,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import io.pebbletemplates.pebble.loader.ClasspathLoader
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 
 
 fun Application.configureRouting() {
