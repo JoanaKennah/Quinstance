@@ -34,7 +34,7 @@ object TestDatabase {
                 it[name] = "Ethan Harris"
                 it[email] = "ethan@gmail.com"
                 it[key_stage] = "Further Education"
-                it[role] = "Admin"
+                it[role] = "admin"
             }
 
             val hashedPasswordTwo = Password.hash("password456").addRandomSalt(8).withScrypt()
@@ -42,8 +42,9 @@ object TestDatabase {
                 it[username] = "JoanaKennah"
                 it[password] = hashedPasswordTwo.result
                 it[name] = "Joana Kennah"
+                it[email] = "joanakennah@gmail.com"
                 it[key_stage] = "Further Education"
-                it[role] = "Admin"
+                it[role] = "admin"
             }
 
             val hashedPasswordThree = Password.hash("password789").addRandomSalt(8).withScrypt()
@@ -51,10 +52,12 @@ object TestDatabase {
                 it[username] = "MinghaoLe123"
                 it[password] = hashedPasswordThree.result
                 it[name] = "Minghao Le"
+                it[email] = "tgqj4326@leeds.ac.uk"
                 it[key_stage] = "Further Education"
-                it[role] = "Admin"
+                it[role] = "admin"
             }
         }
     }
 }
 
+// to use test database over the real one, type in the command box "./gradlew run -PapplicationModule=testModule
