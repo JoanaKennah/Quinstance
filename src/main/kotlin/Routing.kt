@@ -111,5 +111,15 @@ fun Application.configureRouting() {
             }
 
         }
+
+        get("/teacher-dashboard") {
+            val username = "Teacher" // TODO: get from session
+            call.respond(PebbleContent("teacher_dashboard.peb", mapOf("username" to username)))
+        }
+
+        get("/student-dashboard") {
+            val username = "Student" // TODO: get from session
+            call.respond(PebbleContent("student_dashboard.peb", mapOf("username" to username)))
+        }
     }
 }
