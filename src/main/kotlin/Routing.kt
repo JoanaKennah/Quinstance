@@ -16,6 +16,7 @@ import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 
 import com.password4j.Password
 import com.example.retrieveUser
+import com.example.addUser
 
 fun Application.configureRouting() {
     routing {
@@ -49,10 +50,10 @@ fun Application.configureRouting() {
             if (checkPassword) {
                 when (user.role.lowercase()) {
                     "student" -> {
-                        call.respondRedirect("/student_dashboard")
+                        call.respondRedirect("/student-dashboard")
                     }
                     "teacher", "admin" -> {
-                        call.respondRedirect("/teacher_dashboard")
+                        call.respondRedirect("/teacher-dashboard")
                     }
                 }
             } else {
@@ -64,12 +65,44 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("signup.peb", mapOf<String, Any>()))
         }
 
-        get("/student_dashboard") {
-            call.respond(PebbleContent("student_dashboard.peb", mapOf()))
-        }
+        post("/signup") {
+            val parameters = call.receiveParameters()
+            val firstname = parameters["firstname"]
+            val lastname = parameters["lastname"]
+            val email = parameters["email"]
+            val username = parameters["username"]
+            val password = parameters["password"]
+            val confirmpassword = parameters["confirmpassword"]
+            val role = parameters["role"]
+            val keystage = parameters["keystage"]
 
-        get("/teacher_dashboard") {
-            call.respond(PebbleContent("teacher_dashboard.peb", mapOf()))
+            if (firstname == null || lastname == null || email == null || username == null || password == null || confirmpassword == null || role == null || keystage == null) {
+                call.respondText("Missing input(s)")
+                return@post
+            }
+
+            if (password != confirmpassword) {
+                call.respondText("Passwords don't match")
+                return@post
+            }
+
+            val name = "$firstname $lastname"
+            val result = transaction(ProjectDatabase.database) {
+                val newUser = addUser(username, password, name, email, keystage, role)
+                newUser?.role?.lowercase()
+            }
+
+            when (result) {
+                "student" -> {
+                    call.respondRedirect("/student-dashboard")
+                }
+                "teacher", "admin" -> {
+                    call.respondRedirect("/teacher-dashboard")
+                }
+                else -> {
+                    call.respondText("Failed to create new user")
+                }
+            }
         }
     }
 }
