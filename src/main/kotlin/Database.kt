@@ -6,6 +6,7 @@ import org.jetbrains.exposed.v1.core.eq
 import com.password4j.Password
 import kotlin.text.isNotEmpty
 import com.example.database.ProjectDatabase
+import com.example.database.TestDatabase
 import com.example.database.tables.*
 import com.example.database.objects.*
 
@@ -40,8 +41,12 @@ fun configureDatabase() {
  * Retrieves user from UserTable using their username, returns null if no user found
  */
 fun retrieveUser(username: String) : User? {
-    val foundUser = User.find { UserTable.username eq username }
-    return foundUser.firstOrNull()
+    return transaction(ProjectDatabase.database) {
+        User.find { UserTable.username eq username }.firstOrNull()
+    }
+    
+    //val foundUser = User.find { UserTable.username eq username }
+    //return foundUser.firstOrNull()
 }
 
 /**
