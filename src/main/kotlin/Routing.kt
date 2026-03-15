@@ -21,12 +21,52 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("homepage.peb", mapOf<String, Any>()))
         }
 
+        get("/home") {
+            call.respond(PebbleContent("homepage.peb", mapOf<String, Any>()))
+        }
+
         get("/login") {
             call.respond(PebbleContent("login.peb", mapOf<String, Any>()))
         }
 
+        post("/login") {
+            val params = call.receiveParameters()
+            val username = params["username"] ?: ""
+            //add - look up in db and check role
+            val role = "student" //placeholder
+
+            if (role == "teacher") {
+                call.respondRedirect("/teacher-dashboard")
+            } else {
+                call.respondRedirect("/student-dashboard")
+            }
+        }
+
         get("/signup") {
             call.respond(PebbleContent("signup.peb", mapOf<String, Any>()))
+        }
+
+        post("/signup") {
+            val params = call.receiveParameters()
+            val username = params["username"] ?: ""
+            val role = params["role"] ?: "student"
+            //add - insert user in db
+
+            if (role == "teacher") {
+                call.respondRedirect("/teacher-dashboard")
+            } else {
+                call.respondRedirect("/student-dashboard")
+            }
+        }
+
+        get("/teacher-dashboard") {
+            val username = "Teacher" // TODO: get from session
+            call.respond(PebbleContent("teacher_dashboard.peb", mapOf("username" to username)))
+        }
+
+        get("/student-dashboard") {
+            val username = "Student" // TODO: get from session
+            call.respond(PebbleContent("student_dashboard.peb", mapOf("username" to username)))
         }
     }
 }
