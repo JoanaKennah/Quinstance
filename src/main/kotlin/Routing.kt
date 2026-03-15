@@ -24,6 +24,10 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("homepage.peb", mapOf<String, Any>()))
         }
 
+        get("/home") {
+            call.respond(PebbleContent("homepage.peb", mapOf<String, Any>()))
+        }
+
         get("/login") {
             call.respond(PebbleContent("login.peb", mapOf<String, Any>()))
         }
@@ -90,7 +94,7 @@ fun Application.configureRouting() {
                     newUser?.role?.lowercase()
                 }
             }
-            
+
             when (newUserRole) {
                 "USERNAME_EXISTS" -> {
                     call.respondText("Username already exists")
