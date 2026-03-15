@@ -72,7 +72,7 @@
 <button>Create a Quiz</button>
 <button>View Quizzes</button>
 <button>View Statistics</button>
-<button>Create a Student Account</button>
+<button onclick="window.location.href='/signup'">Create a Student Account</button>
 </div>
 
 </body>
