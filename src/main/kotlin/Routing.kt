@@ -67,19 +67,14 @@ fun Application.configureRouting() {
 
         post("/signup") {
             val parameters = call.receiveParameters()
-            val firstname = parameters["firstname"]
-            val lastname = parameters["lastname"]
-            val email = parameters["email"]
-            val username = parameters["username"]
-            val password = parameters["password"]
-            val confirmpassword = parameters["confirmpassword"]
-            val role = parameters["role"]
-            val keystage = parameters["keystage"]
-
-            if (firstname == null || lastname == null || email == null || username == null || password == null || confirmpassword == null || role == null || keystage == null) {
-                call.respondText("Missing input(s)")
-                return@post
-            }
+            val firstname = parameters["firstname"]?: return@post call.respondText("Missing input")
+            val lastname = parameters["lastname"]?: return@post call.respondText("Missing input")
+            val email = parameters["email"]?: return@post call.respondText("Missing input")
+            val username = parameters["username"]?: return@post call.respondText("Missing input")
+            val password = parameters["password"]?: return@post call.respondText("Missing input")
+            val confirmpassword = parameters["confirmpassword"]?: return@post call.respondText("Missing input")
+            val role = parameters["role"]?: return@post call.respondText("Missing input")
+            val keystage = parameters["keystage"]?: return@post call.respondText("Missing input")
 
             if (password != confirmpassword) {
                 call.respondText("Passwords don't match")
@@ -87,12 +82,19 @@ fun Application.configureRouting() {
             }
 
             val name = "$firstname $lastname"
-            val result = transaction(ProjectDatabase.database) {
+            val newUserRole = transaction(ProjectDatabase.database) {
                 val newUser = addUser(username, password, name, email, keystage, role)
-                newUser?.role?.lowercase()
+                if (newUser == null) {
+                    "USERNAME_EXISTS"
+                } else {
+                    newUser?.role?.lowercase()
+                }
             }
-
-            when (result) {
+            
+            when (newUserRole) {
+                "USERNAME_EXISTS" -> {
+                    call.respondText("Username already exists")
+                }
                 "student" -> {
                     call.respondRedirect("/student-dashboard")
                 }
@@ -103,6 +105,16 @@ fun Application.configureRouting() {
                     call.respondText("Failed to create new user")
                 }
             }
+
+        }
+        get("/teacher-dashboard") {
+            val username = "Teacher" // TODO: get from session
+            call.respond(PebbleContent("teacher_dashboard.peb", mapOf("username" to username)))
+        }
+
+        get("/student-dashboard") {
+            val username = "Student" // TODO: get from session
+            call.respond(PebbleContent("student_dashboard.peb", mapOf("username" to username)))
         }
     }
 }
