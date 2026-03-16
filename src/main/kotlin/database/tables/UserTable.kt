@@ -12,10 +12,10 @@ import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
  * @property role account role (e.g. Student, Teacher, Admin)
  */
 object UserTable : IntIdTable() {
-    val username = varchar("username", 20).uniqueIndex() // random length for now, unique
+    val username = varchar("username", 50).uniqueIndex() // random length for now, unique
     val password = varchar("password", 255) // will be hashed
-    val name = varchar("name", 20)
-    val email = varchar("email", 20)
+    val name = varchar("name", 50)
+    val email = varchar("email", 50)
     val key_stage = varchar("key_stage", 20)
-    val role = varchar("role", 7)
+    val role = varchar("role", 10)
 }
