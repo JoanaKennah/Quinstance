@@ -28,7 +28,7 @@
         }
 
         h1 {
-            color: black,
+            color: black;
             margin-top: 40px;
         }
 
@@ -63,6 +63,8 @@
 
 <div class="navbar">
 <a href="/profile">Profile</a>
+<a href="/logout">Logout</a>
+
 </div>
 
 <h1>Hello {{ username }}!</h1>
