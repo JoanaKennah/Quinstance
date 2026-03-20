@@ -62,12 +62,12 @@
 <body>
 
 <div class="navbar">
-<a href="/profile">Profile</a>
+<a>Profile</a>
 </div>
 
 <h1>Hello {{ username }}!</h1>
 
-<div class="button-container">
+<div class="button-container"> <!--- NEED TO ADD ROUTING --->
 <button>Join a Lobby</button>
 <button>Create a Quiz</button>
 <button>View Quizzes</button>
