@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Quiz Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+      
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+        }
+
+        .title-box {
+            border: 2px solid #e63973;
+            background-color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        .title-box h1 {
+            color: black;
+            margin: 0;
+        }
+
+        .button-bar {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .add-btn {
+            background-color: #e63973;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+      
+        .add-btn:hover {
+            background-color: #d6285f;
+        }
+
+        .next-btn {
+            padding: 10px 20px;
+            background-color: #e63973;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .next-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+      
+        .next-btn:hover {
+            background-color: #d6285f;
+        }
+
+        .questions-container {
+            margin-top: 30px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .question-box {
+            border: 2px solid #e63973;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            color: black;
+        }
+    </style>
+
+    <script>
+        function validateForm() {
+            const questionCount = {{ questions | length }};
+            
+            if (questionCount === 0) {
+                alert("You must add at least one question before continuing.");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="navbar">
+  <a>Quiz Creation</a>
+</div>
+
+<div class="content">
+
+    <div class="title-box">
+        <h1>{{ quizName }}</h1>
+    </div>
+
+    <div class="button-bar">
+
+        <a class="add-btn"> <!--- NEED TO ADD ROUTING --->
+            + Add a Question
+        </a>
+
+        <form method="post" action="" onsubmit="return validateForm()"> <!--- NEED TO CHECK AFTER ROUTING --->
+            <button class="next-btn" type="submit"
+                {% if questions is empty %}disabled{% endif %}>
+                Next
+            </button>
+        </form>
+
+    </div>
+
+    <div class="questions-container">
+
+        {% for question in questions %}
+            <div class="question-box">
+                {{ loop.index }}. {{ question.text }}
+            </div>
+        {% endfor %}
+
+    </div>
+</div>
+
+</body>
+</html>

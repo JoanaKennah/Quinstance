@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Create a Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+      
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+        }
+
+        h1 {
+            color: black;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .left, .right {
+            width: 45%;
+        }
+
+        label {
+            color: #e63973;
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        .mini-games {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .games-options {
+            display: none;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .bottom-bar {
+            margin-top: 40px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .cancel {
+            margin-right: 20px;
+            text-decoration: none;
+            color: black;
+        }
+
+        .cancel:hover {
+            text-decoration: underline;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #e63973;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #d6285f;
+        }
+      
+        .tooltip {
+            display: inline-block;
+            position: relative;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        .tooltip-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: #e63973;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 12px;
+            line-height: 16px;
+            font-weight: bold;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 180px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            padding: 6px;
+            border-radius: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; 
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+        }
+      
+    </style>
+
+    <script>
+        function toggleMiniGames() {
+            const toggle = document.getElementById("miniGamesToggle");
+            const options = document.getElementById("gamesOptions");
+
+            options.style.display = toggle.checked ? "block" : "none";
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="navbar">
+  <a>Quiz Creation</a>
+</div>
+
+<div class="content">
+
+<h1>Create a Quiz</h1>
+
+<form method="post" action="/create-quiz">
+
+    <div class="container">
+
+        <div class="left">
+            <label>Quiz Name:</label>
+            <input type="text" name="quizName" required>
+
+            <label>Description:</label>
+            <textarea name="description" required></textarea>
+        </div>
+
+        <div class="right">
+            <label>Key Stage:</label>
+            <select name="keystage" required>
+                <option value="">Select...</option>
+                <option value="KS1">KS1</option>
+                <option value="KS2">KS2</option>
+                <option value="KS3">KS3</option>
+                <option value="KS4">KS4</option>
+                <option value="KS5">KS5</option>
+                <option value="furthereducation">Further Education</option>
+            </select>
+
+            <label>Category:</label>
+            <select name="category" required>
+                <option value="">Select...</option>
+                <option value="art">Art and Design</option>
+                <option value="biology">Biology</option>
+                <option value="business">Business Studies</option>
+                <option value="chemistry">Chemistry</option>
+                <option value="cs">Computer Science</option>
+                <option value="dt">Design and Technology</option>
+                <option value="drama">Drama</option>
+                <option value="eng_lang">English Language</option>
+                <option value="eng_lit">English Literature</option>
+                <option value="french">French</option>
+                <option value="geography">Geography</option>
+                <option value="german">German</option>
+                <option value="history">History</option>
+                <option value="latin">Latin</option>
+                <option value="maths">Mathematics</option>
+                <option value="media">Media Studies</option>
+                <option value="music">Music</option>
+                <option value="pe">Physical Education</option>
+                <option value="physics">Physics</option>
+                <option value="rs">Religious Studies</option>
+                <option value="spanish">Spanish</option>
+                <option value="other">Other</option>
+                
+            </select>
+        </div>
+
+    </div>
+
+    <div class="mini-games">
+        <label>Mini Games?</label>
+        <input type="checkbox" id="miniGamesToggle" name="miniGames" onchange="toggleMiniGames()">
+        Yes
+    </div>
+
+    <div id="gamesOptions" class="games-options">
+
+    <input type="radio" name="gameType" value="murder_party">
+    Murder Party
+
+    <span class="tooltip">
+        <span class="tooltip-icon">?</span>
+        <span class="tooltip-text">
+            People who answer incorrectly go into a head-to-head to see who will remain in the game.
+        </span>
+    </span>
+
+    <br>
+
+    <input type="radio" name="gameType" value="gold_quest">
+    Gold Quest
+
+    <span class="tooltip">
+        <span class="tooltip-icon">?</span>
+        <span class="tooltip-text">
+            Players can answer questions to collect/lose gold to see who will come out with the most.
+        </span>
+    </span>
+    </div>
+
+    <div class="bottom-bar"> <!--- NEED TO ADD ROUTING --->
+
+        <a class="cancel">
+            Cancel
+        </a>
+
+        <button type="submit">Next</button>
+
+    </div>
+
+</form>
+</div>
+
+</body>
+</html>

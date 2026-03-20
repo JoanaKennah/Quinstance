@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Quiz Created</title>
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            text-align: center;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: black,
+            margin-top: 40px;
+        }
+
+        .button-container {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        button {
+            background-color: #e63973;
+            padding: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            color: white;
+            width: 260px;
+            transition: 0.2s;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #d6285f;
+            color: white;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+<a>Quiz Creation</a>
+</div>
+
+<h1>Quiz Created!</h1>
+
+<div class="button-container"> <!--- NEED TO ADD ROUTING --->
+<button>Create a Lobby</button>
+<button>View Quizzes</button>
+<button>Return to Dashboard</button>
+</div>
+
+</body>
+</html>

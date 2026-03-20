@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Sign Up</title>
     <style>
@@ -18,7 +18,7 @@
         }
 
         .navbar a {
-            color: white;
+            color: black;
             text-decoration: none;
             font-weight: bold;
         }
@@ -87,13 +87,14 @@
             margin-top: 25px;
             padding: 10px 25px;
             background-color: #a2d192;
-            color: white;
+            color: black;
             border: none;
             cursor: pointer;
         }
 
         button:hover {
             background-color: green;
+            color: white;
         }
 
     </style>
@@ -131,6 +132,7 @@
     <div class="field">
     <label>Key Stage:</label>
     <select name="keystage">
+    <option value="">Select...</option>
     <option value="keystageone">KS1</option>
     <option value="keystagetwo">KS2</option>
     <option value="keystagethree">KS3</option>
@@ -143,6 +145,7 @@
     <div class="field">
     <label>Role:</label>
     <select name="role">
+    <option value="">Select...</option>
     <option value="student">Student</option>
     <option value="teacher">Teacher</option>
     </select>

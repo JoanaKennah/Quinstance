@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Create Question</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+      
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+        }
+
+        .title-box {
+            border: 2px solid #e63973;
+            background-color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        h1 {
+            color: black;
+            margin: 0;
+        }
+
+        .question-row {
+            margin-top: 30px;
+        }
+
+        .question-row label {
+            color: #e63973;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .question-input {
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .answers {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .column {
+            width: 45%;
+        }
+
+        .answer-box {
+            border: 2px solid #e63973;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            background-color: white;
+        }
+
+        .answer-box input[type="text"] {
+            border: none;
+            outline: none;
+            flex-grow: 1;
+        }
+
+        .answer-box input[type="checkbox"] {
+            margin-left: 10px;
+        }
+
+        .remove-btn {
+            margin-right: 10px;
+            cursor: pointer;
+            color: #e63973;
+            font-weight: bold;
+        }
+
+        .bottom-bar {
+            margin-top: 40px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .cancel {
+            margin-right: 20px;
+            text-decoration: none;
+            color: black;
+        }
+
+        .cancel:hover {
+            text-decoration: underline;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #e63973;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+      
+        button:hover {
+            background-color: #d6285f;
+        }
+
+    </style>
+
+    <script>
+        function onlyOneCheckbox(clicked) {
+            const checkboxes = document.getElementsByName("correct");
+            checkboxes.forEach(cb => {
+                if (cb !== clicked) cb.checked = false;
+            });
+        }
+
+        function removeAnswer(id) {
+            const el = document.getElementById(id);
+            el.remove();
+        }
+
+        function validateForm() {
+            const question = document.getElementById("question").value.trim();
+            const answers = document.querySelectorAll(".answer-box input[type='text']");
+            const checked = document.querySelectorAll("input[name='correct']:checked");
+
+            let filledAnswers = 0;
+            answers.forEach(a => {
+                if (a.value.trim() !== "") filledAnswers++;
+            });
+
+            if (question === "") {
+                alert("Question must be filled in.");
+                return false;
+            }
+
+            if (filledAnswers < 2) {
+                alert("You must have at least 2 answers.");
+                return false;
+            }
+
+            if (checked.length !== 1) {
+                alert("Please select exactly one correct answer.");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="navbar">
+  <a>Quiz Creation</a>
+</div>
+
+<div class="content">
+
+    <div class="title-box">
+        <h1>{{ quizName }}</h1>
+    </div>
+
+    <form method="post" action="" onsubmit="return validateForm()"> <!--- NEED TO CHECK AFTER ROUTING --->
+
+        <div class="question-row">
+            <label>Question:</label>
+            <input type="text" id="question" name="question" class="question-input" required>
+        </div>
+
+        <div class="answers">
+
+            <div class="column">
+                <div class="answer-box" id="a1">
+                    <input type="text" name="answers[]" placeholder="Answer 1">
+                    <input type="checkbox" name="correct" value="0" onclick="onlyOneCheckbox(this)">
+                </div>
+                <div class="answer-box" id="a3">
+                    <span class="remove-btn" onclick="removeAnswer('a3')">x</span>
+                    <input type="text" name="answers[]" placeholder="Answer 3">
+                    <input type="checkbox" name="correct" value="2" onclick="onlyOneCheckbox(this)">
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="answer-box" id="a2">
+                    <input type="text" name="answers[]" placeholder="Answer 2">
+                    <input type="checkbox" name="correct" value="1" onclick="onlyOneCheckbox(this)">
+                </div>
+                <div class="answer-box" id="a4">
+                    <span class="remove-btn" onclick="removeAnswer('a4')">x</span>
+                    <input type="text" name="answers[]" placeholder="Answer 4">
+                    <input type="checkbox" name="correct" value="3" onclick="onlyOneCheckbox(this)">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="bottom-bar">
+
+            <a class="cancel"> <!--- NEED TO ADD ROUTING --->
+                Cancel
+            </a>
+
+            <button type="submit">Create</button> <!--- NEED TO ADD ROUTING --->
+
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>
