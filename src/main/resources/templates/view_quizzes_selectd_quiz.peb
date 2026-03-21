@@ -1,1 +1,180 @@
-slide 35
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Quiz Details</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+      
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+      
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 28px;
+            color: black;
+            margin-bottom: 40px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .left {
+            width: 65%;
+        }
+
+        .right {
+            width: 30%;
+        }
+
+        .subtitle {
+            color: #e63973;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .text {
+            margin-top: 5px;
+            font-size: 16px;
+        }
+
+        .quiz-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: black;
+        }
+
+        .description {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        .bottom-bar {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .left-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 14px 22px;
+            font-size: 16px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .cancel {
+            text-decoration: none;
+            color: black;
+        }
+
+        .cancel:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+
+<body>
+  
+<div class="navbar">
+    <a>View Quizzes</a>
+</div>
+
+<div class="content">
+
+    <div class="title">
+        {{ username }}'s Quizzes
+    </div>
+
+    <div class="container">
+        <div class="left">
+            <div class="quiz-name">
+                {{ quiz.name }}
+            </div>
+            <div class="description">
+                {{ quiz.description }}
+            </div>
+        </div>
+
+        <div class="right">
+            <div class="subtitle">Mini Games:</div>
+            <div class="text">
+                {% if quiz.miniGame %}
+                    Yes - {{ quiz.gameType }}
+                {% else %}
+                    No
+                {% endif %}
+            </div>
+            <div class="subtitle">Category:</div>
+            <div class="text">
+                {{ quiz.category }}
+            </div>
+            <div class="subtitle">Key Stage:</div>
+            <div class="text">
+                {{ quiz.keystage }}
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div class="left-buttons">
+            <form action=""> <!--- NEED TO ADD ROUTING -->
+                <input type="hidden" name="quizId" value="{{ quiz.id }}">
+                <button class="btn">Create a Lobby</button>
+            </form>
+
+            <form action=""> <!--- NEED TO ADD ROUTING -->
+                <input type="hidden" name="quizId" value="{{ quiz.id }}">
+                <button class="btn">Edit Quiz</button>
+            </form>
+
+            <form action=""> <!--- NEED TO ADD ROUTING -->
+                <input type="hidden" name="quizId" value="{{ quiz.id }}">
+                <button class="btn">Delete Quiz</button>
+            </form>
+
+        </div>
+
+        <a class="cancel" href=""> <!--- NEED TO ADD ROUTING -->
+            Cancel
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>
