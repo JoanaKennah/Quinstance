@@ -28,6 +28,11 @@ dependencies {
     implementation(libs.logback.classic)
     implementation("com.password4j:password4j:1.8.4")
     implementation(libs.ktor.server.config.yaml)
+    implementation("io.ktor:ktor-client-core")
+    implementation("io.ktor:ktor-client-cio")
+    implementation("io.ktor:ktor-client-serialization")
+    implementation("io.ktor:ktor-client-websockets")
+    implementation("io.ktor:ktor-server-websockets")
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 }

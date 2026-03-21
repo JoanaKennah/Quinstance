@@ -164,5 +164,12 @@
 
     </main>
 
+    <script>
+        const serverURL = 'ws://127.0.0.1:8080/';
+        const socket = new WebSocket(serverURL);
+
+        socket.onmessage = console.log("hi!")
+    </script>
+
 </body>
 </html>
