@@ -1,1 +1,148 @@
-slide 21-22
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Play Quiz for Client</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+      
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+ 
+        .question-title {
+            color: black;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .question-box {
+            border: 4px solid #e63973;
+            background-color: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 20px;
+        }
+
+        .answers {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .column {
+            width: 45%;
+        }
+
+        .answer-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+      
+        .answer-btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .answer-btn.selected {
+            background-color: #e63973;
+            color: white;
+        }
+    </style>
+
+    <script>
+        function selectAnswer(index) {
+            <!--- to stop multiple clicks and traffic --->
+            const buttons = document.querySelectorAll(".answer-btn");
+            buttons.forEach(btn => btn.disabled = true);
+
+            const selected = document.getElementById("answer-" + index);
+            selected.classList.add("selected");
+
+            setTimeout(() => {}, 500); <!--- NEED TO ADD ROUTING --->
+        }
+    </script>
+
+</head>
+
+<body>
+
+<div class="navbar">
+    <a>{{ quizName }}</a>
+</div>
+
+<div class="content">
+
+    <div class="question-title">
+        Question {{ questionNumber }}:
+    </div>
+
+    <div class="question-box">
+        {{ question.text }}
+    </div>
+
+    <div class="answers">
+
+        <div class="column">
+            {% if answers[0] is defined %}
+                <button id="answer-0" class="answer-btn"
+                        onclick="selectAnswer(0)">
+                    {{ answers[0] }}
+                </button>
+            {% endif %}
+            {% if answers[2] is defined %}
+                <button id="answer-2" class="answer-btn"
+                        onclick="selectAnswer(2)">
+                    {{ answers[2] }}
+                </button>
+            {% endif %}
+
+        </div>
+
+        <div class="column">
+            {% if answers[1] is defined %}
+                <button id="answer-1" class="answer-btn"
+                        onclick="selectAnswer(1)">
+                    {{ answers[1] }}
+                </button>
+            {% endif %}
+            {% if answers[3] is defined %}
+                <button id="answer-3" class="answer-btn"
+                        onclick="selectAnswer(3)">
+                    {{ answers[3] }}
+                </button>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

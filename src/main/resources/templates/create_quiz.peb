@@ -182,6 +182,7 @@
                 <option value="KS4">KS4</option>
                 <option value="KS5">KS5</option>
                 <option value="furthereducation">Further Education</option>
+                <optin value ="nonapplicable">N/A</option>
             </select>
 
             <label>Category:</label>
