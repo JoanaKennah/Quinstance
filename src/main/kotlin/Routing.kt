@@ -17,6 +17,13 @@ import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import com.password4j.Password
 import com.example.retrieveUser
 import com.example.addUser
+import com.example.database.objects.*
+import com.example.addQuiz
+import com.example.retrieveQuizQuestions
+import com.example.addQuestion
+import com.example.addAnswer
+
+
 
 fun Application.configureRouting() {
     routing {
@@ -121,5 +128,87 @@ fun Application.configureRouting() {
             val username = "Student" // TODO: get from session
             call.respond(PebbleContent("student_dashboard.peb", mapOf("username" to username)))
         }
+        get("/create-quiz") {
+            call.respond(PebbleContent("create_quiz.peb", mapOf<String, Any>()))
+        }
+
+        post("/create-quiz") {
+            val parameters = call.receiveParameters()
+            val quizName = parameters["quizName"] ?: return@post call.respondText("Please enter a quiz name")
+            val description = parameters["description"] ?: return@post call.respondText("Please enter a description")
+            val keystage = parameters["keystage"] ?: return@post call.respondText("Please enter a key stage")
+            val category = parameters["category"] ?: return@post call.respondText("Please enter a category")
+            
+            //NEEDED: Get actual user from session - This just grabs first available
+            val user = transaction(ProjectDatabase.database) {
+                User.all().firstOrNull()
+            } ?: return@post call.respondText("No such user found")
+
+            val quiz = transaction(ProjectDatabase.database) {
+                addQuiz(user, quizName, description, category)
+            }
+
+            call.respondRedirect("/view-quiz-questions/${quiz.id.value}")
+        }
+        get("/view-quiz-questions/{quizId}") {
+            val quizId = call.parameters["quizId"]?.toIntOrNull()
+                ?: return@get call.respondText("Quiz ID Invalid")
+
+            val quiz = transaction(ProjectDatabase.database) {
+                Quiz.findById(quizId)
+            } ?: return@get call.respondText("Quiz not found") 
+
+            val questions = retrieveQuizQuestions(quiz)
+
+            call.respond(PebbleContent("view_quiz_questions.peb", mapOf("quizName" to quiz.quiz_name, "questions" to questions, "quizId" to quizId)))
+        }
+
+        get("/add-question/{quizId}") {
+            val quizId = call.parameters["quizId"]?.toIntOrNull()
+                ?: return@get call.respondText("Invalid Quiz ID")
+            
+            val quiz = transaction(ProjectDatabase.database) {
+                Quiz.findById(quizId)
+            } ?: return@get call.respondText("No Quiz Found") 
+
+            call.respond(PebbleContent("add_question.peb", mapOf("quizName" to quiz.quiz_name, "quizId" to quizId)))
+        }
+
+        //Reading question, all the answers, checking correct answer, saving to DB
+        post("/add-question/{quizId}") {
+            val quizId = call.parameters["quizId"]?.toIntOrNull()
+                ?: return@post call.respondText("Invalid quiz ID")
+
+            val quiz = transaction(ProjectDatabase.database) {
+                Quiz.findById(quizId)
+            } ?: return@post call.respondText("No Quiz Found")
+
+            val parameters = call.receiveParameters()
+            val questionText = parameters["question"] 
+                ?: return@post call.respondText("Please enter a question")
+
+            val answers = parameters.getAll("answers[]") 
+                ?: return@post call.respondText("Please enter at least 2 answers")
+
+            //stores index of correct answer (checkbox)
+            val correctIndex = parameters["correct"]?.toIntOrNull()
+                ?: return@post call.respondText("Please select a correct answer")
+
+            val option1 = answers.getOrNull(0) 
+                ?: return@post call.respondText("Please enter at least 2 answers")
+            val option2 = answers.getOrNull(1) 
+                ?: return@post call.respondText("Please enter at least 2 answers")
+            val option3 = answers.getOrNull(2) 
+            val option4 = answers.getOrNull(3)
+
+            transaction(ProjectDatabase.database) {
+                val question = addQuestion(quiz, questionText, quiz.category)
+                addAnswer(question, option1, option2, option3, option4, correctIndex)
+                //correct index here indicates correct answer for DB
+            } 
+
+            call.respondRedirect("/view-quiz-questions/$quizId")
+        }
+
     }
 }

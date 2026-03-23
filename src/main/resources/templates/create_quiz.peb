@@ -249,9 +249,7 @@
 
     <div class="bottom-bar"> <!--- NEED TO ADD ROUTING --->
 
-        <a class="cancel">
-            Cancel
-        </a>
+        <a class="cancel" href="/teacher-dashboard">Cancel</a>
 
         <button type="submit">Next</button>
 

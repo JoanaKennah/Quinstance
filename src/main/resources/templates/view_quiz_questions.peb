@@ -118,7 +118,7 @@
 
     <div class="button-bar">
 
-        <a class="add-btn"> <!--- NEED TO ADD ROUTING --->
+        <a class="add-btn" href="/add-question/{{ quizId }}">
             + Add a Question
         </a>
 
@@ -135,7 +135,7 @@
 
         {% for question in questions %}
             <div class="question-box">
-                {{ loop.index }}. {{ question.text }}
+                {{ loop.index }}. {{ question.question }}
             </div>
         {% endfor %}
 

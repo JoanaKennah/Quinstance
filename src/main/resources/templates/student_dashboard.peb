@@ -69,7 +69,7 @@
 
 <div class="button-container"> <!--- NEED TO ADD ROUTING --->
 <button>Join a Lobby</button>
-<button>Create a Quiz</button>
+<button onclick="window.location.href='/create-quiz'">Create a Quiz</button>
 <button>View Quizzes</button>
 <button>View Statistics</button>
 </div>
