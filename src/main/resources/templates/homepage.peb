@@ -2,6 +2,32 @@
 <html lang="en">
 <head>
     <title>Game Night</title>
+    <script>
+        let serverURL;
+        let socket;
+
+        function setupSocket() {
+            serverURL = 'ws://127.0.0.1:8080/';
+            const socket = new WebSocket(serverURL);
+
+            socket.onopen = logOpenToConsole;
+            socket.onclose = logCloseToConsole;
+            socket.onmessage = test;
+        }
+
+        function logOpenToConsole() {
+            console.log("Web socket connection opened");
+        }
+
+        function logCloseToConsole() {
+            console.log("Web socket connection closed");
+        }
+
+        function test(event) {
+            let message = JSON.parse(event.data)
+            console.log("Received message ${message.text}")
+        }
+    </script>
     <style>
 
         * {
@@ -127,7 +153,7 @@
     </style>
 </head>
 
-<body>
+<body onload="javascript:setupSocket()">
 
     <!-- Navigation bar -->
     <nav class="navbar">
@@ -137,7 +163,7 @@
         </div>
         <div class="navbar-right">
             <button class="btn-signup" onclick="window.location.href='/signup'">Sign Up</button>
-            <button class="btn-login"  onclick="window.location.href='/login'">Log In</button>
+            <button class="btn-login" action="javascript:test()" onclick="window.location.href='/login'">Log In</button>
         </div>
     </nav>
 
@@ -163,13 +189,6 @@
         </div>
 
     </main>
-
-    <script>
-        const serverURL = 'ws://127.0.0.1:8080/';
-        const socket = new WebSocket(serverURL);
-
-        socket.onmessage = console.log("hi!")
-    </script>
 
 </body>
 </html>
