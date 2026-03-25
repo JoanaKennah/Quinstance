@@ -22,6 +22,7 @@ import com.example.addQuiz
 import com.example.retrieveQuizQuestions
 import com.example.addQuestion
 import com.example.addAnswer
+import com.example.retrieveUserQuizzes
 
 
 
@@ -210,5 +211,21 @@ fun Application.configureRouting() {
             call.respondRedirect("/view-quiz-questions/$quizId")
         }
 
+        get ("/view-quizzes") {
+            val username = "teacher"               //PLACEHOLDER - Get user from session
+            val returnURL = "/teacher-dashboard"    //PLACEHOLDER - "
+            val quizzes = retrieveUserQuizzes(username) ?: emptyList<Quiz>()
+
+            call.respond(PebbleContent("view_quizzes.peb", mapOf("username" to username, "returnURL" to returnURL, "quizzes" to quizzes)))
+        }
+
+        post ("/quiz-created/{quizId}") {
+            val quizId = call.parameters["quizId"]?.toIntOrNull()
+                ?: return@post call.respondText("Quiz ID Invalid")
+
+            val returnURL = "/teacher-dashboard" //PLACEHOLDER - needs user from session
+
+            call.respond(PebbleContent("quiz_created.peb", mapOf("quizId" to quizId, "returnURL" to returnURL)))
+        }
     }
 }
