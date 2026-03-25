@@ -122,7 +122,7 @@
             + Add a Question
         </a>
 
-        <form method="post" action="" onsubmit="return validateForm()"> <!--- NEED TO CHECK AFTER ROUTING --->
+        <form method="post" action="/quiz-created/{{ quizId }}" onsubmit="return validateForm()">
             <button class="next-btn" type="submit"
                 {% if questions is empty %}disabled{% endif %}>
                 Next

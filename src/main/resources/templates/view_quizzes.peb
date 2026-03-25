@@ -96,7 +96,7 @@
         <div class="quiz-container">
             {% for quiz in quizzes %}
                 <div class="quiz-box">
-                    {{ loop.index }}. {{ quiz.name }}
+                    {{ loop.index }}. {{ quiz.quiz_name }}
                 </div>
             {% endfor %}
         </div>
@@ -105,12 +105,10 @@
 
     <div class="bottom-bar">
 
-        <form action=""> <!--- NEED TO ADD ROUTING --->
-            <button class="btn">+ Create a Quiz</button>
-        </form>
+        <button class="btn" onclick="window.location.href='/create-quiz'">+ Create a Quiz</button>
 
-        <button class="btn"  onclick="window.location.href='/teacher-dashboard'">Return</button> <!--- NEED TO CHECK WHICH (student/teacher) DASHBOARD TO RETURN TO --->
-        </form>
+        <button class="btn" onclick="window.location.href='{{ returnURL }}'">Return</button>
+        <!-- PLACEHOLDER: just returns to dashboard for now, will use session role when ready -->
 
     </div>
 
