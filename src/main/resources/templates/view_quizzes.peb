@@ -1,1 +1,118 @@
-slide 33-34
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>View Quizzes</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+      
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 28px;
+            color: black;
+            margin-bottom: 30px;
+        }
+
+        .quiz-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 40px;
+        }
+
+        .quiz-box {
+            border: 2px solid #e63973;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .empty {
+            color: #e63973;
+            font-size: 20px;
+            margin-top: 100px;
+        }
+
+        .bottom-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+  
+<div class="navbar">
+    <a>View Quizzes</a>
+</div>
+
+<div class="content">
+
+    <div class="title">
+        {{ username }}'s Quizzes
+    </div>
+
+    {% if quizzes is empty %}
+        <div class="empty">
+            No quizzes found!
+        </div>
+    {% else %}
+        <div class="quiz-container">
+            {% for quiz in quizzes %}
+                <div class="quiz-box">
+                    {{ loop.index }}. {{ quiz.quiz_name }}
+                </div>
+            {% endfor %}
+        </div>
+
+    {% endif %}
+
+    <div class="bottom-bar">
+
+        <button class="btn" onclick="window.location.href='/create-quiz'">+ Create a Quiz</button>
+
+        <button class="btn" onclick="window.location.href='{{ returnURL }}'">Return</button>
+        <!-- PLACEHOLDER: just returns to dashboard for now, will use session role when ready -->
+
+    </div>
+
+</div>
+
+</body>
+</html>

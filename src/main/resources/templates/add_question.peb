@@ -131,9 +131,40 @@
             });
         }
 
+        let answerCount = 4;
+
         function removeAnswer(id) {
             const el = document.getElementById(id);
             el.remove();
+            answerCount--;
+        }
+
+        function addAnswer() {
+            if (answerCount >=4) {
+                alert("Maximum 4 answers allowed");
+                return;
+            }
+
+            // makes sure that "add answer" adds the lowest available answer index
+            let newIndex = 1;
+            while (document.getElementById("a" + newIndex)) {
+                newIndex++;
+            }
+
+            answerCount++;
+
+            const cols = document.querySelectorAll(".column");
+            const col = (newIndex % 2 === 0) ? cols[1] : cols[0];
+
+            const div = document.createElement("div");
+            div.className = "answer-box";
+            div.id = "a" + newIndex;
+            div.innerHTML = `
+                <span class="remove-btn" onclick="removeAnswer('a${newIndex}')">x</span>
+                <input type="text" name="answers[]" placeholder="Answer ${newIndex}">
+                <input type="checkbox" name="correct" value="${newIndex - 1}" onclick="onlyOneCheckbox(this)">
+            `;
+            col.appendChild(div);
         }
 
         function validateForm() {
@@ -178,7 +209,7 @@
         <h1>{{ quizName }}</h1>
     </div>
 
-    <form method="post" action="" onsubmit="return validateForm()"> <!--- NEED TO CHECK AFTER ROUTING --->
+    <form method="post" action="/add-question/{{ quizId }}" onsubmit="return validateForm()"> <!--- NEED TO CHECK AFTER ROUTING --->
 
         <div class="question-row">
             <label>Question:</label>
@@ -213,12 +244,14 @@
 
         </div>
 
+        <div style="margin-top: 15px;">
+            <button type="button" onclick="addAnswer()">+ Add Answer</button>
+        </div>
+
         <div class="bottom-bar">
 
-            <a class="cancel"> <!--- NEED TO ADD ROUTING --->
-                Cancel
-            </a>
-
+            <a class="cancel" href="/view-quiz-questions/{{ quizId }}">Cancel</a> <!--- NEED TO ADD ROUTING --->
+            
             <button type="submit">Create</button> <!--- NEED TO ADD ROUTING --->
 
         </div>
