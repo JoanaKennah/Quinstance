@@ -215,13 +215,14 @@ fun retrieveUserQuizzes(username: String) : MutableList<Quiz>? {
 /**
  * Creates and adds an Answer (to a Question) to AnswerTable
  */
-fun addAnswer(question: Question, correct_answer: String, option2: String, option3: String? = null, option4: String? = null) : Answer? {
+fun addAnswer(question: Question, option1: String, option2: String, option3: String? = null, option4: String? = null, correctIndex: Int) : Answer? {
     // Will need to discuss with team if we want the user to be able to have 2, 3 or 4 answers
+    //Slightly changed this to accept 4 answers then flag the correct one, helped make the frontend a bit cleaner
     transaction(ProjectDatabase.database) {
         require( (Question.findById(question.id))?.id == question.id ) { "Question given does not exist" }
     }
-    require(correct_answer.isNotEmpty()) { "correct_answer must not be empty" }
-    require(option2.isNotEmpty()) { "option2 must not be empty" }
+    require(option1.isNotEmpty()) { "option 1 must not be empty" }
+    require(option2.isNotEmpty()) { "option 2 must not be empty" }
 
     // Check to see if an Answer already exists (Question and Answer have 1:1 relationship), return null if Answer
     // already exists
@@ -231,10 +232,11 @@ fun addAnswer(question: Question, correct_answer: String, option2: String, optio
             return@transaction null
         }
 
+        val allOptions = listOfNotNull(option1, option2, option3, option4)
         val newAnswer = Answer.new {
             this.question = question
-            this.correct_answer = correct_answer
-            this.option2 = option2
+            this.correct_answer = allOptions[correctIndex]
+            this.option2 = option2 
             this.option3 = option3
             this.option4 = option4
         }

@@ -118,11 +118,11 @@
 
     <div class="button-bar">
 
-        <a class="add-btn"> <!--- NEED TO ADD ROUTING --->
+        <a class="add-btn" href="/add-question/{{ quizId }}">
             + Add a Question
         </a>
 
-        <form method="post" action="" onsubmit="return validateForm()"> <!--- NEED TO CHECK AFTER ROUTING --->
+        <form method="post" action="/quiz-created/{{ quizId }}" onsubmit="return validateForm()">
             <button class="next-btn" type="submit"
                 {% if questions is empty %}disabled{% endif %}>
                 Next
@@ -135,7 +135,7 @@
 
         {% for question in questions %}
             <div class="question-box">
-                {{ loop.index }}. {{ question.text }}
+                {{ loop.index }}. {{ question.question }}
             </div>
         {% endfor %}
 

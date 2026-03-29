@@ -1,1 +1,93 @@
-slide 28
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Position</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+      
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+      
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 28px;
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        .position {
+            font-size: 36px;
+            font-weight: bold;
+            color: black;
+            margin-bottom: 10px;
+        }
+
+        .out-of {
+            color: #e63973;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .score-title {
+            font-size: 22px;
+            color: black;
+            margin-bottom: 10px;
+        }
+
+        .score {
+            font-size: 36px;
+            font-weight: bold;
+            color: black;
+        }
+    </style>
+
+</head>
+
+<body>
+  
+<div class="navbar">
+    <a>{{ quizName }}</a>
+</div>
+
+<div class="content"> <!--- NEED TO COORDINATE ROUTING TO CHANGE WHEN SERVER SIDE CHANGES --->
+
+    <div class="title">
+        You are currently:
+    </div>
+    <div class="position">
+        {{ position }}
+    </div>
+
+    <div class="out-of">
+        Out of {{ totalPlayers }}
+    </div>
+
+    <div class="score-title">
+        Total Score:
+    </div>
+    <div class="score">
+        {{ score }}
+    </div>
+
+</div>
+
+</body>
+</html>
