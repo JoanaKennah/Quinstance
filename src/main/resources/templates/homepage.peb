@@ -26,8 +26,8 @@
 
         function test(event) {
             let questionData = JSON.parse(event.data);
-            console.log(`Question: ${questionData.questionText}`);
-            console.log(`Answers: ${questionData.answerOne}, ${questionData.answerTwo}, ${questionData.answerThree}, ${questionData.answerFour} `);
+            console.log(`Retrieved question: ${questionData.questionText}`);
+            console.log(`Retrieved answers: ${questionData.answerOne}, ${questionData.answerTwo}, ${questionData.answerThree}, ${questionData.answerFour} `);
 
             let data = buildAnswer()
             sendAnswerViaSocket(data)

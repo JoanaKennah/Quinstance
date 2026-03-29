@@ -47,7 +47,7 @@ fun Application.configureSockets() {
             delay(1000)
 
             val userAnswer = receiveDeserialized<SentAnswerData>()
-            println("userAnswer: $userAnswer")
+            println("Received userAnswer: $userAnswer")
             close(CloseReason(CloseReason.Codes.NORMAL, "All ok!"))
         }
     }
