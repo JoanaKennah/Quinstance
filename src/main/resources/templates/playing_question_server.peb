@@ -55,14 +55,20 @@
         let timeLeft = 30;
 
         function startTimer() {
+            if (!localStorage.getItem("quizEndTime")) {
+                const endTime = Date.now() + 30000;
+                localStorage.setItem("quizEndTime", endTime);
+            }
             const timerDisplay = document.getElementById("timer");
 
             const countdown = setInterval(() => {
-                timeLeft--;
+                const endTime = localStorage.getItem("quizEndTime");
+                const timeLeft = Math.floor((endTime - Date.now()) / 1000);
                 timerDisplay.textContent = timeLeft;
 
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
+                    localStorage.removeItem("quizEndTime");
 
                     <!--- NEED TO ADD ROUTING TO DISPLAY CORRECT ANS --->
                 }
