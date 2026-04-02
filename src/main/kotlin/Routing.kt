@@ -10,6 +10,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import io.pebbletemplates.pebble.loader.ClasspathLoader
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -60,6 +61,7 @@ fun Application.configureRouting() {
             val checkPassword = Password.check(password, user.password).withScrypt()
 
             if (checkPassword) {
+                call.sessions.set(UserSession(username = user.username, role = user.role.lowercase()))
                 when (user.role.lowercase()) {
                     "student" -> {
                         call.respondRedirect("/student-dashboard")
@@ -108,9 +110,11 @@ fun Application.configureRouting() {
                     call.respondText("Username already exists")
                 }
                 "student" -> {
+                    call.sessions.set(UserSession(username = username, role = role))
                     call.respondRedirect("/student-dashboard")
                 }
                 "teacher", "admin" -> {
+                    call.sessions.set(UserSession(username = username, role = role))
                     call.respondRedirect("/teacher-dashboard")
                 }
                 else -> {
@@ -121,33 +125,35 @@ fun Application.configureRouting() {
         }
 
         get("/teacher-dashboard") {
-            val username = "Teacher" // TODO: get from session
-            call.respond(PebbleContent("teacher_dashboard.peb", mapOf("username" to username)))
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+
+            call.respond(PebbleContent("teacher_dashboard.peb", mapOf("username" to session.username)))
         }
 
         get("/student-dashboard") {
-            val username = "Student" // TODO: get from session
-            call.respond(PebbleContent("student_dashboard.peb", mapOf("username" to username)))
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            
+            call.respond(PebbleContent("student_dashboard.peb", mapOf("username" to session.username)))
         }
         get("/create-quiz") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+
             call.respond(PebbleContent("create_quiz.peb", mapOf<String, Any>()))
         }
 
         post("/create-quiz") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+
             val parameters = call.receiveParameters()
             val quizName = parameters["quizName"] ?: return@post call.respondText("Please enter a quiz name")
             val description = parameters["description"] ?: return@post call.respondText("Please enter a description")
             val keystage = parameters["keystage"] ?: return@post call.respondText("Please enter a key stage")
             val category = parameters["category"] ?: return@post call.respondText("Please enter a category")
             
-            //NEEDED: Get actual user from session - This just grabs first available
-            val user = transaction(ProjectDatabase.database) {
-                User.all().firstOrNull()
-            } ?: return@post call.respondText("No such user found")
+            val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
 
-            val quiz = transaction(ProjectDatabase.database) {
-                addQuiz(user, quizName, description, category)
-            }
+
+            val quiz = addQuiz(user, quizName, description, category)
 
             call.respondRedirect("/view-quiz-questions/${quiz.id.value}")
         }
@@ -212,18 +218,30 @@ fun Application.configureRouting() {
         }
 
         get ("/view-quizzes") {
-            val username = "teacher"               //PLACEHOLDER - Get user from session
-            val returnURL = "/teacher-dashboard"    //PLACEHOLDER - "
-            val quizzes = retrieveUserQuizzes(username) ?: emptyList<Quiz>()
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
 
-            call.respond(PebbleContent("view_quizzes.peb", mapOf("username" to username, "returnURL" to returnURL, "quizzes" to quizzes)))
+            val returnURL = if (session.role == "teacher" || session.role == "admin") {
+                "/teacher-dashboard" 
+            } else {
+                "/student-dashboard"
+            } 
+
+            val quizzes = retrieveUserQuizzes(session.username) ?: emptyList<Quiz>()
+
+            call.respond(PebbleContent("view_quizzes.peb", mapOf("username" to session.username, "returnURL" to returnURL, "quizzes" to quizzes)))
         }
 
         post ("/quiz-created/{quizId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+
             val quizId = call.parameters["quizId"]?.toIntOrNull()
                 ?: return@post call.respondText("Quiz ID Invalid")
 
-            val returnURL = "/teacher-dashboard" //PLACEHOLDER - needs user from session
+            val returnURL = if (session.role == "teacher" || session.role == "admin") {
+                "/teacher-dashboard" 
+            } else {
+                "/student-dashboard"
+            } 
 
             call.respond(PebbleContent("quiz_created.peb", mapOf("quizId" to quizId, "returnURL" to returnURL)))
         }
