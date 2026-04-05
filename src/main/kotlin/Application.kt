@@ -31,4 +31,5 @@ fun Application.testModule() {
     TransactionManager.defaultDatabase = TestDatabase.db
     configureTemplating()
     configureRouting()
+    configureSessions()
 }
