@@ -8,7 +8,7 @@ import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 /**
- * Demo databas used for Testing. It is currently set up to test our first Sprint. Contains 3 Users, all with hashed
+ * Demo databasee used for Testing. It is currently set up to test our first Sprint. Contains 3 Users, all with hashed
  * passwords.
  * @param db connection to access the demo Database
  */
@@ -34,7 +34,7 @@ object TestDatabase {
                 it[name] = "Ethan Harris"
                 it[email] = "ethan@gmail.com"
                 it[key_stage] = "Further Education"
-                it[role] = "admin"
+                it[role] = "student"
             }
 
             val hashedPasswordTwo = Password.hash("password456").addRandomSalt(8).withScrypt()
@@ -44,7 +44,7 @@ object TestDatabase {
                 it[name] = "Joana Kennah"
                 it[email] = "joanakennah@gmail.com"
                 it[key_stage] = "Further Education"
-                it[role] = "admin"
+                it[role] = "teacher"
             }
 
             val hashedPasswordThree = Password.hash("password789").addRandomSalt(8).withScrypt()
@@ -54,7 +54,7 @@ object TestDatabase {
                 it[name] = "Minghao Le"
                 it[email] = "tgqj4326@leeds.ac.uk"
                 it[key_stage] = "Further Education"
-                it[role] = "admin"
+                it[role] = "teacher"
             }
         }
     }
