@@ -78,6 +78,18 @@
     </style>
 
     <script>
+        let timeleft = 30;
+
+        function startTimer() {
+            const countdown = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    <!--- ROUTE TO NEXT PAGE --->
+                }
+            }, 1000)
+        }
+
         function selectAnswer(index) {
             <!--- to stop multiple clicks and traffic --->
             const buttons = document.querySelectorAll(".answer-btn");
@@ -88,6 +100,8 @@
 
             setTimeout(() => {}, 500); <!--- NEED TO ADD ROUTING --->
         }
+
+        window.onload = startTimer;
     </script>
 
 </head>

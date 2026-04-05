@@ -28,6 +28,7 @@ dependencies {
     implementation(libs.logback.classic)
     implementation("com.password4j:password4j:1.8.4")
     implementation(libs.ktor.server.config.yaml)
+    implementation(libs.ktor.server.sessions)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.kotest.assertions.core)

@@ -46,13 +46,29 @@
 
 </head>
 
+<script>
+    function checkTime() {
+        const endTime = localStorage.getItem("quizEndTime");
+        if (!endTime) return;
+        const interval = setInterval(() => {
+            const timeLeft = parseInt(endTime) - Date.now();
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                localStorage.removeItem("quizEndTime");
+                <!--- ROUTING --->
+            }
+        }, 200);
+    }
+    window.onload = checkTime;
+</script>
+
 <body>
 
 <div class="navbar">
     <a>{{ quizName }}</a>
 </div>
 
-<div class="content"> <!--- NEED TO COORDINATE ROUTING TO CHANGE WHEN SERVER SIDE CHANGES --->
+<div class="content">
 
     <div class="title">
         You selected:

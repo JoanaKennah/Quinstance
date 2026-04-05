@@ -137,6 +137,10 @@
         </form>
 
         <form action="">
+            <button class="control-btn">View Previous Top Scores</button>
+        </form>
+
+        <form action="">
             <button class="control-btn">Settings</button>
         </form>
 
