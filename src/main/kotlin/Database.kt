@@ -53,9 +53,11 @@ fun retrieveUser(username: String) : User? {
  */
 fun addUser(username: String, password: String, name: String, email: String, key_stage: String, role: String) : User? {
     // Check to ensure all parameters are not empty
-    for (parameter in listOf(username, name, email, key_stage, role)) {
+    for (parameter in listOf(username, password, name, email, key_stage, role)) {
         require(parameter.isNotEmpty())
     }
+    require(username.length <= 50)
+    require(email.length <= 50)
     // Check to see if user already exists with the same username
     val userExists = retrieveUser(username)
     if (userExists == null) {

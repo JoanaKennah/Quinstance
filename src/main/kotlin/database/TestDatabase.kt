@@ -33,7 +33,7 @@ object TestDatabase {
                 it[password] = hashedPasswordOne.result
                 it[name] = "Ethan Harris"
                 it[email] = "ethan@gmail.com"
-                it[key_stage] = "Further Education"
+                it[key_stage] = "furthereducation"
                 it[role] = "student"
             }
 
@@ -43,7 +43,7 @@ object TestDatabase {
                 it[password] = hashedPasswordTwo.result
                 it[name] = "Joana Kennah"
                 it[email] = "joanakennah@gmail.com"
-                it[key_stage] = "Further Education"
+                it[key_stage] = "furthereducation"
                 it[role] = "teacher"
             }
 
@@ -53,7 +53,7 @@ object TestDatabase {
                 it[password] = hashedPasswordThree.result
                 it[name] = "Minghao Le"
                 it[email] = "tgqj4326@leeds.ac.uk"
-                it[key_stage] = "Further Education"
+                it[key_stage] = "furthereducation"
                 it[role] = "teacher"
             }
         }
