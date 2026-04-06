@@ -31,7 +31,7 @@ fun configureDatabase() {
             QuestionTable,
             QuinstanceTable,
             QuizTable,
-            SessionTable,
+            GameTable,
             UserScoreTable,
             UserTable)
     }
