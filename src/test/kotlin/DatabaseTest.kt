@@ -12,10 +12,13 @@ import com.password4j.Password
 import io.kotest.matchers.string.shouldHaveLength
 
 class DatabaseTest: StringSpec({
+    // Testing the functions used for Login / Signup
+
     "Retrieve correct user data for user with username 'linguin0'" {
         testApplication {
             application { testModule() }
             val user = retrieveUser("linguin0")
+            println(user)
             user.let {
                 it shouldNotBe null
                 it?.username shouldBe "linguin0"
@@ -252,6 +255,30 @@ class DatabaseTest: StringSpec({
                     retrievedUser.password shouldHaveLength 109
                 }
             }
+        }
+    }
+
+    // Testing functions used for Quizzes (Questions, Quinstances, Answers)
+    "Retrieve all (2) quizzes for user 'linguin0'" {
+        testApplication {
+            application { testModule() }
+
+            val quizzesData = listOf(
+                listOf("COMP2860 Quiz", 2, "Quiz to test my limited knowledge on COMP2860", "computerscience"),
+                listOf("FNAF Quiz", 0, "Freddy Fazbear", "other"))
+
+            val foundQuizzes = retrieveUserQuizzes("linguin0")
+            foundQuizzes shouldNotBe null
+
+            if (foundQuizzes != null) {
+                for (i in 0..1) {
+                    foundQuizzes[i].quiz_name shouldBe quizzesData[i][0]
+                    foundQuizzes[i].num_of_questions shouldBe quizzesData[i][1]
+                    foundQuizzes[i].description shouldBe quizzesData[i][2]
+                    foundQuizzes[i].category shouldBe quizzesData[i][3]
+                }
+            }
+
         }
     }
 })
