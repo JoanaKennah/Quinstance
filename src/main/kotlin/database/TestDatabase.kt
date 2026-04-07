@@ -1,5 +1,6 @@
 package com.example.database
 
+import com.example.database.objects.Quiz
 import com.example.database.tables.UserTable
 import com.example.database.tables.QuizTable
 import com.example.database.tables.QuestionTable
@@ -76,9 +77,17 @@ object TestDatabase {
                 it[key_stage] = "furthereducation"
             }
 
+            Quiz.findByIdAndUpdate(userOneQuiz.value) {
+                it.num_of_questions += 1
+            }
+
             val userOneQuizQ2 = QuestionTable.insertAndGetId {
                 it[question] = "What is a thread?"
                 it[key_stage] = "furthereducation"
+            }
+
+            Quiz.findByIdAndUpdate(userOneQuiz.value) {
+                it.num_of_questions += 1
             }
 
             AnswerTable.insert {
@@ -128,6 +137,10 @@ object TestDatabase {
             val userTwoQuizQ1 = QuestionTable.insertAndGetId {
                 it[question] = "What is a finite state automation?"
                 it[key_stage] = "furthereducation"
+            }
+
+            Quiz.findByIdAndUpdate(userTwoQuiz.value) {
+                it.num_of_questions += 1
             }
 
             AnswerTable.insert {

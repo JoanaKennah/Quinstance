@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.database.tables.QuizTable.num_of_questions
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.*
@@ -9,6 +10,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import com.password4j.Password
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.string.shouldHaveLength
 
 class DatabaseTest: StringSpec({
@@ -269,8 +271,9 @@ class DatabaseTest: StringSpec({
 
             val foundQuizzes = retrieveUserQuizzes("linguin0")
             foundQuizzes shouldNotBe null
-
             if (foundQuizzes != null) {
+                foundQuizzes shouldHaveSize 2
+
                 for (i in 0..1) {
                     foundQuizzes[i].quiz_name shouldBe quizzesData[i][0]
                     foundQuizzes[i].num_of_questions shouldBe quizzesData[i][1]
@@ -278,7 +281,145 @@ class DatabaseTest: StringSpec({
                     foundQuizzes[i].category shouldBe quizzesData[i][3]
                 }
             }
-
         }
     }
+
+    "Retrieve all (1) quizzes for user 'JoanaKennah'" {
+        testApplication {
+            application { testModule() }
+
+            val foundQuizzes = retrieveUserQuizzes("JoanaKennah")
+            foundQuizzes shouldNotBe null
+
+            if (foundQuizzes != null) {
+                foundQuizzes shouldHaveSize 1
+
+                foundQuizzes[0].quiz_name shouldBe "COMP2870 Quiz"
+                foundQuizzes[0].num_of_questions shouldBe 1
+                foundQuizzes[0].description shouldBe "University of Leeds COMP2870 Quiz for Revision :)"
+                foundQuizzes[0].category shouldBe "computerscience"
+            }
+        }
+    }
+
+    "Retrieve empty list of quizzes for user 'MinghaoLe123' who has not made a quiz yet" {
+        testApplication {
+            application { testModule() }
+
+            val foundQuizzes = retrieveUserQuizzes("MinghaoLe123")
+            foundQuizzes shouldNotBe null
+            if (foundQuizzes != null) foundQuizzes shouldHaveSize 0
+        }
+    }
+
+    "Return null when trying to find quizzes made by a user who does not exist" {
+        testApplication {
+            application { testModule() }
+
+            val foundQuizzes = retrieveUserQuizzes("FNAFLover123")
+            foundQuizzes shouldBe null
+        }
+    }
+
+    "Add a new quiz (normal data) under user 'MinghaoLe123'" {
+        testApplication {
+            application { testModule() }
+
+            val user = retrieveUser("MinghaoLe123")
+            if (user != null) {
+                val newQuiz = addQuiz(user,
+                    "My Quiz #1",
+                    "This is a test quiz",
+                    "other",
+                    0)
+                newQuiz shouldNotBe null
+            }
+        }
+    }
+
+    "Add a new quiz with quiz name of length 50" {
+        testApplication {
+            application { testModule() }
+
+            val user = retrieveUser("MinghaoLe123")
+            if (user != null) {
+                val newQuiz = addQuiz(user,
+                    "My really cool awesome quiz with many characters!!",
+                    "This is a test quiz",
+                    "other",
+                    0)
+                newQuiz shouldNotBe null
+            }
+        }
+    }
+
+    "Adding a new quiz with quiz name of length > 50 should throw an IllegalArgumentException" {
+        testApplication {
+            application { testModule() }
+
+            val user = retrieveUser("MinghaoLe123")
+            if (user != null) {
+                shouldThrow<IllegalArgumentException> {
+                    addQuiz(user,
+                        "My really cool awesome quiz with many characters!! Uh oh!!",
+                        "This is a test quiz",
+                        "other",
+                        0)
+                }
+            }
+        }
+    }
+
+    "Add a new quiz with a description of length 256" {
+        testApplication {
+            application { testModule() }
+
+            val user = retrieveUser("MinghaoLe123")
+            if (user != null) {
+                val newQuiz = addQuiz(user,
+                    "My really cool awesome quiz with many characters!!",
+                    "This is a really long, boring, very tedious description for testing purposes. 256 characters may be too little, may be too many, may even be the perfect amount of descriptions! Depends how much you like to type, say, yap, et cetera. I think this is done!!!",
+                    "other",
+                    0)
+                newQuiz shouldNotBe null
+                newQuiz.description shouldHaveLength 256
+            }
+        }
+    }
+
+    "Adding a new quiz with a description of length > 256 should throw an IllegalArgumentException" {
+        testApplication {
+            application { testModule() }
+
+            val user = retrieveUser("MinghaoLe123")
+            if (user != null) {
+                shouldThrow<IllegalArgumentException> {
+                    addQuiz(user,
+                        "My Quiz #1",
+                        "This is a really long, boring, very tedious description for testing purposes. 256 characters may be too little, may be too many, may even be the perfect amount of descriptions! Depends how much you like to type, say, yap, et cetera. I think this is done!!! Uh oh!",
+                        "other",
+                        0)
+                }
+            }
+        }
+    }
+
+    "Adding a new quiz with -1 as the number of questions should throw an IllegalArgumentException" {
+        testApplication {
+            application { testModule() }
+
+            val user = retrieveUser("MinghaoLe123")
+            if (user != null) {
+                shouldThrow<IllegalArgumentException> {
+                    addQuiz(user,
+                        "My Quiz #1",
+                        "This is a test quiz",
+                        "other",
+                        -1)
+                }
+            }
+        }
+    }
+
+
 })

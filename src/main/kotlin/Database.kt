@@ -110,6 +110,12 @@ fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
             this.quiz = quiz
             this.question = question
         }
+
+        // Very poor way of using the quiz
+        Quiz.findByIdAndUpdate(quiz.id.value) {
+            it.num_of_questions += 1
+        }
+
         return@transaction question
     }
     return newQuestion
