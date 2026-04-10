@@ -1,6 +1,11 @@
 package com.example
 
-import com.example.database.tables.QuizTable.num_of_questions
+import com.example.database.TestDatabase
+import com.example.database.objects.Quiz
+import com.example.database.tables.QuizTable
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.core.eq
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.*
@@ -321,7 +326,7 @@ class DatabaseTest: StringSpec({
         }
     }
 
-    "Add a new quiz (normal data) under user 'MinghaoLe123'" {
+    "Add a new Quiz (normal data) under user 'MinghaoLe123'" {
         testApplication {
             application { testModule() }
 
@@ -337,7 +342,7 @@ class DatabaseTest: StringSpec({
         }
     }
 
-    "Add a new quiz with quiz name of length 50" {
+    "Add a new Quiz with quiz name of length 50" {
         testApplication {
             application { testModule() }
 
@@ -353,7 +358,7 @@ class DatabaseTest: StringSpec({
         }
     }
 
-    "Adding a new quiz with quiz name of length > 50 should throw an IllegalArgumentException" {
+    "Adding a new Quiz with quiz name of length > 50 should throw an IllegalArgumentException" {
         testApplication {
             application { testModule() }
 
@@ -370,7 +375,7 @@ class DatabaseTest: StringSpec({
         }
     }
 
-    "Add a new quiz with a description of length 256" {
+    "Add a new Quiz with a description of length 256" {
         testApplication {
             application { testModule() }
 
@@ -387,7 +392,7 @@ class DatabaseTest: StringSpec({
         }
     }
 
-    "Adding a new quiz with a description of length > 256 should throw an IllegalArgumentException" {
+    "Adding a new Quiz with a description of length > 256 should throw an IllegalArgumentException" {
         testApplication {
             application { testModule() }
 
@@ -404,7 +409,7 @@ class DatabaseTest: StringSpec({
         }
     }
 
-    "Adding a new quiz with -1 as the number of questions should throw an IllegalArgumentException" {
+    "Adding a new Quiz with -1 as the number of questions should throw an IllegalArgumentException" {
         testApplication {
             application { testModule() }
 
@@ -421,5 +426,133 @@ class DatabaseTest: StringSpec({
         }
     }
 
+    "Add a Question (normal data) to Quiz 'COMP2860 Quiz'" {
+        testApplication {
+            application { testModule() }
 
+            // Assumes Minghao only has one quiz. This may not be appropriate for a test tho
+            val retrievedQuizzes = retrieveUserQuizzes("JoanaKennah")
+            retrievedQuizzes shouldNotBe null
+
+            val quiz = retrievedQuizzes!!.first()
+            quiz shouldNotBe null
+            quiz.num_of_questions shouldBe 1
+
+            val question = addQuestion(quiz,
+                "This is a test question",
+                "furthereducation")
+            question shouldNotBe null
+
+            quiz.num_of_questions shouldBe 2
+        }
+    }
+
+    "Add a Question to Quiz 'COMP2860 Quiz' with a question of length 256" {
+        testApplication {
+            application { testModule() }
+
+            // Assumes Minghao only has one quiz. This may not be appropriate for a test tho
+            val retrievedQuizzes = retrieveUserQuizzes("JoanaKennah")
+            retrievedQuizzes shouldNotBe null
+
+            val quiz = retrievedQuizzes!!.first()
+            quiz shouldNotBe null
+            quiz.num_of_questions shouldBe 1
+
+            val question = addQuestion(quiz,
+                "This is a test question. I don't know how to make this long to be honest. Hello examiner, how has your day been? Writing tests are very important but do you enjoy writing tests? I think I enjoy it but it can be quite tedious, but is important. What is 2+2?",
+                "furthereducation")
+            question shouldNotBe null
+            question.question shouldHaveLength 256
+            quiz.num_of_questions shouldBe 2
+        }
+    }
+
+    "Add a Question to Quiz 'COMP2870' with a question of length > 256" {
+        testApplication {
+            application { testModule() }
+
+            val retrievedQuizzes = retrieveUserQuizzes("JoanaKennah")
+            retrievedQuizzes shouldNotBe null
+
+            val quiz = retrievedQuizzes!!.first()
+            quiz shouldNotBe null
+
+            shouldThrow<IllegalArgumentException> {
+                addQuestion(
+                    quiz,
+                    "This is a test question. I don't know how to make this long to be honest. Hello examiner, how has your day been? Writing tests are very important but do you enjoy writing tests? I think I enjoy it but it can be quite tedious, but is important. What is 2+2????!",
+                    "furthereducation")
+            }
+        }
+    }
+
+    "Retrieve all questions (2) from Quiz 'COMP2860 Quiz'" {
+        testApplication {
+            application { testModule() }
+
+            val questionData = listOf(
+                listOf("What is a process?", "furthereducation"),
+                listOf("What is a thread?", "furthereducation"))
+
+            val retrievedQuizzes = retrieveUserQuizzes("linguin0")
+            retrievedQuizzes shouldNotBe null
+
+            val quiz = retrievedQuizzes!!.first()
+            quiz shouldNotBe null
+            quiz.quiz_name shouldBe "COMP2860 Quiz"
+
+            val quizQuestions = retrieveQuizQuestions(quiz)
+            quizQuestions shouldNotBe null
+            quizQuestions.size shouldBe 2
+
+            for (i in 0..1) {
+                quizQuestions[i] shouldNotBe null
+                quizQuestions[i].question shouldBe questionData[i][0]
+                quizQuestions[i].key_stage shouldBe questionData[i][1]
+            }
+        }
+    }
+
+    "Retrieve all questions (1) from Quiz 'COMP2870 Quiz'" {
+        testApplication {
+            application { testModule() }
+
+            val retrievedQuizzes = retrieveUserQuizzes("JoanaKennah")
+            retrievedQuizzes shouldNotBe null
+
+            val quiz = retrievedQuizzes!!.first()
+            quiz shouldNotBe null
+            quiz.quiz_name shouldBe "COMP2870 Quiz"
+
+            val quizQuestions = retrieveQuizQuestions(quiz)
+            quizQuestions shouldNotBe null
+            quizQuestions.size shouldBe 1
+
+            quizQuestions[0].question shouldBe "What is a finite state automation?"
+            quizQuestions[0].key_stage shouldBe "furthereducation"
+        }
+    }
+
+    "Retrieve empty list of questions from new Quiz 'Test Quiz'" {
+        testApplication {
+            application { testModule() }
+
+            val user = retrieveUser("MinghaoLe123")
+            if (user != null) {
+                val newQuiz = addQuiz(user,
+                    "Test Quiz",
+                    "This is a test quiz",
+                    "other",
+                    0)
+                newQuiz shouldNotBe null
+
+                val retrievedQuizzes = retrieveUserQuizzes("MinghaoLe123")
+                retrievedQuizzes shouldNotBe null
+
+                val retrievedQuestions = retrieveQuizQuestions(newQuiz)
+                retrievedQuestions shouldBe emptyList()
+            }
+        }
+    }
 })

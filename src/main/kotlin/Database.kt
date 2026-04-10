@@ -2,6 +2,7 @@ package com.example
 
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.replace
 import org.jetbrains.exposed.v1.core.eq
 import com.password4j.Password
 import kotlin.text.isNotEmpty
@@ -93,7 +94,7 @@ fun deleteUser(user : User) {
 }
 
 /**
- * Creates and adds a new Question to QuestionTable
+ * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1.
  */
 fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
     for (parameter in listOf(question, key_stage)) {
@@ -111,10 +112,7 @@ fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
             this.question = question
         }
 
-        // Very poor way of using the quiz
-        Quiz.findByIdAndUpdate(quiz.id.value) {
-            it.num_of_questions += 1
-        }
+        quiz.num_of_questions += 1
 
         return@transaction question
     }
