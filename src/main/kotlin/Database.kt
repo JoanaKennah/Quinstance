@@ -2,6 +2,7 @@ package com.example
 
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.replace
 import org.jetbrains.exposed.v1.core.eq
 import com.password4j.Password
 import kotlin.text.isNotEmpty
@@ -9,6 +10,7 @@ import com.example.database.ProjectDatabase
 import com.example.database.TestDatabase
 import com.example.database.tables.*
 import com.example.database.objects.*
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 
 //  All code here was written by a human :>
 /*  Websites used for debugging/learning
@@ -42,7 +44,7 @@ fun configureDatabase() {
  */
 fun retrieveUser(username: String) : User? {
     require(username.isNotEmpty()) { "User can't be empty" }
-    return transaction(ProjectDatabase.database) {
+    return transaction(TransactionManager.defaultDatabase) {
         User.find { UserTable.username eq username }.firstOrNull()
     }
 }
@@ -52,14 +54,16 @@ fun retrieveUser(username: String) : User? {
  */
 fun addUser(username: String, password: String, name: String, email: String, key_stage: String, role: String) : User? {
     // Check to ensure all parameters are not empty
-    for (parameter in listOf(username, name, email, key_stage, role)) {
+    for (parameter in listOf(username, password, name, email, key_stage, role)) {
         require(parameter.isNotEmpty())
     }
+    require(username.length <= 50)
+    require(email.length <= 50)
     // Check to see if user already exists with the same username
     val userExists = retrieveUser(username)
     if (userExists == null) {
         val hash = Password.hash(password).addRandomSalt(8).withScrypt()
-        return transaction(ProjectDatabase.database) {
+        return transaction(TransactionManager.defaultDatabase) {
             User.new {
                 this.username = username
                 this.password = hash.result
@@ -79,7 +83,7 @@ fun deleteUser(user : User) {
     // Checks if the user exists in the table before deleting it
     val userExists = retrieveUser(user.username)
     if (userExists != null) {
-        transaction(ProjectDatabase.database) {
+        transaction(TransactionManager.defaultDatabase) {
             user.delete()
         }
     } else {
@@ -90,13 +94,13 @@ fun deleteUser(user : User) {
 }
 
 /**
- * Creates and adds a new Question to QuestionTable
+ * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1.
  */
 fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
     for (parameter in listOf(question, key_stage)) {
         require(parameter.isNotEmpty())
     }
-    val newQuestion = transaction(ProjectDatabase.database) {
+    val newQuestion = transaction(TransactionManager.defaultDatabase) {
         // Don't need to check if Question already exists
         val question = Question.new {
             this.question = question
@@ -107,6 +111,9 @@ fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
             this.quiz = quiz
             this.question = question
         }
+
+        quiz.num_of_questions += 1
+
         return@transaction question
     }
     return newQuestion
@@ -117,7 +124,7 @@ fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
  */
 fun deleteQuestion(question: Question): Boolean {
     // Finds if the given question exists, then deletes it
-    return transaction(ProjectDatabase.database) {
+    return transaction(TransactionManager.defaultDatabase) {
         val foundQuestion = Question.find { QuestionTable.id eq question.id }
         if (foundQuestion.firstOrNull() != null) {
             question.delete()
@@ -133,7 +140,7 @@ fun deleteQuestion(question: Question): Boolean {
  */
 fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
     // Find all question ID's associated with the given Quiz
-    return transaction(ProjectDatabase.database) {
+    return transaction(TransactionManager.defaultDatabase) {
         // Check to see if quiz actually exists
         println("test ${quiz.id}")
         require( (Quiz.findById(quiz.id))?.id == quiz.id ) { "Quiz received does not exist" }
@@ -165,7 +172,7 @@ fun addQuiz(user: User, quiz_name: String, description: String, category: String
         require(parameter.isNotEmpty()) { "Parameter $parameter must not be empty" }
     }
     // Don't need to check if Quiz already exists
-    return transaction(ProjectDatabase.database) {
+    return transaction(TransactionManager.defaultDatabase) {
         Quiz.new {
             this.user = user
             this.quiz_name = quiz_name
@@ -181,7 +188,7 @@ fun addQuiz(user: User, quiz_name: String, description: String, category: String
  */
 fun deleteQuiz(quiz: Quiz) : Boolean {
     // Finds if given Quiz exists, then deletes it
-    return transaction(ProjectDatabase.database) {
+    return transaction(TransactionManager.defaultDatabase) {
         val foundQuiz = Quiz.find { QuizTable.id eq quiz.id }
         if (foundQuiz.firstOrNull() != null) {
             quiz.delete()
@@ -200,7 +207,7 @@ fun retrieveUserQuizzes(username: String) : MutableList<Quiz>? {
     val currentUser = retrieveUser(username) ?: return null
     val userID = currentUser.id
 
-    return transaction(ProjectDatabase.database) {
+    return transaction(TransactionManager.defaultDatabase) {
         val quizList = mutableListOf<Quiz>()
 
         // Finds all quizzes associated with the specified User
@@ -218,7 +225,7 @@ fun retrieveUserQuizzes(username: String) : MutableList<Quiz>? {
 fun addAnswer(question: Question, option1: String, option2: String, option3: String? = null, option4: String? = null, correctIndex: Int) : Answer? {
     // Will need to discuss with team if we want the user to be able to have 2, 3 or 4 answers
     //Slightly changed this to accept 4 answers then flag the correct one, helped make the frontend a bit cleaner
-    transaction(ProjectDatabase.database) {
+    transaction(TransactionManager.defaultDatabase) {
         require( (Question.findById(question.id))?.id == question.id ) { "Question given does not exist" }
     }
     require(option1.isNotEmpty()) { "option 1 must not be empty" }
@@ -226,7 +233,7 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
 
     // Check to see if an Answer already exists (Question and Answer have 1:1 relationship), return null if Answer
     // already exists
-    return transaction(ProjectDatabase.database) {
+    return transaction(TransactionManager.defaultDatabase) {
         val check = Answer.find {AnswerTable.question eq question.id }
         if (check.firstOrNull() != null) {
             return@transaction null
@@ -250,7 +257,7 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
  * unless I was to map each answer to a questionID. Am happy to do this instead but will want to discuss with the team
  */
 fun retrieveQuestionAnswer(question: Question) : Answer? {
-    return transaction(ProjectDatabase.database) {
+    return transaction(TransactionManager.defaultDatabase) {
         // Check to see if quiz given actually exists
         require( (Question.findById(question.id))?.id == question.id ) { "Question given does not exist" }
 

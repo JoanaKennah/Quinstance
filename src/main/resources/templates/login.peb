@@ -78,7 +78,7 @@
         .switch-link:hover {
             text-decoration: underline;
         }
-        
+
         button {
             margin-top: 25px;
             padding: 10px 25px;
