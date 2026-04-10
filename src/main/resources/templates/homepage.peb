@@ -2,6 +2,51 @@
 <html lang="en">
 <head>
     <title>Game Night</title>
+    <script>
+        <!--- ALL OF THIS IS JUST TO TEST HOW WEBSOCKETS WORK :) --->
+        let serverURL;
+        let socket;
+
+        function setupSocket() {
+            serverURL = 'ws://127.0.0.1:8080/gameServer';
+            socket = new WebSocket(serverURL);
+
+            socket.onopen = logOpenToConsole;
+            socket.onclose = logCloseToConsole;
+            socket.onmessage = test;
+        }
+
+        function logOpenToConsole() {
+            console.log("Web socket connection opened");
+        }
+
+        function logCloseToConsole() {
+            console.log("Web socket connection closed");
+        }
+
+        function test(event) {
+            let questionData = JSON.parse(event.data);
+            console.log(`Retrieved question: ${questionData.questionText}`);
+            console.log(`Retrieved answers: ${questionData.answerOne}, ${questionData.answerTwo}, ${questionData.answerThree}, ${questionData.answerFour} `);
+
+            let data = buildAnswer()
+            sendAnswerViaSocket(data)
+
+        }
+
+        <!--- temp userID, will need to pass this into peb file --->
+        function buildAnswer() {
+            return {
+                userID: 1,
+                chosenAnswer: 0,
+                answerSpeed: 1.0
+            }
+        }
+
+        function sendAnswerViaSocket(data) {
+            socket.send(JSON.stringify(data));
+        }
+    </script>
     <style>
 
         * {
@@ -128,7 +173,6 @@
 </head>
 
 <body>
-
     <!-- Navigation bar -->
     <nav class="navbar">
         <div class="navbar-left">
@@ -137,7 +181,7 @@
         </div>
         <div class="navbar-right">
             <button class="btn-signup" onclick="window.location.href='/signup'">Sign Up</button>
-            <button class="btn-login"  onclick="window.location.href='/login'">Log In</button>
+            <button class="btn-login" action="javascript:test()" onclick="window.location.href='/login'">Log In</button>
         </div>
     </nav>
 
