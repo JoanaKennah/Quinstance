@@ -8,7 +8,7 @@
         let socket;
 
         function setupSocket() {
-            serverURL = 'ws://127.0.0.1:8080/';
+            serverURL = 'ws://127.0.0.1:8080/gameServer';
             socket = new WebSocket(serverURL);
 
             socket.onopen = logOpenToConsole;
@@ -172,7 +172,7 @@
     </style>
 </head>
 
-<body onload='javascript:setupSocket()'>
+<body>
     <!-- Navigation bar -->
     <nav class="navbar">
         <div class="navbar-left">
