@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>User Quiz Statistics</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+      
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+      
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+        }
+
+        .leaderboard-title {
+            font-size: 28px;
+            color: black;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 2px solid #e63973;
+            color: black;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .empty {
+            text-align: center;
+            color: #e63973;
+            font-size: 20px;
+            margin-top: 100px;
+        }
+
+        .bottom-bar {
+            margin-top: 40px;
+        }
+
+        .control-btn {
+            padding: 12px 20px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+
+        .control-btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+  
+<div class="navbar">
+    <a>{{ quizName }}</a>
+</div>
+
+<div class="content">
+
+    <div class="leaderboard-title">
+        Your Previous Scores:
+    </div>
+
+    {% if attempts is empty %}
+        <div class="empty">
+            No previous attempts found!
+        </div>
+    {% else %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Score:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in attempts %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ attempt.score }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    <div class="bottom-bar"> <!--- NEED TO ADD ROUTING --->
+        <form action="">
+            <button class="control-btn">Return to Dashboard</button>
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

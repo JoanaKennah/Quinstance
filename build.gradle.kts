@@ -33,6 +33,7 @@ dependencies {
     implementation("io.ktor:ktor-client-serialization")
     implementation("io.ktor:ktor-client-websockets")
     implementation("io.ktor:ktor-server-websockets")
+    implementation(libs.ktor.server.sessions)
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
 }

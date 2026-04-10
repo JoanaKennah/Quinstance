@@ -1,6 +1,7 @@
 package com.example
 
 import io.ktor.server.application.*
+import io.ktor.server.sessions.*
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import com.example.database.TestDatabase
 import io.ktor.server.websocket.*
@@ -11,10 +12,19 @@ fun main(args: Array<String>) {
 }
 
 fun Application.module() {
+    configureSessions()
     configureDatabase()
     configureTemplating()
     configureRouting()
     configureSockets()
+}
+
+fun Application.configureSessions() {
+    install(Sessions) {
+        cookie<UserSession>("user_session") {
+            cookie.httpOnly = true
+        }
+    }
 }
 
 // Used for testing :)
