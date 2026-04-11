@@ -1,6 +1,7 @@
 package com.example
 
 import com.example.database.ProjectDatabase
+import com.example.UserAnswers
 import com.example.database.tables.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -18,14 +19,7 @@ import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.core.eq
 
 import com.password4j.Password
-import com.example.retrieveUser
-import com.example.addUser
 import com.example.database.objects.*
-import com.example.addQuiz
-import com.example.retrieveQuizQuestions
-import com.example.addQuestion
-import com.example.addAnswer
-import com.example.retrieveUserQuizzes
 
 
 
@@ -137,6 +131,45 @@ fun Application.configureRouting() {
             
             call.respond(PebbleContent("student_dashboard.peb", mapOf("username" to session.username)))
         }
+
+        get("/gameServer") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+
+            val foundQuizzes = retrieveUserQuizzes(session.username)
+
+            if (foundQuizzes != null && foundQuizzes.isEmpty()) {
+                if (session.role == "teacher") call.respondRedirect("/teacher-dashboard")
+                else call.respondRedirect("/student-dashboard")
+            }
+
+            val quiz = foundQuizzes?.get(0)
+            if (quiz != null) {
+                val quizQuestions = retrieveQuizQuestions(quiz)
+
+                if (quizQuestions.isNotEmpty()) {
+
+                    for (count in 1..quizQuestions.lastIndex+1) {
+                        val answers = retrieveQuestionAnswer(quizQuestions[count-1])
+                        if (answers != null) {
+                            sendQuestionToUsers(count,quizQuestions[count-1], answers)
+
+                        }
+                        else call.respondText("No answers found for question")
+                        call.respond(PebbleContent("playing_question_server.peb", mapOf("username" to session.username, "quizName" to quiz.quiz_name, "questionNumber" to count,"questionText" to quizQuestions[count-1].question)))
+                    }
+                }
+
+            }
+        }
+
+        get("/game") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val user = retrieveUser(session.username)
+            val quizName = "test" // PLACEHOLDER FOR WHEN WE HAVE LOBBY :3
+            if (user != null) call.respond(PebbleContent("playing_question_client.peb", mapOf("username" to session.username, "quizName" to quizName)))
+            else call.respondText("User with username ${session.username} doesn't exist")
+        }
+
         get("/create-quiz") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
 

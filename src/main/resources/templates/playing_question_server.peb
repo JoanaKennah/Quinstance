@@ -93,7 +93,7 @@
     </div>
 
     <div class="question-box">
-        {{ question.text }}
+        {{ questionText }}
     </div>
 
     <div class="timer">
