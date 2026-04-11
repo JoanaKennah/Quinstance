@@ -17,6 +17,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import io.pebbletemplates.pebble.loader.ClasspathLoader
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.and
 
 import com.password4j.Password
 import com.example.database.objects.*
@@ -540,7 +541,7 @@ fun Application.configureRouting() {
             }
 
             call.respondRedirect(returnURL)
-            
+
         }
 
     }

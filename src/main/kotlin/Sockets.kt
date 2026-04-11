@@ -17,6 +17,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.time.Duration.Companion.seconds
 import com.example.retrieveQuestionAnswer
+import io.ktor.server.websocket.WebSocketServerSession
 
 @Serializable
 data class QuestionData(
@@ -38,7 +39,7 @@ data class GameSession(
     val gameId: Int,
     val questions: List<Question>,
     var currentQuestionIndex: Int = 0,
-    val connections: MutableSet<DefaultWebSocketSession> = Collections.synchronizedSet(LinkedHashSet())
+    val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet())
 )
 
 val activeSessions = Collections.synchronizedMap(mutableMapOf<Int, GameSession>())
