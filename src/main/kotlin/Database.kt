@@ -163,12 +163,12 @@ fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
 /**
  * Creates and adds a new Quiz to QuizTable
  */
-fun addQuiz(user: User, quiz_name: String, description: String, category: String, num_of_questions: Int = 0) : Quiz {
+fun addQuiz(user: User, quiz_name: String, description: String, category: String, key_stage: String, num_of_questions: Int = 0) : Quiz {
     // Checks the User exists
     require(retrieveUser(user.username) != null) { "User must not be null" }
     require(num_of_questions >= 0) { "Number of questions must be greater than or equal to 0" }
     // Checks string parameters are no empty
-    for (parameter in listOf(quiz_name, description, category)) {
+    for (parameter in listOf(quiz_name, description, category, key_stage)) {
         require(parameter.isNotEmpty()) { "Parameter $parameter must not be empty" }
     }
     // Don't need to check if Quiz already exists
@@ -178,6 +178,7 @@ fun addQuiz(user: User, quiz_name: String, description: String, category: String
             this.quiz_name = quiz_name
             this.description = description
             this.category = category
+            this.key_stage = key_stage
             this.num_of_questions = num_of_questions
         }
     }

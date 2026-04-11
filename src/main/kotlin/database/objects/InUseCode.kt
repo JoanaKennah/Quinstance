@@ -10,7 +10,7 @@ class InUseCode(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<InUseCode>(InUseTable)
 
     var room_code by InUseTable.room_code
-    var game by InUseCode referencedOn InUseTable.game
+    var game by Game referencedOn InUseTable.game
 
     override fun toString() = room_code
 }

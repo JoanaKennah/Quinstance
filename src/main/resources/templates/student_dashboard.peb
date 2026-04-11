@@ -68,7 +68,7 @@
 <h1>Hello {{ username }}!</h1>
 
 <div class="button-container"> <!--- NEED TO ADD ROUTING --->
-<button>Join a Lobby</button>
+<button onclick="window.location.href='/join-lobby'">Join a Lobby</button>
 <button onclick="window.location.href='/create-quiz'">Create a Quiz</button>
 <button onclick="window.location.href='/view-quizzes'">View Quizzes</button>
 <button>View Statistics</button>

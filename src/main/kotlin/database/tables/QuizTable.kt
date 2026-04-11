@@ -9,4 +9,5 @@ object QuizTable : IntIdTable() {
     val num_of_questions = integer("num_of_questions")
     val description = varchar("description", 256)
     val category = varchar("category", 50)
+    val key_stage = varchar("key_stage", 20)
 }

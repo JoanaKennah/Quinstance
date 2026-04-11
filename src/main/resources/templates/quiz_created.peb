@@ -64,7 +64,7 @@
 <h1>Quiz Created!</h1>
 
 <div class="button-container"> <!--- NEED TO ADD ROUTING --->
-<button>Create a Lobby</button>
+<button onclick="window.location.href='/create-lobby/{{ quizId }}'">Create a Lobby</button>
 <button onclick="window.location.href='/view-quizzes'">View Quizzes</button>
 <button onclick="window.location.href='{{ returnURL }}'">Return to Dashboard</button>
 </div>

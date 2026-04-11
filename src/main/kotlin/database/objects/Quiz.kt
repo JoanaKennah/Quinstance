@@ -13,6 +13,7 @@ class Quiz(id: EntityID<Int>) : IntEntity(id) {
     var num_of_questions by QuizTable.num_of_questions
     var description by QuizTable.description
     var category by QuizTable.category
+    var key_stage by QuizTable.key_stage
 
     override fun toString() = quiz_name
 }
