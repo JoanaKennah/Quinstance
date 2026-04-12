@@ -34,7 +34,8 @@ fun Application.configureSessions() {
 fun Application.testModule() {
     TestDatabase.create()
     TransactionManager.defaultDatabase = TestDatabase.db
+    configureSessions()
     configureTemplating()
     configureRouting()
-    configureSessions()
+    configureSockets()
 }

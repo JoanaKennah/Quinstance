@@ -1,18 +1,9 @@
 package com.example
 
-import com.example.database.TestDatabase
-import com.example.database.objects.Quiz
-import com.example.database.tables.QuizTable
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
-import org.jetbrains.exposed.v1.core.eq
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.*
 import io.kotest.matchers.string.shouldContain
-import io.ktor.client.request.*
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.*
 import io.ktor.server.testing.*
 import com.password4j.Password
 import io.kotest.matchers.collections.shouldHaveSize
@@ -20,6 +11,16 @@ import io.kotest.matchers.string.shouldHaveLength
 
 class DatabaseTest: StringSpec({
     // Testing the functions used for Login / Signup
+
+    // Putting the error case first as it fixed an issue I GENUINELY have no idea how to fix.
+    "Retrieving user with empty username throws an IllegalArgumentException" {
+        testApplication {
+            application { testModule() }
+            shouldThrow<IllegalArgumentException> {
+                retrieveUser("")
+            }
+        }
+    }
 
     "Retrieve correct user data for user with username 'linguin0'" {
         testApplication {
@@ -74,15 +75,6 @@ class DatabaseTest: StringSpec({
             application { testModule() }
             val user = retrieveUser("testUser")
             user shouldBe null
-        }
-    }
-
-    "Retrieving user with empty username throws an IllegalArgumentException" {
-        testApplication {
-            application { testModule() }
-            shouldThrow<IllegalArgumentException> {
-                retrieveUser("")
-            }
         }
     }
 

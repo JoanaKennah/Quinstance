@@ -11,6 +11,7 @@ import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.insertAndGetId
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 /**
@@ -26,7 +27,6 @@ object TestDatabase {
         Database.connect(URL, DRIVER)
     }
 
-    // Creates UserTable and three Users for testing purposes.
     fun create() {
         transaction(db) {
             SchemaUtils.drop(UserTable, QuizTable, QuestionTable, AnswerTable, QuinstanceTable)
