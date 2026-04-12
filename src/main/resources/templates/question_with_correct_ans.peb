@@ -88,7 +88,7 @@
         socket.onmessage = function(event) {
             const data = JSON.parse(event.data);
             if(data.redirect) {
-                window.location.href = data.rediect
+                window.location.href = data.redirect
             }
         }
 
@@ -96,7 +96,7 @@
             console.log("WebSocket Error: " + error);
         }
         {% endif %}
-    <script>
+    </script>
 
 </head>
 
