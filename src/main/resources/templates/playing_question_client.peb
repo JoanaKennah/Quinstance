@@ -36,16 +36,16 @@
 
             // if not - handle as question data
             answered = false;
-            console.log(`Retrieved question: ${questionData.questionText}`);
-            console.log(`Retrieved answers: ${questionData.answerOne}, ${questionData.answerTwo}, ${questionData.answerThree}, ${questionData.answerFour} `);
+            console.log(`Retrieved question: ${data.questionText}`);
+            console.log(`Retrieved answers: ${data.answerOne}, ${data.answerTwo}, ${data.answerThree}, ${data.answerFour} `);
 
-            document.getElementById('questionNum').innerHTML = "Question " + questionData.questionNumber + ":";
-            document.getElementById('questionText').innerHTML = questionData.questionText;
+            document.getElementById('questionNum').innerHTML = "Question " + data.questionNumber + ":";
+            document.getElementById('questionText').innerHTML = data.questionText;
 
-            document.getElementById('answer-0').innerHTML = questionData.answerOne;
-            document.getElementById('answer-1').innerHTML = questionData.answerTwo;
-            document.getElementById('answer-2').innerHTML = questionData.answerThree;
-            document.getElementById('answer-3').innerHTML = questionData.answerFour;
+            document.getElementById('answer-0').innerHTML = data.answerOne;
+            document.getElementById('answer-1').innerHTML = data.answerTwo;
+            document.getElementById('answer-2').innerHTML = data.answerThree;
+            document.getElementById('answer-3').innerHTML = data.answerFour;
         }
 
         function buildAnswer(name, answer) {
@@ -165,7 +165,12 @@
             const selected = document.getElementById("answer-" + index);
             selected.classList.add("selected");
 
-            buildAnswer("{{ username }}", selected.innerHTML)
+            const selectedText = selected.innerHTML.trim();
+
+            buildAnswer("{{ username }}", selectedText);
+
+            //take user towaiting screen showing selected answer, handles special characters
+            window.location.href = "/selected-answer/{{ gameId }}?answer=" + encodeURIComponent(selectedText);
         }
 
     </script>

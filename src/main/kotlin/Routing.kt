@@ -563,5 +563,22 @@ fun Application.configureRouting() {
 
         //TESTED UP TO HERE
 
+        //serves selected answer template and params
+        get("/selected-answer/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login") 
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val game = transaction(TransactionManager.defaultDatabase) {
+                Game.findById(gameId)
+            } ?: return@get call.respondText("Game not found") 
+
+            val selectedAnswer = call.request.queryParameters["answer"] ?: ""
+
+            call.respond(PebbleContent("client_selected_ans.peb", mapOf(
+                "quizName" to game.quiz.quiz_name,
+                "gameId" to gameId, 
+                "selectedAnswer" to selectedAnswer
+            )))
+        }
+
     }
 }
