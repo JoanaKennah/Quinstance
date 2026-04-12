@@ -4,13 +4,13 @@
     <title>Play Quiz for Client</title>
 
     <script>
-        <!--- ALL OF THIS IS JUST TO TEST HOW WEBSOCKETS WORK :) --->
+        //ALL OF THIS IS JUST TO TEST HOW WEBSOCKETS WORK
         let serverURL;
         let socket;
+        let answered = false;
 
         function setupSocket() {
-            serverURL = 'ws://127.0.0.1:8080/gameServer';
-            socket = new WebSocket(serverURL);
+            socket = new WebSocket("ws://" + location.host + "/game/{{ gameId }}");
 
             socket.onopen = logOpenToConsole;
             socket.onclose = logCloseToConsole;
@@ -26,7 +26,16 @@
         }
 
         function retrieveQuestion(event) {
-            let questionData = JSON.parse(event.data);
+            let data = JSON.parse(event.data);
+
+            // check for redirect instruction
+            if (data.redirect) {
+                window.location.href = data.redirect;
+                return;
+            }
+
+            // if not - handle as question data
+            answered = false;
             console.log(`Retrieved question: ${questionData.questionText}`);
             console.log(`Retrieved answers: ${questionData.answerOne}, ${questionData.answerTwo}, ${questionData.answerThree}, ${questionData.answerFour} `);
 
@@ -128,37 +137,42 @@
     </style>
 
     <script>
-        let timeleft = 30;
+        let timeLeft = 30;
 
         function startTimer() {
             const countdown = setInterval(() => {
                 timeLeft--;
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
-                    <!--- ROUTE TO NEXT PAGE --->
+                    //checks player hasn't clicked to avoid a dupe answer
+                    if (!answered) {                            
+                        answered = true;
+                        //sends empty string as answer
+                        buildAnswer("{{ username }}", "");
+                    }
                 }
             }, 1000)
         }
 
         function selectAnswer(index) {
-            <!--- to stop multiple clicks and traffic --->
-            const buttons = document.querySelectorAll(".answer-btn");
+            //to stop multiple clicks and traffic --->
+            if (answered) return;
+            answered = true;
+
+            const buttons= document.querySelectorAll(".answer-btn");
             buttons.forEach(btn => btn.disabled = true);
 
             const selected = document.getElementById("answer-" + index);
             selected.classList.add("selected");
 
-            setTimeout(() => {}, 500); <!--- NEED TO ADD ROUTING --->
-
             buildAnswer("{{ username }}", selected.innerHTML)
         }
 
-        window.onload = startTimer;
     </script>
 
 </head>
 
-<body onload='javascript:setupSocket()'>
+<body onload='setupSocket(); startTimer();'>
 
 <div class="navbar">
     <a>{{ quizName }}</a>

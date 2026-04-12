@@ -18,12 +18,18 @@ import io.pebbletemplates.pebble.loader.ClasspathLoader
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.and
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
+import io.ktor.websocket.Frame
 
 import com.password4j.Password
 import com.example.database.objects.*
 import com.example.activeSessions
 import com.example.GameSession
 import com.example.broadcastQuestion
+import com.example.retrieveQuestionAnswer
+import com.example.retrieveUserQuizzes
+import com.example.retrieveQuizQuestions
 
 
 
@@ -137,12 +143,19 @@ fun Application.configureRouting() {
         }
 
 
-        get("/game") {
+        //gets gameId and other details to pass to template
+        get("/game/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
-            val user = retrieveUser(session.username)
-            val quizName = "test" // PLACEHOLDER FOR WHEN WE HAVE LOBBY :3
-            if (user != null) call.respond(PebbleContent("playing_question_client.peb", mapOf("username" to session.username, "quizName" to quizName)))
-            else call.respondText("User with username ${session.username} doesn't exist")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val game = transaction(TransactionManager.defaultDatabase) {
+                Game.findById(gameId)
+            } ?: return@get call.respondText("Game Not Found")
+
+            call.respond(PebbleContent("playing_question_client.peb", mapOf(
+                "username" to session.username,
+                "quizName" to game.quiz.quiz_name,
+                "gameId" to gameId
+            )))
         }
 
         get("/create-quiz") {
@@ -452,6 +465,10 @@ fun Application.configureRouting() {
 
             //Broadcasr first question to connected players
             broadcastQuestion(gameSession)
+
+            //redirect all connected players to game page
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text(Json.encodeToString(mapOf("redirect" to "/game/$gameId")))) }
+
 
             call.respond(PebbleContent("playing_question_server.peb", mapOf(
                 "quizName" to game.quiz.quiz_name,
