@@ -654,10 +654,10 @@ fun Application.configureRouting() {
         get("/show-correct-answer/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
+            val (game, quiz) = transaction(TransactionManager.defaultDatabase) {
                 val game = Game.findById(gameId) ?: return@transaction null
-                val quizName = game.quiz.quiz_name
-                Pair(game, quizName)
+                val quiz = game.quiz
+                Pair(game, quiz)
             } ?: return@get call.respondText("Game not found")
 
             val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
@@ -666,7 +666,7 @@ fun Application.configureRouting() {
             val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@get call.respondText("No answer found for question")
 
             call.respond(PebbleContent("question_with_correct_ans.peb", mapOf(
-                "quizName" to quizName,
+                "quizName" to quiz.quiz_name,
                 "questionNumber" to gameSession.currentQuestionIndex + 1,
                 "questionText" to currentQuestion.question,
                 "correctAnswer" to correctAnswer,

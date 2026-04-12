@@ -25,7 +25,6 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
             val user = retrieveUser("linguin0")
-            println(user)
             user.let {
                 it shouldNotBe null
                 it?.username shouldBe "linguin0"
@@ -336,7 +335,7 @@ class DatabaseTest: StringSpec({
                     "My Quiz #1",
                     "This is a test quiz",
                     "other",
-                    0)
+                    "furthereducation")
                 newQuiz shouldNotBe null
             }
         }
@@ -352,7 +351,7 @@ class DatabaseTest: StringSpec({
                     "My really cool awesome quiz with many characters!!",
                     "This is a test quiz",
                     "other",
-                    0)
+                    "furthereducation")
                 newQuiz shouldNotBe null
             }
         }
@@ -369,7 +368,7 @@ class DatabaseTest: StringSpec({
                         "My really cool awesome quiz with many characters!! Uh oh!!",
                         "This is a test quiz",
                         "other",
-                        0)
+                        "furthereducation")
                 }
             }
         }
@@ -385,7 +384,7 @@ class DatabaseTest: StringSpec({
                     "My really cool awesome quiz with many characters!!",
                     "This is a really long, boring, very tedious description for testing purposes. 256 characters may be too little, may be too many, may even be the perfect amount of descriptions! Depends how much you like to type, say, yap, et cetera. I think this is done!!!",
                     "other",
-                    0)
+                    "furthereducation")
                 newQuiz shouldNotBe null
                 newQuiz.description shouldHaveLength 256
             }
@@ -403,7 +402,7 @@ class DatabaseTest: StringSpec({
                         "My Quiz #1",
                         "This is a really long, boring, very tedious description for testing purposes. 256 characters may be too little, may be too many, may even be the perfect amount of descriptions! Depends how much you like to type, say, yap, et cetera. I think this is done!!! Uh oh!",
                         "other",
-                        0)
+                        "furthereducation")
                 }
             }
         }
@@ -420,7 +419,8 @@ class DatabaseTest: StringSpec({
                         "My Quiz #1",
                         "This is a test quiz",
                         "other",
-                        -1)
+                        "furthereducation",
+                        num_of_questions = -1)
                 }
             }
         }
@@ -544,7 +544,7 @@ class DatabaseTest: StringSpec({
                     "Test Quiz",
                     "This is a test quiz",
                     "other",
-                    0)
+                    "furthereducation")
                 newQuiz shouldNotBe null
 
                 val retrievedQuizzes = retrieveUserQuizzes("MinghaoLe123")
