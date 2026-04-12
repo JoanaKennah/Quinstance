@@ -138,8 +138,9 @@
 
 </div>
 
-//polls for joined players once per sec
+
 <script>
+    //polls for joined players once per sec
     const pollPlayers = setInterval(() => {
         fetch("/lobby-players/{{ gameId }}")
             .then(response => response.json())

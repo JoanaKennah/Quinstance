@@ -332,7 +332,50 @@ fun Application.configureRouting() {
                 Quiz.findById(quizId)
             } ?: return@get call.respondText("Quiz not found")
 
-            call.respond(PebbleContent("create_lobby.peb", mapOf("quizId" to quizId, "quizName" to quiz.quiz_name, "numQuestions" to quiz.num_of_questions, "category" to quiz.category, "keyStage" to quiz.key_stage)))
+            val categoryDisplay = when (quiz.category) {
+                "art" -> "Art and Design"
+                "biology" -> "Biology"
+                "business" -> "Business Studies"
+                "chemistry" -> "Chemistry"
+                "cs" -> "Computer Science"
+                "dt" -> "Design and Technology"
+                "drama" -> "Drama"
+                "eng_lang" -> "English Language"
+                "eng_lit" -> "English Literature"
+                "french" -> "French"
+                "geography" -> "Geography"
+                "german" -> "German"
+                "history" -> "History"
+                "latin" -> "Latin"
+                "maths" -> "Mathematics"
+                "media" -> "Media Studies"
+                "music" -> "Music"
+                "pe" -> "Physical Education"
+                "physics" -> "Physics"
+                "rs" -> "Religious Studies"
+                "spanish" -> "Spanish"
+                "other" -> "Other"
+                else -> quiz.category
+            }
+
+            val keyStageDisplay = when (quiz.key_stage) {
+                "KS1" -> "Key Stage 1"
+                "KS2" -> "Key Stage 2"
+                "KS3" -> "Key Stage 3"
+                "KS4" -> "Key Stage 4"
+                "KS5" -> "Key Stage 5"
+                "furthereducation" -> "Further Education"
+                "nonapplicable" -> "N/A"
+                else -> quiz.key_stage
+            }
+
+            call.respond(PebbleContent("create_lobby.peb", mapOf(
+                "quizId" to quizId, 
+                "quizName" to quiz.quiz_name, 
+                "numQuestions" to quiz.num_of_questions, 
+                "category" to categoryDisplay, 
+                "keyStage" to keyStageDisplay
+                )))
 
         }
         
