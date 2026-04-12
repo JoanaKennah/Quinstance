@@ -119,7 +119,7 @@
                 <tbody>
                     {% for player in players %}
                         <tr>
-                            <td>{{ loop.index }}</td>
+                            <td>{{ loop.index + 1 }}</td>
                             <td>{{ player.username }}</td>
                             <td>{{ player.score }}</td>
                         </tr>
@@ -132,23 +132,19 @@
 
     <div class="controls"> <!--- NEED TO ADD ROUTING --->
 
-        <form action="">
+        <form method="post" action="/next-question/{{ gameId }}">
             <button class="control-btn">Continue</button>
-        </form>
-
-        <form action="">
-            <button class="control-btn">View Previous Top Scores</button>
         </form>
 
         <form action="">
             <button class="control-btn">Settings</button>
         </form>
 
-        <form action="">
+        <form action="/create-lobby/{{ quizId }}" method="get">
             <button class="control-btn">Restart</button>
         </form>
 
-        <form action="/leaderboard-quit/{{ gameId }}" method="post">
+        <form method="post" action="/leaderboard-quit/{{ gameId }}">
             <button class="control-btn">Quit</button>
         </form>
 

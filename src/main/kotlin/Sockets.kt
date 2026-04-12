@@ -41,6 +41,7 @@ data class GameSession(
     var currentQuestionIndex: Int = 0,
     var isAdvanced: Boolean = false,                //flag for advancing question
     var isStarted: Boolean = false,
+    var isFinished: Boolean = false,
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet())
 )
 

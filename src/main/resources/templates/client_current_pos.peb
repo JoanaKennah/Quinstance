@@ -67,24 +67,24 @@
     </style>
 
     <script>
-        //set 10 sec timer then advance
-        let timeLeft = 10;
+        //replace timer with polling approach
+        const currentIndex = {{ questionIndex }};
 
-        function startTimer() {
-            const timerDisplay = document.getElementById("countdown");
-            const countdown = setInterval(() => {
-                timeLeft--;
-                timerDisplay.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    //when timer expires post to next Q
-                    fetch("/next-question/{{ gameId }}", { method: "POST" })
-                        .then(() => window.location.href = "/game/{{ gameId }}");
+        const pollSend = setInterval(() => {
+            fetch("/question-index/{{ gameId }}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.finished) {
+                    clearInterval(pollSend);
+                    window.location.href = "/end-game/{{ gameId }}";
+                } else if (data.index > currentIndex) {
+                    clearInterval(pollSend);
+                    window.location.href = "/game/{{ gameId }}";
                 }
-            } , 1000);
-        }
+            })
+            .catch(err => console.log("Polling error: " + err));
+        }, 500);
 
-        window.onload = startTimer;
     </script>
 
 </head>
@@ -113,10 +113,6 @@
     </div>
     <div class="score">
         {{ score }}
-    </div>
-
-    <div class="timer">
-        Next question in <span id="countdown">10</span> seconds...
     </div>
 
 </div>

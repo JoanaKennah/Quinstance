@@ -602,11 +602,13 @@ fun Application.configureRouting() {
             gameSession.currentQuestionIndex++          //advance quiz to next Q
 
             if (gameSession.currentQuestionIndex >= gameSession.questions.size) {
+                gameSession.isFinished = true
                 activeSessions.remove(gameId)           //cut game and go to leaderboard
                 call.respondRedirect("/leaderboard/$gameId") 
 
             } else {
                 gameSession.isAdvanced = false          //reset flag for next Q
+                delay(1000)
                 broadcastQuestion(gameSession)
 
                 val nextQuestion = gameSession.questions[gameSession.currentQuestionIndex] 
@@ -624,19 +626,25 @@ fun Application.configureRouting() {
 
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID") 
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
+            val (game, quizName, quizId) = transaction(TransactionManager.defaultDatabase) {
                 val game = Game.findById(gameId) ?: return@transaction null
                 val quizName = game.quiz.quiz_name
-                Pair(game, quizName)
+                val quizId = game.quiz.id.value
+                Triple(game, quizName, quizId)
             } ?: return@get call.respondText("Game not found") 
 
             //retrieve player scores, sort by highest 
             val players = transaction(TransactionManager.defaultDatabase) {
-                UserScore.find { UserScoreTable.game eq game.id }.sortedByDescending { it.score }.map { userScore -> mapOf("username" to userScore.user.username, "score" to userScore.score)}
+                UserScore.find { UserScoreTable.game eq game.id }.sortedByDescending { it.score }.map { userScore -> mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score) }
 
             } 
 
-            call.respond(PebbleContent("leaderboard.peb", mapOf("quizName" to quizName, "players" to players)))
+            call.respond(PebbleContent("leaderboard.peb", mapOf(
+                "quizName" to quizName, 
+                "players" to players,
+                "gameId" to gameId,
+                "quizId" to quizId
+                )))
 
         }
 
@@ -772,10 +780,11 @@ fun Application.configureRouting() {
         post("/show-positions/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
+            val (game, quizName, quizId) = transaction(TransactionManager.defaultDatabase) {
                 val game = Game.findById(gameId) ?: return@transaction null
                 val quizName = game.quiz.quiz_name
-                Pair(game, quizName)
+                val quizId = game.quiz.id.value
+                Triple(game, quizName, quizId)
             } ?: return@post call.respondText("Game not found")
 
             val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found")
@@ -784,7 +793,7 @@ fun Application.configureRouting() {
                 UserScore.find { UserScoreTable.game eq game.id }
                     .sortedByDescending { it.score }
                     .map { userScore -> 
-                        mapOf("username" to userScore.user.username, "score" to userScore.score)
+                        mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score) 
                     }
             }
 
@@ -797,7 +806,9 @@ fun Application.configureRouting() {
 
             call.respond(PebbleContent("leaderboard.peb", mapOf(
                 "quizName" to quizName,
-                "players" to scores
+                "players" to scores,
+                "gameId" to gameId,
+                "quizId" to quizId
             )))
         }
 
@@ -816,20 +827,25 @@ fun Application.configureRouting() {
             val allScores = transaction(TransactionManager.defaultDatabase) {
                 UserScore.find { UserScoreTable.game eq game.id }
                     .sortedByDescending { it.score }
+                    .map { userScore ->
+                        Triple<Int, String, Int>(userScore.user.id.value, userScore.user.username, userScore.score)
+                    }
             }
 
             //find score and position per player
-            val playerScore = allScores.indexOfFirst { it.user.id == user.id }
+            val playerScore = allScores.indexOfFirst { it.first == user.id.value }
             val position = playerScore + 1 
-            val score = allScores.getOrNull(playerScore)?.score ?: 0
+            val score = allScores.getOrNull(playerScore)?.third ?: 0
             val totalPlayers = allScores.size
+            val questionIndex: Int = activeSessions[gameId]?.currentQuestionIndex ?: 0
 
-            call.respond(PebbleContent("client_current_pos.peb", mapOf(
+            call.respond(PebbleContent("client_current_pos.peb", mapOf<String, Any>(
                 "quizName" to quizName,
                 "gameId" to gameId,
                 "position" to position,
                 "score" to score,
-                "totalPlayers" to totalPlayers
+                "totalPlayers" to totalPlayers,
+                "questionIndex" to questionIndex
             )))
         }
 
@@ -854,7 +870,14 @@ fun Application.configureRouting() {
             call.respondText(json, ContentType.Application.Json)
         }
 
-        
+        get("/question-index/{gameId}") {
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("{\"index\":0}", ContentType.Application.Json)
+            val session = activeSessions[gameId]
+            val index = activeSessions[gameId]?.currentQuestionIndex ?: 0
+            val finished = session?.isFinished ?: true
+            println("Question index polled: gameId=$gameId index=$index finished=$finished")
+            call.respondText("{\"index\":$index,\"finished\":$finished}", ContentType.Application.Json)
+        }
 
     }
 }
