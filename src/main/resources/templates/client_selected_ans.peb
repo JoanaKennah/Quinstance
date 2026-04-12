@@ -49,7 +49,8 @@
 <script>
 
     //connect to game, wait for server to advance to next Q
-    const socket = new WebSocket("ws://" + location.host + "/game/{{ gameId }}");
+    const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+    const socket = new WebSocket(protocol + "//" + location.host + "/game/{{ gameId }}");
 
     socket.onmessage = function(event) {
         const data = JSON.parse(event.data);

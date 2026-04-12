@@ -84,18 +84,18 @@
     </style>
 
     <script>
-        const socket = new WebSocket("ws://" + location.host + "/game/{{ gameId }}");
-        
-        socket.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            if (data.redirect) {
-                window.location.href = data.redirect;
-            }
-        }
-
-        socket.onerror = function(error) {
-            console.log("WebSocket error: " + error);
-        }
+    // Poll every 500ms to check if host has started the game
+    const checkGameStarted = setInterval(() => {
+        fetch("/game-started/{{ gameId }}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.started) {
+                    clearInterval(checkGameStarted);
+                    window.location.href = "/game/{{ gameId }}";
+                }
+            })
+            .catch(err => console.log("Polling error: " + err));
+        }, 500);
     </script>
 
 </head>

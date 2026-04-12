@@ -40,6 +40,7 @@ data class GameSession(
     val questions: List<Question>,
     var currentQuestionIndex: Int = 0,
     var isAdvanced: Boolean = false,                //flag for advancing question
+    var isStarted: Boolean = false,
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet())
 )
 
@@ -59,6 +60,10 @@ fun Application.configureSockets() {
     routing {
     webSocket("/game/{gameId}") {
         val gameId = call.parameters["gameId"]?.toIntOrNull()              //read gameId from URL
+
+        println("WebSocket connection attempt for gameId: $gameId")
+        println("Active sessions: ${activeSessions.keys}")
+
         if (gameId == null) {
             close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid Game Id"))
             return@webSocket

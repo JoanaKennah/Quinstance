@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+
     <title>Lobby</title>
 
     <style>
@@ -59,7 +61,7 @@
         .player-name {
             color: #e63973;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 32px;
         }
 
         .controls {
@@ -111,7 +113,7 @@
     <div class="main-container">
 
         <div class="players-section">
-            <div class="player-grid">
+            <div class="player-grid" id="player-grid">
                 {% for player in players %}
                     <div class="player-name">{{ player }}</div>
                 {% endfor %}
@@ -135,6 +137,21 @@
     </div>
 
 </div>
+
+//polls for joined players once per sec
+<script>
+    const pollPlayers = setInterval(() => {
+        fetch("/lobby-players/{{ gameId }}")
+            .then(response => response.json())
+            .then(players => {
+                const grid = document.getElementById("player-grid");
+                grid.innerHTML = players
+                    .map(p => `<div class="player-name">${p}</div>`)
+                    .join("");
+            })
+            .catch(err => console.log("Player poll error: " + err));
+    }, 1000);
+</script>
 
 </body>
 </html>
