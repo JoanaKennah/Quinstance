@@ -47,19 +47,21 @@
 </head>
 
 <script>
-    function checkTime() {
-        const endTime = localStorage.getItem("quizEndTime");
-        if (!endTime) return;
-        const interval = setInterval(() => {
-            const timeLeft = parseInt(endTime) - Date.now();
-            if (timeLeft <= 0) {
-                clearInterval(interval);
-                localStorage.removeItem("quizEndTime");
-                <!--- ROUTING --->
-            }
-        }, 200);
+
+    //connect to game, wait for server to advance to next Q
+    const socket = new WebSocket("ws://" + location.host + "/game/{{ gameId }}");
+
+    socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if (data.redirect) {
+            window.location.href = data.redirect;
+        }
     }
-    window.onload = checkTime;
+
+    socket.onerror = function(error) {
+        console.log("WebSocket error: " + error);
+    }
+
 </script>
 
 <body>

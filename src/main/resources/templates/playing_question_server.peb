@@ -1,106 +1,106 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Play Quiz on Server</title>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <title>Play Quiz on Server</title>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
-      
-        .navbar {
-            background-color: #e63973;
-            display: flex;
-            justify-content: flex-end;
-            padding: 12px 20px;
-        }
-      
-        .navbar a {
-            color: black;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .content {
-            margin: 40px;
-            text-align: center;
-        }
-
-        .question-title {
-            color: black;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-
-        .question-box {
-            border: 4px solid #e63973;
-            background-color: white;
-            color: black;
-            padding: 20px;
-            border-radius: 10px;
-            width: 100%;
-            box-sizing: border-box;
-            font-size: 20px;
-        }
-
-        .timer {
-            margin-top: 30px;
-            font-size: 26px;
-            color: black;
-        }
-    </style>
-
-    <script>
-        let timeLeft = 30;
-
-        function startTimer() {
-            if (!localStorage.getItem("quizEndTime")) {
-                const endTime = Date.now() + 30000;
-                localStorage.setItem("quizEndTime", endTime);
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
             }
-            const timerDisplay = document.getElementById("timer");
+        
+            .navbar {
+                background-color: #e63973;
+                display: flex;
+                justify-content: flex-end;
+                padding: 12px 20px;
+            }
+        
+            .navbar a {
+                color: black;
+                text-decoration: none;
+                font-weight: bold;
+            }
 
-            const countdown = setInterval(() => {
-                const endTime = localStorage.getItem("quizEndTime");
-                const timeLeft = Math.floor((endTime - Date.now()) / 1000);
-                timerDisplay.textContent = timeLeft;
+            .content {
+                margin: 40px;
+                text-align: center;
+            }
 
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    localStorage.removeItem("quizEndTime");
+            .question-title {
+                color: black;
+                font-size: 28px;
+                margin-bottom: 20px;
+            }
 
-                    <!--- NEED TO ADD ROUTING TO DISPLAY CORRECT ANS --->
-                }
-            }, 1000);
-        }
+            .question-box {
+                border: 4px solid #e63973;
+                background-color: white;
+                color: black;
+                padding: 20px;
+                border-radius: 10px;
+                width: 100%;
+                box-sizing: border-box;
+                font-size: 20px;
+            }
 
-        window.onload = startTimer;
-    </script>
+            .timer {
+                margin-top: 30px;
+                font-size: 26px;
+                color: black;
+            }
+        </style>
 
-</head>
+        <script>
+            let timeLeft = 30;
 
-<body>
+            function startTimer() {
+                if (!localStorage.getItem("quizEndTime")) {
+                    const endTime = Date.now() + 30000;
+                    localStorage.setItem("quizEndTime", endTime);
+                } 
+                const timerDisplay = document.getElementById("timer");
 
-<div class="navbar">
-  <a>{{ quizName }}</a>
-</div>
+                const countdown = setInterval(() => {
+                    const endTime = localStorage.getItem("quizEndTime");
+                    const timeLeft = Math.floor((endTime - Date.now()) / 1000);
+                    timerDisplay.textContent = timeLeft;
 
-<div class="content"> <!--- NEED TO ADD BACKEND CODE TO CYCLE THROUGH QUESTIONS --->
+                    if (timeLeft <= 0) {
+                        clearInterval(countdown);
+                        localStorage.removeItem("quizEndTime");
+                        fetch("/show-correct-answer/{{ gameId }}", { method: "POST" })
+                            .then(() => window.location.href = "/show-correct-answer/{{ gameId }}");
+                    }
+                }, 1000);
+            }
 
-    <div class="question-title">
-        Question {{ questionNumber }}:
+            window.onload = startTimer;
+        </script>
+
+    </head>
+
+    <body>
+
+    <div class="navbar">
+    <a>{{ quizName }}</a>
     </div>
 
-    <div class="question-box">
-        {{ questionText }}
+    <div class="content"> <!--- NEED TO ADD BACKEND CODE TO CYCLE THROUGH QUESTIONS --->
+
+        <div class="question-title">
+            Question {{ questionNumber }}:
+        </div>
+
+        <div class="question-box">
+            {{ questionText }}
+        </div>
+
+        <div class="timer">
+            <span id="timer">30</span>
+        </div>
+
     </div>
 
-    <div class="timer">
-        <span id="timer">30</span>
-    </div>
-
-</div>
-
-</body>
-</html>
+    </body>
+    </html>

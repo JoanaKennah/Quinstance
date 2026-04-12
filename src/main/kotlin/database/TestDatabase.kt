@@ -70,6 +70,7 @@ object TestDatabase {
                 it[num_of_questions] = 0
                 it[description] = "Quiz to test my limited knowledge on COMP2860"
                 it[category] = "computerscience"
+                it[key_stage] = "furthereducation"
             }
 
             val userOneQuizQ1 = QuestionTable.insertAndGetId {
@@ -123,6 +124,7 @@ object TestDatabase {
                 it[num_of_questions] = 0
                 it[description] = "Freddy Fazbear"
                 it[category] = "other"
+                it[key_stage] = "furthereducation"
             }
 
             // Quiz #1 for user JoanaKennah (1 question with answers)
@@ -132,6 +134,7 @@ object TestDatabase {
                 it[num_of_questions] = 0
                 it[description] = "University of Leeds COMP2870 Quiz for Revision :)"
                 it[category] = "computerscience"
+                it[key_stage] = "furthereducation"
             }
 
             val userTwoQuizQ1 = QuestionTable.insertAndGetId {

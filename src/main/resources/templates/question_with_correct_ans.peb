@@ -80,6 +80,24 @@
 
     </style>
 
+    <script>
+        {% if not isHost %}
+        //client waits for host to advance
+        const socket = new WebSocket("ws://" + location.host + "/game/{{ gameId }}");
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if(data.redirect) {
+                window.location.href = data.redirect
+            }
+        }
+
+        socket.onerror = function(error) {
+            console.log("WebSocket Error: " + error);
+        }
+        {% endif %}
+    </script>
+
 </head>
 
 <body>
@@ -95,7 +113,7 @@
     </div>
 
     <div class="question-box">
-        {{ question.text }}
+        {{ questionText }}
     </div>
 
     <div class="answer-label">
@@ -105,10 +123,12 @@
     <div class="answer-box">
         {{ correctAnswer }}
     </div>
-  
-    <form method="get" action=""> <!--- NEED TO ADD ROUTING --->
+    
+    {% if isHost %}
+    <form method="post" action="/show-positions/{{ gameId }}">
         <button type="submit" class="next-btn">Next</button>
     </form>
+    {% endif %}
 
 </div>
 

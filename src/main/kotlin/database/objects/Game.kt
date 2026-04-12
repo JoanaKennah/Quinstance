@@ -8,7 +8,7 @@ import com.example.database.tables.GameTable
 class Game(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Game>(GameTable)
 
-    var quiz by Quiz referencedOn GameTable.id
+    var quiz by Quiz referencedOn GameTable.quiz
 
     override fun toString() = id.toString()
 }

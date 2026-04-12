@@ -16,6 +16,8 @@ import kotlinx.serialization.json.internal.decodeByReader
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.time.Duration.Companion.seconds
+import com.example.retrieveQuestionAnswer
+import io.ktor.server.websocket.WebSocketServerSession
 
 @Serializable
 data class QuestionData(
@@ -33,6 +35,16 @@ data class SentAnswerData(
     val chosenAnswer: String, // actual text as the questions are jumbled up
 )
 
+data class GameSession(
+    val gameId: Int,
+    val questions: List<Question>,
+    var currentQuestionIndex: Int = 0,
+    var isAdvanced: Boolean = false,                //flag for advancing question
+    val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet())
+)
+
+val activeSessions = Collections.synchronizedMap(mutableMapOf<Int, GameSession>())
+
 fun Application.configureSockets() {
     install(WebSockets) {
         contentConverter = KotlinxWebsocketSerializationConverter(Json)
@@ -42,21 +54,71 @@ fun Application.configureSockets() {
         masking = false
     }
     println("Server socket configured")
-}
-fun Application.sendQuestionToUsers(questionNumber: Int, question: Question, questionAnswers: Answer){
-    routing {
-        webSocket("/gameServer") {
-            println("game server web socket exists :3")
-            val answers = listOf(questionAnswers.correct_answer, questionAnswers.option2, questionAnswers.option3, questionAnswers.option4)
-            val randomisedAnswers = answers.filterNotNull().shuffled()
-            val builtQuestion = QuestionData(questionNumber, question.question, randomisedAnswers[0], randomisedAnswers[1], randomisedAnswers[2], randomisedAnswers[3])
-            sendSerialized(builtQuestion)
 
-            // when data is sent back
-            val answerData= receiveDeserialized<SentAnswerData>()
-            UserAnswers.addAnswer(answerData)
-            println("Answer $answerData")
-            println(UserAnswers.allUserAnswers())
+    //routing for sockets - added here to keep wesockets code in the same place
+    routing {
+    webSocket("/game/{gameId}") {
+        val gameId = call.parameters["gameId"]?.toIntOrNull()              //read gameId from URL
+        if (gameId == null) {
+            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid Game Id"))
+            return@webSocket
         }
+
+        //Fetch active session for game
+        val session = activeSessions[gameId]
+        if (session == null) {
+            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Game Not Found"))
+            return@webSocket
+        }
+
+        //set connection per player
+        session.connections.add(this)
+        println("Player Connected To Game $gameId, ${session.connections.size} players connected")
+
+        //monitor for incoming messages from player
+        try {
+            for (frame in incoming) {
+                if (frame is Frame.Text) {
+                    try {
+                        val answerData = Json.decodeFromString<SentAnswerData>(frame.readText())
+                        UserAnswers.addAnswer(answerData)
+                        println("Answer recieved from ${answerData.username}: ${answerData.chosenAnswer}")
+                    } catch (e: Exception) {
+                        println("Could not deserialise answer: ${e.message}")
+                    }
+                }
+            }
+        } finally {
+            //remove connection when player disconnects
+            session.connections.remove(this)
+            println("Player Disconnected From Game $gameId, ${session.connections.size} players remaining")
+        }
+
     }
 }
+}
+
+
+
+suspend fun broadcastQuestion(session: GameSession) {
+    val question = session.questions[session.currentQuestionIndex]
+    val answers = retrieveQuestionAnswer(question) ?: return 
+
+    //builds list of answers & shuffles
+    val answerList = listOf(answers.correct_answer, answers.option2, answers.option3, answers.option4).filterNotNull().shuffled()
+
+
+    
+    val questionData = QuestionData(
+        questionNumber = session.currentQuestionIndex + 1,
+        questionText = question.question,
+        answerOne = answerList[0],
+        answerTwo = answerList[1],
+        answerThree = answerList.getOrNull(2),
+        answerFour = answerList.getOrNull(3)
+    )
+    //sends to each player connected concurrrently
+    session.connections.forEach { connection -> connection.sendSerialized(questionData) }
+
+}
+

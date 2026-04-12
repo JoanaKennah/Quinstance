@@ -148,7 +148,7 @@
             <button class="control-btn">Restart</button>
         </form>
 
-        <form action="">
+        <form action="/leaderboard-quit/{{ gameId }}" method="post">
             <button class="control-btn">Quit</button>
         </form>
 

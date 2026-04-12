@@ -96,6 +96,8 @@
         <div class="quiz-container">
             {% for quiz in quizzes %}
                 <div class="quiz-box">
+                    onclick="window.location.href='/view-quiz/{{ quiz.id.value }}'"
+                    style="cursor: pointer;">
                     {{ loop.index }}. {{ quiz.quiz_name }}
                 </div>
             {% endfor %}
