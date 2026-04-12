@@ -57,7 +57,35 @@
             font-weight: bold;
             color: black;
         }
+
+        .timer {
+            margin-top: 30px;
+            font-size: 18px;
+            color: #e63973
+        }
+
     </style>
+
+    <script>
+        //set 10 sec timer then advance
+        let timeLeft = 10;
+
+        function startTimer() {
+            const timerDisplay = document.getElementById("countdown");
+            const countdown = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    //when timer expires post to next Q
+                    fetch("/next-question/{{ gameId }}", { method: "POST" })
+                        .then(() => window.location.href = "/game/{{ gameId }}");
+                }
+            } , 1000);
+        }
+
+        window.onload = startTimer;
+    </script>
 
 </head>
 
@@ -67,7 +95,7 @@
     <a>{{ quizName }}</a>
 </div>
 
-<div class="content"> <!--- NEED TO COORDINATE ROUTING TO CHANGE WHEN SERVER SIDE CHANGES --->
+<div class="content">
 
     <div class="title">
         You are currently:
@@ -85,6 +113,10 @@
     </div>
     <div class="score">
         {{ score }}
+    </div>
+
+    <div class="timer">
+        Next question in <span id="countdown">10</span> seconds...
     </div>
 
 </div>

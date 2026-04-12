@@ -69,8 +69,8 @@
                     if (timeLeft <= 0) {
                         clearInterval(countdown);
                         localStorage.removeItem("quizEndTime");
-                        fetch("/next-question/{{ gameId }}", { method: "POST" })
-                            .then(() => window.location.href = "/playing-server/{{ gameId }}");
+                        fetch("/show-correct-answer/{{ gameId }}", { method: "POST" })
+                            .then(() => window.location.href = "/show-correct-answer/{{ gameId }}");
                     }
                 }, 1000);
             }
