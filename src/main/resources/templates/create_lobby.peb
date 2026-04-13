@@ -182,6 +182,12 @@
                     <button type="button" class="time-btn" onclick="selectTime(60)">60s</button>
                     <button type="button" class="time-btn" onclick="selectTime(0)">Unlimited</button>
                 </div>
+
+                <div class="theme-label" style="margin-top: 20px; font-size: 16px; color: black;">
+                    Spooky theme:
+                    <input type="checkbox" name="theme" value="spooky" style="margin-left: 8px;">
+                <div>
+
             </div>
 
         </div>

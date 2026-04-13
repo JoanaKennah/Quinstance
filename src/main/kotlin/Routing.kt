@@ -42,7 +42,7 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("homepage.peb", mapOf<String, Any>()))
         }
 
-        serves homepage - dedicated
+        //serves homepage - dedicated
         get("/home") {
             call.respond(PebbleContent("homepage.peb", mapOf<String, Any>()))
         }
@@ -408,6 +408,9 @@ fun Application.configureRouting() {
 
             val parameters = call.receiveParameters()
             val timeLimit = parameters["timeLimit"]?.toIntOrNull() ?: 30
+            //read and update theme from checkbox
+            val theme = if (parameters["theme"] == "spooky") "spooky" else "default"
+            call.sessions.set(session.copy(theme = theme))
 
             val game = transaction(TransactionManager.defaultDatabase) {
                 Game.new {
@@ -448,7 +451,12 @@ fun Application.configureRouting() {
                 UserScore.find { UserScoreTable.game eq game.id }.map { it.user.username }
             }
 
-            call.respond(PebbleContent("lobby_server_view.peb", mapOf("quizName" to quiz.quiz_name, "roomCode" to roomCode, "players" to players, "gameId" to gameId)))
+            call.respond(PebbleContent("lobby_server_view.peb", mapOf("quizName" to quiz.quiz_name, 
+                "roomCode" to roomCode, 
+                "players" to players, 
+                "gameId" to gameId,
+                "theme" to session.theme
+            )))
         }
 
         //serves join lobby page for client
