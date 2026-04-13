@@ -1,7 +1,5 @@
 package com.example
 
-import com.example.database.ProjectDatabase
-import com.example.UserAnswers
 import com.example.database.tables.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -14,24 +12,14 @@ import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
-import io.pebbletemplates.pebble.loader.ClasspathLoader
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.and
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
 import io.ktor.websocket.Frame
 import kotlinx.coroutines.delay
 
 import com.password4j.Password
 import com.example.database.objects.*
-import com.example.activeSessions
-import com.example.GameSession
-import com.example.broadcastQuestion
-import com.example.retrieveQuestionAnswer
-import com.example.retrieveUserQuizzes
-import com.example.retrieveQuizQuestions
-
 
 
 fun Application.configureRouting() {
@@ -103,13 +91,9 @@ fun Application.configureRouting() {
             }
 
             val name = "$firstname $lastname"
-            val newUserRole = transaction(ProjectDatabase.database) {
-                val newUser = addUser(username, password, name, email, keystage, role)
-                if (newUser == null) {
-                    "USERNAME_EXISTS"
-                } else {
-                    newUser?.role?.lowercase()
-                }
+            val newUserRole = when (val newUser = addUser(username, password, name, email, keystage, role)) {
+                null -> "USERNAME_EXISTS"
+                else ->  newUser.role.lowercase()
             }
 
             when (newUserRole) {
@@ -128,7 +112,6 @@ fun Application.configureRouting() {
                     call.respondText("Failed to create new user")
                 }
             }
-
         }
 
         get("/teacher-dashboard") {
@@ -148,15 +131,12 @@ fun Application.configureRouting() {
         get("/game/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quizName = game.quiz.quiz_name
-                Pair(game, quizName)
-            } ?: return@get call.respondText("Game Not Found")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game Not Found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz Not Found")
 
             call.respond(PebbleContent("playing_question_client.peb", mapOf(
                 "username" to session.username,
-                "quizName" to quizName,
+                "quizName" to quiz.quiz_name,
                 "gameId" to gameId
             )))
         }
@@ -186,10 +166,7 @@ fun Application.configureRouting() {
             val quizId = call.parameters["quizId"]?.toIntOrNull()
                 ?: return@get call.respondText("Quiz ID Invalid")
 
-            val quiz = transaction(ProjectDatabase.database) {
-                Quiz.findById(quizId)
-            } ?: return@get call.respondText("Quiz not found") 
-
+            val quiz = retrieveQuiz(quizId) ?: return@get call.respondText("Quiz not found")
             val questions = retrieveQuizQuestions(quiz)
 
             call.respond(PebbleContent("view_quiz_questions.peb", mapOf("quizName" to quiz.quiz_name, "questions" to questions, "quizId" to quizId)))
@@ -199,21 +176,17 @@ fun Application.configureRouting() {
             val quizId = call.parameters["quizId"]?.toIntOrNull()
                 ?: return@get call.respondText("Invalid Quiz ID")
             
-            val quiz = transaction(ProjectDatabase.database) {
-                Quiz.findById(quizId)
-            } ?: return@get call.respondText("No Quiz Found") 
+            val quiz = retrieveQuiz(quizId) ?: return@get call.respondText("No Quiz Found")
 
             call.respond(PebbleContent("add_question.peb", mapOf("quizName" to quiz.quiz_name, "quizId" to quizId)))
         }
 
-        //Reading question, all the answers, checking correct answer, saving to DB
+        // Reading question, all the answers, checking correct answer, saving to DB
         post("/add-question/{quizId}") {
             val quizId = call.parameters["quizId"]?.toIntOrNull()
                 ?: return@post call.respondText("Invalid quiz ID")
 
-            val quiz = transaction(ProjectDatabase.database) {
-                Quiz.findById(quizId)
-            } ?: return@post call.respondText("No Quiz Found")
+            val quiz = retrieveQuiz(quizId) ?: return@post call.respondText("No Quiz Found")
 
             val parameters = call.receiveParameters()
             val questionText = parameters["question"] 
@@ -222,7 +195,7 @@ fun Application.configureRouting() {
             val answers = parameters.getAll("answers[]") 
                 ?: return@post call.respondText("Please enter at least 2 answers")
 
-            //stores index of correct answer (checkbox)
+            // Stores index of correct answer (checkbox)
             val correctIndex = parameters["correct"]?.toIntOrNull()
                 ?: return@post call.respondText("Please select a correct answer")
 
@@ -233,11 +206,9 @@ fun Application.configureRouting() {
             val option3 = answers.getOrNull(2) 
             val option4 = answers.getOrNull(3)
 
-            transaction(ProjectDatabase.database) {
-                val question = addQuestion(quiz, questionText, quiz.category)
-                addAnswer(question, option1, option2, option3, option4, correctIndex)
-                //correct index here indicates correct answer for DB
-            } 
+            // Correct index here indicates correct answer for DB
+            val question = addQuestion(quiz, questionText, quiz.category)
+            addAnswer(question, option1, option2, option3, option4, correctIndex)
 
             call.respondRedirect("/view-quiz-questions/$quizId")
         }
@@ -274,9 +245,7 @@ fun Application.configureRouting() {
         get("/view-quiz/{quizId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val quizId = call.parameters["quizId"]?.toIntOrNull() ?: return@get call.respondText("Invalid quiz ID")
-            val quiz = transaction(TransactionManager.defaultDatabase) {
-                Quiz.findById(quizId)
-            } ?: return@get call.respondText("Quiz not found") 
+            val quiz = retrieveQuiz(quizId) ?: return@get call.respondText("Quiz not found")
 
             val categoryDisplay = when (quiz.category) {
                 "art" -> "Art and Design"
@@ -328,9 +297,7 @@ fun Application.configureRouting() {
         get("/create-lobby/{quizId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val quizId = call.parameters["quizId"]?.toIntOrNull() ?: return@get call.respondText("Invalid quiz ID")
-            val quiz = transaction(TransactionManager.defaultDatabase) {
-                Quiz.findById(quizId)
-            } ?: return@get call.respondText("Quiz not found")
+            val quiz = retrieveQuiz(quizId) ?: return@get call.respondText("Quiz not found")
 
             val categoryDisplay = when (quiz.category) {
                 "art" -> "Art and Design"
@@ -381,31 +348,19 @@ fun Application.configureRouting() {
         
         post("/create-lobby/{quizId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
-            val quizId = call.parameters["quizId"]?.toIntOrNull() ?: return@post call.respondText("Invalid quiz ID") 
-            val quiz = transaction(TransactionManager.defaultDatabase) {
-                Quiz.findById(quizId) 
-            } ?: return@post call.respondText("Quiz not found") 
+            val quizId = call.parameters["quizId"]?.toIntOrNull() ?: return@post call.respondText("Invalid quiz ID")
+            val quiz = retrieveQuiz(quizId) ?: return@post call.respondText("Quiz not found")
 
             val parameters = call.receiveParameters()
             val timeLimit = parameters["timeLimit"]?.toIntOrNull() ?: 30
 
-            val game = transaction(TransactionManager.defaultDatabase) {
-                Game.new {
-                    this.quiz = quiz
-                }
-            }
+            val game = addGame(quiz)
             val questions = retrieveQuizQuestions(quiz)
             val gameSession = GameSession(gameId = game.id.value, questions = questions)
             activeSessions[game.id.value] = gameSession
 
             val roomCode = generateRoomCode()
-
-            transaction(TransactionManager.defaultDatabase) {
-                InUseCode.new {
-                    this.room_code = roomCode
-                    this.game = game
-                }
-            }
+            addInUseCode(roomCode, game)
 
             call.respondRedirect("/lobby-server/${game.id.value}")
         }
@@ -413,19 +368,13 @@ fun Application.configureRouting() {
         get("/lobby-server/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
-            val (game, quiz) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quiz = game.quiz
-                Pair(game, quiz)
-            } ?: return@get call.respondText("Game not found") 
 
-            val roomCode = transaction(TransactionManager.defaultDatabase) {
-                InUseCode.find { InUseTable.game eq game.id }.firstOrNull()?.room_code
-            } ?: return@get call.respondText("Room code not found") 
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
 
-            val players = transaction(TransactionManager.defaultDatabase) {
-                UserScore.find { UserScoreTable.game eq game.id }.map { it.user.username }
-            }
+            val roomCode = retrieveRoomCode(game) ?: return@get call.respondText("Room code not found")
+
+            val players = retrieveGamePlayers(game)
 
             call.respond(PebbleContent("lobby_server_view.peb", mapOf("quizName" to quiz.quiz_name, "roomCode" to roomCode, "players" to players, "gameId" to gameId)))
         }
@@ -453,62 +402,42 @@ fun Application.configureRouting() {
                 "/student-dashboard"
             }
 
-            val inUseCode = transaction(TransactionManager.defaultDatabase) {
-                InUseCode.find { InUseTable.room_code eq roomCode }.firstOrNull()
-            }
+            val inUseCode = retrieveInUseCode(roomCode)
 
             if (inUseCode == null) {
                 call.respond(PebbleContent("join_lobby.peb", mapOf("returnURL" to returnURL, "roomCode" to roomCode, "errorMessage" to "Invalid room code, please try again")))
                 return@post
             }
-            val game = transaction(TransactionManager.defaultDatabase) {
-                Game.find { GameTable.id eq inUseCode.game.id}.firstOrNull()
-            } ?: return@post call.respondText("Game not found")
+            val game = retrieveInUseCodeGame(inUseCode) ?: return@post call.respondText("Game not found")
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
 
-            transaction(TransactionManager.defaultDatabase) {
-                UserScore.new {
-                    this.game = game
-                    this.user = user
-                    this.score = 0
-                }
-            }
+            addUserScore(game, user)
             call.respondRedirect("/lobby-client/${game.id.value}")
         }
         
         get("/lobby-client/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
-            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID") 
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quizName = game.quiz.quiz_name
-                Pair(game, quizName)
-            } ?: return@get call.respondText("Game not found") 
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
 
             val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")                          //verify user is actually in game
 
-            val userScore = transaction(TransactionManager.defaultDatabase) {
-                UserScore.find {
-                    UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
-                }.firstOrNull()
-            } ?: return@get call.respondText("You are not a player in this game")
+            val userScore = retrieveUserScore(game, user) ?: return@get call.respondText("You are not a player in this game")
 
-            val roomCode = transaction(TransactionManager.defaultDatabase) {                                                // display room code
-                InUseCode.find { InUseTable.game eq game.id }.firstOrNull()?.room_code
-            } ?: return@get call.respondText("Room code not found") 
+            val roomCode = retrieveRoomCode(game) ?: return@get call.respondText("Room code not found")
 
-            call.respond(PebbleContent("lobby_client_view.peb", mapOf("quizName" to quizName, "roomCode" to roomCode, "gameId" to gameId)))
-
+            call.respond(PebbleContent("lobby_client_view.peb", mapOf("quizName" to quiz.quiz_name, "roomCode" to roomCode, "gameId" to gameId)))
         }
 
         post("/leave-lobby/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login") 
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
-            val game = transaction(TransactionManager.defaultDatabase) {
-                Game.findById(gameId)
-            } ?: return@post call.respondText("Game not found") 
+            val game = retrieveGame(gameId) ?: return@post call.respondText("Game not found")
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
 
+            // This will change in the future so have left this for now :3
             transaction(TransactionManager.defaultDatabase) {
                 UserScore.find {
                     UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id) 
@@ -526,14 +455,11 @@ fun Application.configureRouting() {
         post("/close-lobby/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID") 
-            val game = transaction(TransactionManager.defaultDatabase) {
-                Game.findById(gameId)
-            } ?: return@post call.respondText("Game not found") 
+            val game = retrieveGame(gameId) ?: return@post call.respondText("Game not found")
 
-            transaction(TransactionManager.defaultDatabase) {                                                                   //delete room code
-                InUseCode.find { InUseTable.game eq game.id }.firstOrNull()?.delete() 
-            }
+            deleteInUseCode(game)
 
+            // This will change in the future so have left this for now :3
             transaction(TransactionManager.defaultDatabase) {                                                                   //delete all user scores from this game
                 UserScore.find { UserScoreTable.game eq game.id }.forEach { it.delete() }
             }
@@ -548,11 +474,8 @@ fun Application.configureRouting() {
         post("/start-game/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login") 
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID") 
-            val (game, quiz) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quiz = game.quiz
-                Pair(game, quiz)
-            } ?: return@post call.respondText("Game not found") 
+            val game = retrieveGame(gameId) ?: return@post call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@post call.respondText("Quiz not found")
 
             val questions = retrieveQuizQuestions(quiz)                                        //load questions into quiz
             if (questions.isEmpty()) {
@@ -570,9 +493,8 @@ fun Application.configureRouting() {
             // Small delay allows clients to connect to new WebSocket
             kotlinx.coroutines.delay(1000)
 
-            //Broadcasr first question to connected players
+            //Broadcast first question to connected players
             broadcastQuestion(gameSession)
-
 
             call.respond(PebbleContent("playing_question_server.peb", mapOf(
                 "quizName" to quiz.quiz_name,
@@ -586,11 +508,8 @@ fun Application.configureRouting() {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
 
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID") 
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quizName = game.quiz.quiz_name
-                Pair(game, quizName)
-            } ?: return@post call.respondText("Game not found") 
+            val game = retrieveGame(gameId) ?: return@post call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@post call.respondText("Quiz not found")
 
             val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found for this game")
 
@@ -613,7 +532,7 @@ fun Application.configureRouting() {
 
                 val nextQuestion = gameSession.questions[gameSession.currentQuestionIndex] 
                 call.respond(PebbleContent("playing_question_server.peb", mapOf(
-                    "quizName" to quizName,
+                    "quizName" to quiz.quiz_name,
                     "questionNumber" to gameSession.currentQuestionIndex + 1,
                     "questionText" to nextQuestion.question,
                     "gameId" to gameId
@@ -622,35 +541,27 @@ fun Application.configureRouting() {
 
         }
 
-
-        //serves final leaderboard at end of game
+        // Serves final leaderboard at end of game
         get("/leaderboard/{gameId}") {
 
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
-            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID") 
-            val (game, quizName, quizId) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quizName = game.quiz.quiz_name
-                val quizId = game.quiz.id.value
-                Triple(game, quizName, quizId)
-            } ?: return@get call.respondText("Game not found") 
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
 
-            //retrieve player scores, sort by highest 
-            val players = transaction(TransactionManager.defaultDatabase) {
-                UserScore.find { UserScoreTable.game eq game.id }.sortedByDescending { it.score }.map { userScore -> mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score) }
-
-            } 
+            // Retrieve player scores, sort by highest
+            val players = retrieveDescendingPlayerScores(game)
 
             call.respond(PebbleContent("end_leaderboard.peb", mapOf(
-                "quizName" to quizName, 
+                "quizName" to quiz.quiz_name,
                 "players" to players,
                 "gameId" to gameId,
-                "quizId" to quizId
+                "quizId" to quiz.id
                 )))
 
         }
 
-        //quit button back to dashboard from leaderboards
+        // Quit button back to dashboard from leaderboards
         post("/leaderboard-quit/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val returnURL = if (session.role == "teacher" || session.role == "admin") {
@@ -665,20 +576,17 @@ fun Application.configureRouting() {
 
         //TESTED UP TO HERE
 
-        //serves selected answer template and params
+        // Serves selected answer template and params
         get("/selected-answer/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login") 
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quizName = game.quiz.quiz_name
-                Pair(game, quizName)
-            } ?: return@get call.respondText("Game not found") 
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
 
             val selectedAnswer = call.request.queryParameters["answer"] ?: ""
 
             call.respond(PebbleContent("client_selected_ans.peb", mapOf(
-                "quizName" to quizName,
+                "quizName" to quiz.quiz_name,
                 "gameId" to gameId, 
                 "selectedAnswer" to selectedAnswer
             )))
@@ -687,29 +595,22 @@ fun Application.configureRouting() {
         post("/show-correct-answer/{gameId}") {
             val session = call.sessions.get<UserSession>()?: return@post call.respondRedirect("/login") 
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quizName = game.quiz.quiz_name
-                Pair(game, quizName) 
-            } ?: return@post call.respondText("Game not found") 
+            val game = retrieveGame(gameId) ?: return@post call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@post call.respondText("Quiz not found")
 
             val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found")
 
-            //get current Q and correct ans
+            // Get current Q and correct ans
             val currentQuestion = gameSession.questions[gameSession.currentQuestionIndex]
             val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@post call.respondText("No answer found for question")
 
             val answers = UserAnswers.allUserAnswers()
-            transaction(TransactionManager.defaultDatabase) {
-                answers.forEach { answerData ->
-                    if (answerData.chosenAnswer == correctAnswer) {
-                        val user = retrieveUser(answerData.username)
-                        if (user != null) {
-                            UserScore.find {
-                                UserScoreTable.game eq game.id and
-                                (UserScoreTable.user eq user.id)
-                            }.firstOrNull()?.let { userScore -> userScore.score += 1 }
-                        }
+            for (answerData in answers) {
+                if (answerData.chosenAnswer == correctAnswer) {
+                    val user = retrieveUser(answerData.username)
+                    if (user != null) {
+                        val userScore = retrieveUserScore(game, user)
+                        if (userScore != null) userScore.score += 1
                     }
                 }
             }
@@ -717,12 +618,12 @@ fun Application.configureRouting() {
             // Clear answers ready for next question
             UserAnswers.clearAnswers()
 
-            //send clients to correct ans page
+            // Send clients to correct ans page
             gameSession.connections.forEach { connection -> connection.send(Frame.Text(Json.encodeToString(mapOf("redirect" to "/show-correct-answer-client/$gameId"))))}
 
             //send host to correct ans view w/ next button
             call.respond(PebbleContent("question_with_correct_ans.peb", mapOf(
-                "quizName" to quizName,
+                "quizName" to quiz.quiz_name,
                 "questionNumber" to gameSession.currentQuestionIndex + 1,
                 "questionText" to currentQuestion.question,
                 "correctAnswer" to correctAnswer,
@@ -734,11 +635,8 @@ fun Application.configureRouting() {
         get("/show-correct-answer-client/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quizName = game.quiz.quiz_name
-                Pair(game, quizName)
-            } ?: return@get call.respondText("Game not found")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
 
             val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
 
@@ -746,7 +644,7 @@ fun Application.configureRouting() {
             val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@get call.respondText("No answer found for question")
 
             call.respond(PebbleContent("question_with_correct_ans.peb", mapOf(
-                "quizName" to quizName,
+                "quizName" to quiz.quiz_name,
                 "questionNumber" to gameSession.currentQuestionIndex + 1,
                 "questionText" to currentQuestion.question,
                 "correctAnswer" to correctAnswer,
@@ -758,11 +656,8 @@ fun Application.configureRouting() {
         get("/show-correct-answer/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
-            val (game, quiz) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quiz = game.quiz
-                Pair(game, quiz)
-            } ?: return@get call.respondText("Game not found")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
 
             val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
 
@@ -779,17 +674,12 @@ fun Application.configureRouting() {
             )))
         }
 
-
-        //serves mid-game leaderboard between questions
+        // Serves mid-game leaderboard between questions
         post("/show-positions/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
-            val (game, quizName, quizId) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quizName = game.quiz.quiz_name
-                val quizId = game.quiz.id.value
-                Triple(game, quizName, quizId)
-            } ?: return@post call.respondText("Game not found")
+            val game = retrieveGame(gameId) ?: return@post call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@post call.respondText("Quiz not found")
 
             val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found")
 
@@ -809,34 +699,25 @@ fun Application.configureRouting() {
             }
 
             call.respond(PebbleContent("leaderboard.peb", mapOf(
-                "quizName" to quizName,
+                "quizName" to quiz.quiz_name,
                 "players" to scores,
                 "gameId" to gameId,
-                "quizId" to quizId
+                "quizId" to quiz.id
             )))
         }
 
-        //serves personal position and score to each player, personalised
+        // Serves personal position and score to each player, personalised
         get("/client-position/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                val quizName = game.quiz.quiz_name
-                Pair(game, quizName)
-            } ?: return@get call.respondText("Game not found")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
 
             val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
 
-            val allScores = transaction(TransactionManager.defaultDatabase) {
-                UserScore.find { UserScoreTable.game eq game.id }
-                    .sortedByDescending { it.score }
-                    .map { userScore ->
-                        Triple<Int, String, Int>(userScore.user.id.value, userScore.user.username, userScore.score)
-                    }
-            }
+            val allScores = retrieveAllUserScores(game)
 
-            //find score and position per player
+            // Find score and position per player
             val playerScore = allScores.indexOfFirst { it.first == user.id.value }
             val position = playerScore + 1 
             val score = allScores.getOrNull(playerScore)?.third ?: 0
@@ -844,7 +725,7 @@ fun Application.configureRouting() {
             val questionIndex: Int = activeSessions[gameId]?.currentQuestionIndex ?: 0
 
             call.respond(PebbleContent("client_current_pos.peb", mapOf<String, Any>(
-                "quizName" to quizName,
+                "quizName" to quiz.quiz_name,
                 "gameId" to gameId,
                 "position" to position,
                 "score" to score,
@@ -862,13 +743,9 @@ fun Application.configureRouting() {
 
         get("/lobby-players/{gameId}") {
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("[]", ContentType.Application.Json) 
-            val game = transaction(TransactionManager.defaultDatabase) {
-                Game.findById(gameId)
-            } ?: return@get call.respondText("[]", ContentType.Application.Json) 
+            val game = retrieveGame(gameId) ?: return@get call.respondText("[]", ContentType.Application.Json)
 
-            val players = transaction(TransactionManager.defaultDatabase) {
-                UserScore.find { UserScoreTable.game eq game.id }.map { it.user.username }
-            }
+            val players = retrieveGamePlayers(game)
 
             val json = "[" + players.joinToString(",") { "\"$it\"" } + "]" 
             call.respondText(json, ContentType.Application.Json)
@@ -884,26 +761,17 @@ fun Application.configureRouting() {
         }
 
 
-        //serves client view at end of game
+        // Serves client view at end of game
         get("/end-game/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
-            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID") 
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
 
-
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
-                val game = Game.findById(gameId) ?: return@transaction null
-                Pair(game, game.quiz.quiz_name)
-            } ?: return@get call.respondText("Game not found") 
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
 
             val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login") 
 
-            val allScores = transaction(TransactionManager.defaultDatabase) {
-                UserScore.find { UserScoreTable.game eq game.id }
-                .sortedByDescending { it.score }
-                .map { userScore -> 
-                    Triple<Int, String, Int>(userScore.user.id.value, userScore.user.username, userScore.score)
-                }
-            }
+            val allScores = retrieveAllUserScores(game)
 
             val playerScore = allScores.indexOfFirst { it.first == user.id.value }
             val position = playerScore + 1
@@ -911,13 +779,12 @@ fun Application.configureRouting() {
             val totalPlayers = allScores.size
 
             call.respond(PebbleContent("end_game_client.peb", mapOf<String, Any>(
-                "quizName" to quizName,
+                "quizName" to quiz.quiz_name,
                 "gameId" to gameId,
                 "position" to position,
                 "score" to score,
                 "totalPlayers" to totalPlayers
             )))
         }
-
     }
 }
