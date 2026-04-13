@@ -14,7 +14,7 @@
         }
 
         .navbar {
-            background-color: #00ff00;
+            background-color: #2dc84d;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -27,7 +27,7 @@
         }
 
         .title-box {
-            border: 2px solid #00ff00;
+            border: 2px solid #2dc84d;
             border-radius: 10px;
             padding: 20px;
             text-align: center;
@@ -37,7 +37,7 @@
         .title-box h1 {
             margin: 0;
             font-size: 32px;
-            color: #00ff00;
+            color: #2dc84d;
         }
 
         .main-container {
@@ -57,7 +57,7 @@
         }
 
         .player-name {
-            color: #00ff00;
+            color: #2dc84d;
             font-weight: bold;
             font-size: 36px;
         }
@@ -73,25 +73,25 @@
             padding: 14px 22px;
             font-size: 16px;
             background-color: black;
-            color: #00ff00;
-            border: 2px solid #00ff00;
+            color: #2dc84d;
+            border: 2px solid #2dc84d;
             cursor: pointer;
             border-radius: 6px;
             text-align: center;
         }
 
         .btn:hover {
-            background-color: #00ff00;
+            background-color: #2dc84d;
             color: black;
         }
 
         .btn-start {
-            background-color: #00ff00;
+            background-color: #2dc84d;
             color: black;
         }
 
         .btn-start:hover {
-            background-color: #00cc00;
+            background-color: #23A03D;
         }
 
         .content {
