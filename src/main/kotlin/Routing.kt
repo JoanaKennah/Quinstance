@@ -622,6 +622,8 @@ fun Application.configureRouting() {
 
         }
 
+
+        //serves final leaderboard at end of game
         get("/leaderboard/{gameId}") {
 
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
@@ -639,7 +641,7 @@ fun Application.configureRouting() {
 
             } 
 
-            call.respond(PebbleContent("leaderboard.peb", mapOf(
+            call.respond(PebbleContent("end_leaderboard.peb", mapOf(
                 "quizName" to quizName, 
                 "players" to players,
                 "gameId" to gameId,
@@ -777,6 +779,8 @@ fun Application.configureRouting() {
             )))
         }
 
+
+        //serves mid-game leaderboard between questions
         post("/show-positions/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
@@ -877,6 +881,42 @@ fun Application.configureRouting() {
             val finished = session?.isFinished ?: true
             println("Question index polled: gameId=$gameId index=$index finished=$finished")
             call.respondText("{\"index\":$index,\"finished\":$finished}", ContentType.Application.Json)
+        }
+
+
+        //serves client view at end of game
+        get("/end-game/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID") 
+
+
+            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
+                val game = Game.findById(gameId) ?: return@transaction null
+                Pair(game, game.quiz.quiz_name)
+            } ?: return@get call.respondText("Game not found") 
+
+            val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login") 
+
+            val allScores = transaction(TransactionManager.defaultDatabase) {
+                UserScore.find { UserScoreTable.game eq game.id }
+                .sortedByDescending { it.score }
+                .map { userScore -> 
+                    Triple<Int, String, Int>(userScore.user.id.value, userScore.user.username, userScore.score)
+                }
+            }
+
+            val playerScore = allScores.indexOfFirst { it.first == user.id.value }
+            val position = playerScore + 1
+            val score = allScores.getOrNull(playerScore)?.third ?: 0
+            val totalPlayers = allScores.size
+
+            call.respond(PebbleContent("end_game_client.peb", mapOf<String, Any>(
+                "quizName" to quizName,
+                "gameId" to gameId,
+                "position" to position,
+                "score" to score,
+                "totalPlayers" to totalPlayers
+            )))
         }
 
     }
