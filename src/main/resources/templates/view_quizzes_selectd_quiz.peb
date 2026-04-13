@@ -137,11 +137,11 @@
             </div>
             <div class="subtitle">Category:</div>
             <div class="text">
-                {{ quiz.category }}
+                {{ categoryDisplay }}
             </div>
             <div class="subtitle">Key Stage:</div>
             <div class="text">
-                {{ quiz.key_stage }}
+                {{ keyStageDisplay }}
             </div>
         </div>
     </div>
@@ -152,8 +152,7 @@
                 <button class="btn">Create a Lobby</button>
             </form>
 
-            <form action=""> <!--- NEED TO ADD ROUTING -->
-                <input type="hidden" name="quizId" value="{{ quizId }}">
+            <form action="/view-quiz-questions/{{ quizId }}">
                 <button class="btn">Edit Quiz</button>
             </form>
 
@@ -164,7 +163,7 @@
 
         </div>
 
-        <a class="cancel" href="/view-quizzes">Cancel</a>
+        <button class="btn" onclick="window.location.href='/view-quizzes'">Cancel</button>
 
     </div>
 

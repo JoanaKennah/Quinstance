@@ -47,6 +47,9 @@ class RoutingTest : StringSpec({
     "GET /teacher_dashboard w/out session redirects to login - protected route guard redirects properly" {
         testApplication {
             application { testModule() }
+            val client = createClient {
+                followRedirects = false
+            }
             val response = client.get("/teacher-dashboard")
             checkForRedirect(response, "/login")
         }
@@ -55,6 +58,9 @@ class RoutingTest : StringSpec({
     "GET /student_dashboard w/out session redirects to login - protected route guard redirects properly" {
         testApplication {
             application { testModule() }
+            val client = createClient {
+                followRedirects = false
+            }
             val response = client.get("/student-dashboard")
             checkForRedirect(response, "/login")
         }
@@ -63,6 +69,9 @@ class RoutingTest : StringSpec({
     "GET /create-quiz w/out session redirects to login - protected route guard redirects properly" {
         testApplication {
             application { testModule() }
+            val client = createClient {
+                followRedirects = false
+            }
             val response = client.get("/create-quiz")
             checkForRedirect(response, "/login")
         }
@@ -71,6 +80,9 @@ class RoutingTest : StringSpec({
     "GET /view-quizzes w/out session redirects to login - protected route guard redirects properly" {
         testApplication {
             application { testModule() }
+            val client = createClient {
+                followRedirects = false
+            }
             val response = client.get("/view-quizzes")
             checkForRedirect(response, "/login")
         }
@@ -79,6 +91,9 @@ class RoutingTest : StringSpec({
     "GET /join-lobby w/out session redirects to login - protected route guard redirects properly" {
         testApplication {
             application { testModule() }
+            val client = createClient {
+                followRedirects = false
+            }
             val response = client.get("/join-lobby")
             checkForRedirect(response, "/login")
         }

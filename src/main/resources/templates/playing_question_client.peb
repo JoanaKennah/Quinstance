@@ -10,7 +10,8 @@
         let answered = false;
 
         function setupSocket() {
-            socket = new WebSocket("ws://" + location.host + "/game/{{ gameId }}");
+            const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+            socket = new WebSocket(protocol + "//" + location.host + "/game/{{ gameId }}");
 
             socket.onopen = logOpenToConsole;
             socket.onclose = logCloseToConsole;
@@ -42,10 +43,10 @@
             document.getElementById('questionNum').innerHTML = "Question " + data.questionNumber + ":";
             document.getElementById('questionText').innerHTML = data.questionText;
 
-            document.getElementById('answer-0').innerHTML = data.answerOne;
-            document.getElementById('answer-1').innerHTML = data.answerTwo;
-            document.getElementById('answer-2').innerHTML = data.answerThree;
-            document.getElementById('answer-3').innerHTML = data.answerFour;
+            setAnswer("answer-0", data.answerOne);
+            setAnswer("answer-1", data.answerTwo);
+            setAnswer("answer-2", data.answerThree);
+            setAnswer("answer-3", data.answerFour);
         }
 
         function buildAnswer(name, answer) {
@@ -58,6 +59,16 @@
 
         function sendAnswerViaSocket(data) {
             socket.send(JSON.stringify(data));
+        }
+
+        function setAnswer(id, text) {
+            const btn = document.getElementById(id);
+            if (text) {
+                btn.textContent = text;
+                btn.style.display = "block";
+            } else {
+                btn.style.display = "none";
+            }
         }
 
     </script>
@@ -158,6 +169,7 @@
             //to stop multiple clicks and traffic --->
             if (answered) return;
             answered = true;
+            localStorage.removeItem("quizEndTime");                         //clear old timer
 
             const buttons= document.querySelectorAll(".answer-btn");
             buttons.forEach(btn => btn.disabled = true);
@@ -165,7 +177,7 @@
             const selected = document.getElementById("answer-" + index);
             selected.classList.add("selected");
 
-            const selectedText = selected.innerHTML.trim();
+            const selectedText = selected.textContent.trim();
 
             buildAnswer("{{ username }}", selectedText);
 

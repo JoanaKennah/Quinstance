@@ -83,7 +83,8 @@
     <script>
         {% if not isHost %}
         //client waits for host to advance
-        const socket = new WebSocket("ws://" + location.host + "/game/{{ gameId }}");
+        const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        const socket = new WebSocket(protocol + "//" + location.host + "/game/{{ gameId }}");
 
         socket.onmessage = function(event) {
             const data = JSON.parse(event.data);

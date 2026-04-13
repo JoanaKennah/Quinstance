@@ -21,6 +21,7 @@ import org.jetbrains.exposed.v1.core.and
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import io.ktor.websocket.Frame
+import kotlinx.coroutines.delay
 
 import com.password4j.Password
 import com.example.database.objects.*
@@ -277,7 +278,50 @@ fun Application.configureRouting() {
                 Quiz.findById(quizId)
             } ?: return@get call.respondText("Quiz not found") 
 
-            call.respond(PebbleContent("view_quizzes_selectd_quiz.peb", mapOf( "username" to session.username, "quiz" to quiz, "quizId" to quizId)))
+            val categoryDisplay = when (quiz.category) {
+                "art" -> "Art and Design"
+                "biology" -> "Biology"
+                "business" -> "Business Studies"
+                "chemistry" -> "Chemistry"
+                "cs" -> "Computer Science"
+                "dt" -> "Design and Technology"
+                "drama" -> "Drama"
+                "eng_lang" -> "English Language"
+                "eng_lit" -> "English Literature"
+                "french" -> "French"
+                "geography" -> "Geography"
+                "german" -> "German"
+                "history" -> "History"
+                "latin" -> "Latin"
+                "maths" -> "Mathematics"
+                "media" -> "Media Studies"
+                "music" -> "Music"
+                "pe" -> "Physical Education"
+                "physics" -> "Physics"
+                "rs" -> "Religious Studies"
+                "spanish" -> "Spanish"
+                "other" -> "Other"
+                else -> quiz.category
+            }
+
+            val keyStageDisplay = when (quiz.key_stage) {
+                "KS1" -> "Key Stage 1"
+                "KS2" -> "Key Stage 2"
+                "KS3" -> "Key Stage 3"
+                "KS4" -> "Key Stage 4"
+                "KS5" -> "Key Stage 5"
+                "furthereducation" -> "Further Education"
+                "nonapplicable" -> "N/A"
+                else -> quiz.key_stage
+            }
+
+            call.respond(PebbleContent("view_quizzes_selectd_quiz.peb", mapOf(
+                "username" to session.username,
+                "quiz" to quiz,
+                "quizId" to quizId,
+                "categoryDisplay" to categoryDisplay,
+                "keyStageDisplay" to keyStageDisplay
+            )))
 
         }
 
@@ -288,7 +332,50 @@ fun Application.configureRouting() {
                 Quiz.findById(quizId)
             } ?: return@get call.respondText("Quiz not found")
 
-            call.respond(PebbleContent("create_lobby.peb", mapOf("quizId" to quizId, "quizName" to quiz.quiz_name, "numQuestions" to quiz.num_of_questions, "category" to quiz.category, "keyStage" to quiz.key_stage)))
+            val categoryDisplay = when (quiz.category) {
+                "art" -> "Art and Design"
+                "biology" -> "Biology"
+                "business" -> "Business Studies"
+                "chemistry" -> "Chemistry"
+                "cs" -> "Computer Science"
+                "dt" -> "Design and Technology"
+                "drama" -> "Drama"
+                "eng_lang" -> "English Language"
+                "eng_lit" -> "English Literature"
+                "french" -> "French"
+                "geography" -> "Geography"
+                "german" -> "German"
+                "history" -> "History"
+                "latin" -> "Latin"
+                "maths" -> "Mathematics"
+                "media" -> "Media Studies"
+                "music" -> "Music"
+                "pe" -> "Physical Education"
+                "physics" -> "Physics"
+                "rs" -> "Religious Studies"
+                "spanish" -> "Spanish"
+                "other" -> "Other"
+                else -> quiz.category
+            }
+
+            val keyStageDisplay = when (quiz.key_stage) {
+                "KS1" -> "Key Stage 1"
+                "KS2" -> "Key Stage 2"
+                "KS3" -> "Key Stage 3"
+                "KS4" -> "Key Stage 4"
+                "KS5" -> "Key Stage 5"
+                "furthereducation" -> "Further Education"
+                "nonapplicable" -> "N/A"
+                else -> quiz.key_stage
+            }
+
+            call.respond(PebbleContent("create_lobby.peb", mapOf(
+                "quizId" to quizId, 
+                "quizName" to quiz.quiz_name, 
+                "numQuestions" to quiz.num_of_questions, 
+                "category" to categoryDisplay, 
+                "keyStage" to keyStageDisplay
+                )))
 
         }
         
@@ -307,6 +394,9 @@ fun Application.configureRouting() {
                     this.quiz = quiz
                 }
             }
+            val questions = retrieveQuizQuestions(quiz)
+            val gameSession = GameSession(gameId = game.id.value, questions = questions)
+            activeSessions[game.id.value] = gameSession
 
             val roomCode = generateRoomCode()
 
@@ -469,15 +559,19 @@ fun Application.configureRouting() {
                 return@post call.respondText("No Questions Found in Quiz")
             } 
 
-            //create GameSession, post to activeSessions
-            val gameSession = GameSession(gameId = gameId, questions = questions)
-            activeSessions[gameId] = gameSession
+            val gameSession = activeSessions[gameId]
+                ?: return@post call.respondText("No active session found")
+
+            gameSession.isStarted = true
+            
+            //redirect all connected players to game page
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text(Json.encodeToString(mapOf("redirect" to "/game/$gameId")))) }
+
+            // Small delay allows clients to connect to new WebSocket
+            kotlinx.coroutines.delay(1000)
 
             //Broadcasr first question to connected players
             broadcastQuestion(gameSession)
-
-            //redirect all connected players to game page
-            gameSession.connections.forEach { connection -> connection.send(Frame.Text(Json.encodeToString(mapOf("redirect" to "/game/$gameId")))) }
 
 
             call.respond(PebbleContent("playing_question_server.peb", mapOf(
@@ -508,11 +602,13 @@ fun Application.configureRouting() {
             gameSession.currentQuestionIndex++          //advance quiz to next Q
 
             if (gameSession.currentQuestionIndex >= gameSession.questions.size) {
+                gameSession.isFinished = true
                 activeSessions.remove(gameId)           //cut game and go to leaderboard
                 call.respondRedirect("/leaderboard/$gameId") 
 
             } else {
                 gameSession.isAdvanced = false          //reset flag for next Q
+                delay(1000)
                 broadcastQuestion(gameSession)
 
                 val nextQuestion = gameSession.questions[gameSession.currentQuestionIndex] 
@@ -530,19 +626,25 @@ fun Application.configureRouting() {
 
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID") 
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
+            val (game, quizName, quizId) = transaction(TransactionManager.defaultDatabase) {
                 val game = Game.findById(gameId) ?: return@transaction null
                 val quizName = game.quiz.quiz_name
-                Pair(game, quizName)
+                val quizId = game.quiz.id.value
+                Triple(game, quizName, quizId)
             } ?: return@get call.respondText("Game not found") 
 
             //retrieve player scores, sort by highest 
             val players = transaction(TransactionManager.defaultDatabase) {
-                UserScore.find { UserScoreTable.game eq game.id }.sortedByDescending { it.score }.map { userScore -> mapOf("username" to userScore.user.username, "score" to userScore.score)}
+                UserScore.find { UserScoreTable.game eq game.id }.sortedByDescending { it.score }.map { userScore -> mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score) }
 
             } 
 
-            call.respond(PebbleContent("leaderboard.peb", mapOf("quizName" to quizName, "players" to players)))
+            call.respond(PebbleContent("leaderboard.peb", mapOf(
+                "quizName" to quizName, 
+                "players" to players,
+                "gameId" to gameId,
+                "quizId" to quizId
+                )))
 
         }
 
@@ -678,10 +780,11 @@ fun Application.configureRouting() {
         post("/show-positions/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
-            val (game, quizName) = transaction(TransactionManager.defaultDatabase) {
+            val (game, quizName, quizId) = transaction(TransactionManager.defaultDatabase) {
                 val game = Game.findById(gameId) ?: return@transaction null
                 val quizName = game.quiz.quiz_name
-                Pair(game, quizName)
+                val quizId = game.quiz.id.value
+                Triple(game, quizName, quizId)
             } ?: return@post call.respondText("Game not found")
 
             val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found")
@@ -690,7 +793,7 @@ fun Application.configureRouting() {
                 UserScore.find { UserScoreTable.game eq game.id }
                     .sortedByDescending { it.score }
                     .map { userScore -> 
-                        mapOf("username" to userScore.user.username, "score" to userScore.score)
+                        mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score) 
                     }
             }
 
@@ -703,7 +806,9 @@ fun Application.configureRouting() {
 
             call.respond(PebbleContent("leaderboard.peb", mapOf(
                 "quizName" to quizName,
-                "players" to scores
+                "players" to scores,
+                "gameId" to gameId,
+                "quizId" to quizId
             )))
         }
 
@@ -722,21 +827,56 @@ fun Application.configureRouting() {
             val allScores = transaction(TransactionManager.defaultDatabase) {
                 UserScore.find { UserScoreTable.game eq game.id }
                     .sortedByDescending { it.score }
+                    .map { userScore ->
+                        Triple<Int, String, Int>(userScore.user.id.value, userScore.user.username, userScore.score)
+                    }
             }
 
             //find score and position per player
-            val playerScore = allScores.indexOfFirst { it.user.id == user.id }
+            val playerScore = allScores.indexOfFirst { it.first == user.id.value }
             val position = playerScore + 1 
-            val score = allScores.getOrNull(playerScore)?.score ?: 0
+            val score = allScores.getOrNull(playerScore)?.third ?: 0
             val totalPlayers = allScores.size
+            val questionIndex: Int = activeSessions[gameId]?.currentQuestionIndex ?: 0
 
-            call.respond(PebbleContent("client_current_pos.peb", mapOf(
+            call.respond(PebbleContent("client_current_pos.peb", mapOf<String, Any>(
                 "quizName" to quizName,
                 "gameId" to gameId,
                 "position" to position,
                 "score" to score,
-                "totalPlayers" to totalPlayers
+                "totalPlayers" to totalPlayers,
+                "questionIndex" to questionIndex
             )))
+        }
+
+        get("/game-started/{gameId}") {
+            val gameId = call.parameters["gameId"]?.toIntOrNull()
+                ?: return@get call.respondText("{\"started\":false}", ContentType.Application.Json)
+            val started = activeSessions[gameId]?.isStarted ?: false
+            call.respondText("{\"started\":$started}", ContentType.Application.Json)
+        }
+
+        get("/lobby-players/{gameId}") {
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("[]", ContentType.Application.Json) 
+            val game = transaction(TransactionManager.defaultDatabase) {
+                Game.findById(gameId)
+            } ?: return@get call.respondText("[]", ContentType.Application.Json) 
+
+            val players = transaction(TransactionManager.defaultDatabase) {
+                UserScore.find { UserScoreTable.game eq game.id }.map { it.user.username }
+            }
+
+            val json = "[" + players.joinToString(",") { "\"$it\"" } + "]" 
+            call.respondText(json, ContentType.Application.Json)
+        }
+
+        get("/question-index/{gameId}") {
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("{\"index\":0}", ContentType.Application.Json)
+            val session = activeSessions[gameId]
+            val index = activeSessions[gameId]?.currentQuestionIndex ?: 0
+            val finished = session?.isFinished ?: true
+            println("Question index polled: gameId=$gameId index=$index finished=$finished")
+            call.respondText("{\"index\":$index,\"finished\":$finished}", ContentType.Application.Json)
         }
 
     }
