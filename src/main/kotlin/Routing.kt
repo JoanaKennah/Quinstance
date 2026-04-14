@@ -24,18 +24,24 @@ import com.example.database.objects.*
 
 fun Application.configureRouting() {
     routing {
+
+        //serves homepage - default
         get("/") {
             call.respond(PebbleContent("homepage.peb", mapOf<String, Any>()))
         }
 
+        //serves homepage - dedicated
         get("/home") {
             call.respond(PebbleContent("homepage.peb", mapOf<String, Any>()))
         }
 
+        //serves login page
         get("/login") {
             call.respond(PebbleContent("login.peb", mapOf<String, Any>()))
         }
 
+
+        //takes credentials & validates, sets session, redirects to dashboards
         post("/login") { // I think this will only work for the real database, so we can't test it just yet
             val parameters = call.receiveParameters()
             val username = parameters["username"]
@@ -70,10 +76,12 @@ fun Application.configureRouting() {
             }
         }
 
+        //serves signup page 
         get("/signup") {
             call.respond(PebbleContent("signup.peb", mapOf<String, Any>()))
         }
 
+        //validates signup form, creates user in database, redirects to dash
         post("/signup") {
             val parameters = call.receiveParameters()
             val firstname = parameters["firstname"]?: return@post call.respondText("Missing input")
@@ -114,12 +122,14 @@ fun Application.configureRouting() {
             }
         }
 
+        //serves teacher dash
         get("/teacher-dashboard") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
 
             call.respond(PebbleContent("teacher_dashboard.peb", mapOf("username" to session.username)))
         }
 
+        //serves student dash
         get("/student-dashboard") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             
@@ -127,7 +137,7 @@ fun Application.configureRouting() {
         }
 
 
-        //gets gameId and other details to pass to template
+        //serves question page client-side, websocket connects here during game
         get("/game/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
@@ -141,12 +151,14 @@ fun Application.configureRouting() {
             )))
         }
 
+        //gets quiz creation page
         get("/create-quiz") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
 
             call.respond(PebbleContent("create_quiz.peb", mapOf<String, Any>()))
         }
 
+        //saves created quiz to db, redirects to add Qs page
         post("/create-quiz") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
 
@@ -162,6 +174,8 @@ fun Application.configureRouting() {
 
             call.respondRedirect("/view-quiz-questions/${quiz.id.value}")
         }
+
+        //serves list of Qs in quiz
         get("/view-quiz-questions/{quizId}") {
             val quizId = call.parameters["quizId"]?.toIntOrNull()
                 ?: return@get call.respondText("Quiz ID Invalid")
@@ -172,6 +186,7 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("view_quiz_questions.peb", mapOf("quizName" to quiz.quiz_name, "questions" to questions, "quizId" to quizId)))
         }
 
+        //serves add question to quiz form
         get("/add-question/{quizId}") {
             val quizId = call.parameters["quizId"]?.toIntOrNull()
                 ?: return@get call.respondText("Invalid Quiz ID")
@@ -181,7 +196,7 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("add_question.peb", mapOf("quizName" to quiz.quiz_name, "quizId" to quizId)))
         }
 
-        // Reading question, all the answers, checking correct answer, saving to DB
+        //Reading question, all the answers, checking correct answer, saving to DB, redirects back to Q list
         post("/add-question/{quizId}") {
             val quizId = call.parameters["quizId"]?.toIntOrNull()
                 ?: return@post call.respondText("Invalid quiz ID")
@@ -213,6 +228,7 @@ fun Application.configureRouting() {
             call.respondRedirect("/view-quiz-questions/$quizId")
         }
 
+        //serves list of quizzes created by user
         get ("/view-quizzes") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
 
@@ -227,6 +243,7 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("view_quizzes.peb", mapOf("username" to session.username, "returnURL" to returnURL, "quizzes" to quizzes)))
         }
 
+        //serves conformation page for created quiz
         post ("/quiz-created/{quizId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
 
@@ -242,6 +259,7 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("quiz_created.peb", mapOf("quizId" to quizId, "returnURL" to returnURL)))
         }
 
+        // serves specific quiz view, includes formatting for catagory and KStage
         get("/view-quiz/{quizId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val quizId = call.parameters["quizId"]?.toIntOrNull() ?: return@get call.respondText("Invalid quiz ID")
@@ -294,6 +312,7 @@ fun Application.configureRouting() {
 
         }
 
+        //serves create lobby page, same formatting for category & Kstage
         get("/create-lobby/{quizId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val quizId = call.parameters["quizId"]?.toIntOrNull() ?: return@get call.respondText("Invalid quiz ID")
@@ -346,6 +365,7 @@ fun Application.configureRouting() {
 
         }
         
+        //create game in DB, gen room code, create GameSession, redirect to host lobby view
         post("/create-lobby/{quizId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val quizId = call.parameters["quizId"]?.toIntOrNull() ?: return@post call.respondText("Invalid quiz ID")
@@ -353,6 +373,9 @@ fun Application.configureRouting() {
 
             val parameters = call.receiveParameters()
             val timeLimit = parameters["timeLimit"]?.toIntOrNull() ?: 30
+            //read and update theme from checkbox
+            val theme = if (parameters["theme"] == "spooky") "spooky" else "default"
+            call.sessions.set(session.copy(theme = theme))
 
             val game = addGame(quiz)
             val questions = retrieveQuizQuestions(quiz)
@@ -365,6 +388,7 @@ fun Application.configureRouting() {
             call.respondRedirect("/lobby-server/${game.id.value}")
         }
 
+        //serves host lobby view w/ joined players
         get("/lobby-server/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
@@ -376,9 +400,15 @@ fun Application.configureRouting() {
 
             val players = retrieveGamePlayers(game)
 
-            call.respond(PebbleContent("lobby_server_view.peb", mapOf("quizName" to quiz.quiz_name, "roomCode" to roomCode, "players" to players, "gameId" to gameId)))
+            call.respond(PebbleContent("lobby_server_view.peb", mapOf("quizName" to quiz.quiz_name, 
+                "roomCode" to roomCode, 
+                "players" to players, 
+                "gameId" to gameId,
+                "theme" to session.theme
+            )))
         }
 
+        //serves join lobby page for client
         get("/join-lobby") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val returnURL = if (session.role == "teacher" || session.role == "admin") {
@@ -391,6 +421,7 @@ fun Application.configureRouting() {
 
         }
 
+        //validates room code, creates UserScore for client, redirects to client lobby view
         post("/join-lobby") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val parameters = call.receiveParameters()
@@ -415,6 +446,7 @@ fun Application.configureRouting() {
             call.respondRedirect("/lobby-client/${game.id.value}")
         }
         
+        //serves client lobby view, verified player is in game
         get("/lobby-client/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
@@ -431,6 +463,7 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("lobby_client_view.peb", mapOf("quizName" to quiz.quiz_name, "roomCode" to roomCode, "gameId" to gameId)))
         }
 
+        //removes UserScore entry for player, redirects to dashboard
         post("/leave-lobby/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login") 
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
@@ -452,6 +485,7 @@ fun Application.configureRouting() {
             call.respondRedirect(returnURL)
         }
         
+        //deletes room code, player scores and game, redirects host to dash
         post("/close-lobby/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID") 
@@ -471,6 +505,7 @@ fun Application.configureRouting() {
             call.respondRedirect("/teacher-dashboard")
         }
 
+        //set isStarted flag, sends redirect to clients, broadcasts Question 1 to host
         post("/start-game/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login") 
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID") 
@@ -504,6 +539,7 @@ fun Application.configureRouting() {
             )))
         }
 
+        //increments question index, broadcast next Q or ends game after last Q
         post("/next-question/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
 
@@ -576,7 +612,7 @@ fun Application.configureRouting() {
 
         //TESTED UP TO HERE
 
-        // Serves selected answer template and params
+        //serves selected answer template
         get("/selected-answer/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login") 
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
@@ -592,6 +628,7 @@ fun Application.configureRouting() {
             )))
         }
 
+        //scores answers, clears UserAnswers, serves correct ans pages for clients and host
         post("/show-correct-answer/{gameId}") {
             val session = call.sessions.get<UserSession>()?: return@post call.respondRedirect("/login") 
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
@@ -632,6 +669,7 @@ fun Application.configureRouting() {
             )))
         }
 
+        //serves correct ans for clients, Websocket waits for host to advance
         get("/show-correct-answer-client/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
@@ -653,6 +691,7 @@ fun Application.configureRouting() {
             )))
         }
 
+        //serves correct ans page to host after timer expires
         get("/show-correct-answer/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
@@ -734,6 +773,7 @@ fun Application.configureRouting() {
             )))
         }
 
+        //polling endpoint, returns if game has started, used by lobby client view
         get("/game-started/{gameId}") {
             val gameId = call.parameters["gameId"]?.toIntOrNull()
                 ?: return@get call.respondText("{\"started\":false}", ContentType.Application.Json)
@@ -741,6 +781,7 @@ fun Application.configureRouting() {
             call.respondText("{\"started\":$started}", ContentType.Application.Json)
         }
 
+        //polling endpoint, returns player list in lobby, for host lobby view
         get("/lobby-players/{gameId}") {
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("[]", ContentType.Application.Json) 
             val game = retrieveGame(gameId) ?: return@get call.respondText("[]", ContentType.Application.Json)
@@ -751,6 +792,7 @@ fun Application.configureRouting() {
             call.respondText(json, ContentType.Application.Json)
         }
 
+        //polling endpoint, returns current Q index and finished flag, used by client pos page
         get("/question-index/{gameId}") {
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("{\"index\":0}", ContentType.Application.Json)
             val session = activeSessions[gameId]
