@@ -147,7 +147,8 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("playing_question_client.peb", mapOf(
                 "username" to session.username,
                 "quizName" to quiz.quiz_name,
-                "gameId" to gameId
+                "gameId" to gameId,
+                "theme" to session.theme
             )))
         }
 
@@ -460,7 +461,7 @@ fun Application.configureRouting() {
 
             val roomCode = retrieveRoomCode(game) ?: return@get call.respondText("Room code not found")
 
-            call.respond(PebbleContent("lobby_client_view.peb", mapOf("quizName" to quiz.quiz_name, "roomCode" to roomCode, "gameId" to gameId)))
+            call.respond(PebbleContent("lobby_client_view.peb", mapOf("quizName" to quiz.quiz_name, "roomCode" to roomCode, "gameId" to gameId, "theme" to session.theme)))
         }
 
         //removes UserScore entry for player, redirects to dashboard
@@ -535,7 +536,8 @@ fun Application.configureRouting() {
                 "quizName" to quiz.quiz_name,
                 "questionNumber" to 1,
                 "questionText" to questions[0].question,
-                "gameId" to gameId
+                "gameId" to gameId,
+                "theme" to session.theme
             )))
         }
 
@@ -592,7 +594,8 @@ fun Application.configureRouting() {
                 "quizName" to quiz.quiz_name,
                 "players" to players,
                 "gameId" to gameId,
-                "quizId" to quiz.id
+                "quizId" to quiz.id,
+                "theme" to session.theme
                 )))
 
         }
@@ -624,7 +627,8 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("client_selected_ans.peb", mapOf(
                 "quizName" to quiz.quiz_name,
                 "gameId" to gameId, 
-                "selectedAnswer" to selectedAnswer
+                "selectedAnswer" to selectedAnswer,
+                "theme" to session.theme
             )))
         }
 
@@ -665,7 +669,8 @@ fun Application.configureRouting() {
                 "questionText" to currentQuestion.question,
                 "correctAnswer" to correctAnswer,
                 "gameId" to gameId,
-                "isHost" to true
+                "isHost" to true,
+                "theme" to session.theme
             )))
         }
 
@@ -687,7 +692,8 @@ fun Application.configureRouting() {
                 "questionText" to currentQuestion.question,
                 "correctAnswer" to correctAnswer,
                 "gameId" to gameId,
-                "isHost" to false
+                "isHost" to false,
+                "theme" to session.theme
             )))
         }
 
@@ -709,7 +715,8 @@ fun Application.configureRouting() {
                 "questionText" to currentQuestion.question,
                 "correctAnswer" to correctAnswer,
                 "gameId" to gameId,
-                "isHost" to true
+                "isHost" to true,
+                "theme" to session.theme
             )))
         }
 
@@ -741,7 +748,8 @@ fun Application.configureRouting() {
                 "quizName" to quiz.quiz_name,
                 "players" to scores,
                 "gameId" to gameId,
-                "quizId" to quiz.id
+                "quizId" to quiz.id,
+                "theme" to session.theme
             )))
         }
 
@@ -769,7 +777,8 @@ fun Application.configureRouting() {
                 "position" to position,
                 "score" to score,
                 "totalPlayers" to totalPlayers,
-                "questionIndex" to questionIndex
+                "questionIndex" to questionIndex,
+                "theme" to session.theme
             )))
         }
 
@@ -825,7 +834,8 @@ fun Application.configureRouting() {
                 "gameId" to gameId,
                 "position" to position,
                 "score" to score,
-                "totalPlayers" to totalPlayers
+                "totalPlayers" to totalPlayers,
+                "theme" to session.theme
             )))
         }
     }
