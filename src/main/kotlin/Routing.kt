@@ -20,6 +20,14 @@ import kotlinx.coroutines.delay
 
 import com.password4j.Password
 import com.example.database.objects.*
+import io.ktor.http.content.PartData
+import io.ktor.http.content.forEachPart
+import io.ktor.util.cio.writeChannel
+import io.ktor.utils.io.copyAndClose
+import io.ktor.utils.io.core.Input
+import java.io.File
+import java.io.InputStream
+import java.nio.file.Files
 
 
 fun Application.configureRouting() {
@@ -184,6 +192,34 @@ fun Application.configureRouting() {
             val questions = retrieveQuizQuestions(quiz)
 
             call.respond(PebbleContent("view_quiz_questions.peb", mapOf("quizName" to quiz.quiz_name, "questions" to questions, "quizId" to quizId)))
+        }
+
+        post("/view-quiz-questions/{quidId}") {
+            // Gets a .csv file!!!
+            val multipart = call.receiveMultipart()
+            var quizId: String? = null
+            val inputStream = InputStream.nullInputStream()
+
+            multipart.forEachPart { part ->
+                if(part is PartData.FileItem) {
+                    val fileName = part.originalFileName!!
+                    val file = File("copy_$fileName")
+                    part.provider().copyAndClose(file.writeChannel())
+                    Files.copy(inputStream, file.toPath())
+                }
+                if(part is PartData.FormItem) {
+                    if(part.name == "quizId") {
+                        quizId = part.value
+                    }
+                }
+                part.dispose()
+            }
+
+            for (i in readCsv(inputStream)) {
+                println(i)
+            }
+
+            // read data
         }
 
         //serves add question to quiz form

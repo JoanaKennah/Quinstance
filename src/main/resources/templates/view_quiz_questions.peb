@@ -38,6 +38,24 @@
             margin: 0;
         }
 
+        .csv-container {
+            display: flex;
+            margin: 20px;
+            justify-content: flex-end;
+        }
+
+        .csv-text {
+              color: #e63973;
+              margin: 10px;
+              font-size: 20px;
+        }
+
+        .csv-button {
+              color: #e63973;
+              margin: 5px;
+              font-size: 20px;
+        }
+
         .button-bar {
             margin-top: 20px;
             display: flex;
@@ -121,6 +139,17 @@
         <a class="add-btn" href="/add-question/{{ quizId }}">
             + Add a Question
         </a>
+
+        <div class="csv-container">
+            <b class="csv-text">Already have some questions? Submit a .csv file:</b>
+            <form method="post"
+                  action="/view-quiz-questions/{{ quizId }}"
+                  enctype="multipart/form-data">
+                <input type="file" class="csv-button" name="filename">
+                <input type="hidden" name="quizId" value={{ quizId }}>
+                <input type="submit">
+            </form>
+        </div>
 
         <form method="post" action="/quiz-created/{{ quizId }}" onsubmit="return validateForm()">
             <button class="next-btn" type="submit"
