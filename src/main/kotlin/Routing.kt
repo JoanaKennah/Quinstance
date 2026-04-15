@@ -17,6 +17,7 @@ import org.jetbrains.exposed.v1.core.and
 import kotlinx.serialization.json.Json
 import io.ktor.websocket.Frame
 import kotlinx.coroutines.delay
+import kotlin.math.roundToInt
 
 import com.password4j.Password
 import com.example.database.objects.*
@@ -147,7 +148,9 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("playing_question_client.peb", mapOf(
                 "username" to session.username,
                 "quizName" to quiz.quiz_name,
-                "gameId" to gameId
+                "gameId" to gameId,
+                "theme" to session.theme,
+                "timeLimit" to (activeSessions[gameId]?.timeLimit ?: 30)
             )))
         }
 
@@ -373,13 +376,14 @@ fun Application.configureRouting() {
 
             val parameters = call.receiveParameters()
             val timeLimit = parameters["timeLimit"]?.toIntOrNull() ?: 30
+            println("Time limit received: ${parameters["timeLimit"]}, parsed as: $timeLimit")
             //read and update theme from checkbox
             val theme = if (parameters["theme"] == "spooky") "spooky" else "default"
             call.sessions.set(session.copy(theme = theme))
 
             val game = addGame(quiz)
             val questions = retrieveQuizQuestions(quiz)
-            val gameSession = GameSession(gameId = game.id.value, questions = questions)
+            val gameSession = GameSession(gameId = game.id.value, questions = questions, timeLimit = timeLimit)
             activeSessions[game.id.value] = gameSession
 
             val roomCode = generateRoomCode()
@@ -460,7 +464,7 @@ fun Application.configureRouting() {
 
             val roomCode = retrieveRoomCode(game) ?: return@get call.respondText("Room code not found")
 
-            call.respond(PebbleContent("lobby_client_view.peb", mapOf("quizName" to quiz.quiz_name, "roomCode" to roomCode, "gameId" to gameId)))
+            call.respond(PebbleContent("lobby_client_view.peb", mapOf("quizName" to quiz.quiz_name, "roomCode" to roomCode, "gameId" to gameId, "theme" to session.theme)))
         }
 
         //removes UserScore entry for player, redirects to dashboard
@@ -535,7 +539,9 @@ fun Application.configureRouting() {
                 "quizName" to quiz.quiz_name,
                 "questionNumber" to 1,
                 "questionText" to questions[0].question,
-                "gameId" to gameId
+                "gameId" to gameId,
+                "theme" to session.theme,
+                "timeLimit" to gameSession.timeLimit
             )))
         }
 
@@ -571,7 +577,8 @@ fun Application.configureRouting() {
                     "quizName" to quiz.quiz_name,
                     "questionNumber" to gameSession.currentQuestionIndex + 1,
                     "questionText" to nextQuestion.question,
-                    "gameId" to gameId
+                    "gameId" to gameId,
+                    "timeLimit" to gameSession.timeLimit
                 )))
             }
 
@@ -592,7 +599,8 @@ fun Application.configureRouting() {
                 "quizName" to quiz.quiz_name,
                 "players" to players,
                 "gameId" to gameId,
-                "quizId" to quiz.id
+                "quizId" to quiz.id,
+                "theme" to session.theme
                 )))
 
         }
@@ -624,7 +632,8 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("client_selected_ans.peb", mapOf(
                 "quizName" to quiz.quiz_name,
                 "gameId" to gameId, 
-                "selectedAnswer" to selectedAnswer
+                "selectedAnswer" to selectedAnswer,
+                "theme" to session.theme
             )))
         }
 
@@ -642,12 +651,17 @@ fun Application.configureRouting() {
             val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@post call.respondText("No answer found for question")
 
             val answers = UserAnswers.allUserAnswers()
-            for (answerData in answers) {
-                if (answerData.chosenAnswer == correctAnswer) {
-                    val user = retrieveUser(answerData.username)
-                    if (user != null) {
-                        val userScore = retrieveUserScore(game, user)
-                        if (userScore != null) userScore.score += 1
+            transaction(TransactionManager.defaultDatabase) {
+                for (answerData in answers) {
+                    if (answerData.chosenAnswer == correctAnswer) {
+                        val user = retrieveUser(answerData.username)
+                        if (user != null) {
+                            val userScore = retrieveUserScore(game, user)
+                            if (userScore != null) {
+                                val pointsEarned = (100 + ((answerData.timeRemaining.toDouble() / gameSession.timeLimit.toDouble()) * 900)).roundToInt()
+                                userScore.score += pointsEarned
+                            }
+                        }
                     }
                 }
             }
@@ -665,7 +679,8 @@ fun Application.configureRouting() {
                 "questionText" to currentQuestion.question,
                 "correctAnswer" to correctAnswer,
                 "gameId" to gameId,
-                "isHost" to true
+                "isHost" to true,
+                "theme" to session.theme
             )))
         }
 
@@ -687,7 +702,8 @@ fun Application.configureRouting() {
                 "questionText" to currentQuestion.question,
                 "correctAnswer" to correctAnswer,
                 "gameId" to gameId,
-                "isHost" to false
+                "isHost" to false,
+                "theme" to session.theme
             )))
         }
 
@@ -709,7 +725,8 @@ fun Application.configureRouting() {
                 "questionText" to currentQuestion.question,
                 "correctAnswer" to correctAnswer,
                 "gameId" to gameId,
-                "isHost" to true
+                "isHost" to true,
+                "theme" to session.theme
             )))
         }
 
@@ -741,7 +758,8 @@ fun Application.configureRouting() {
                 "quizName" to quiz.quiz_name,
                 "players" to scores,
                 "gameId" to gameId,
-                "quizId" to quiz.id
+                "quizId" to quiz.id,
+                "theme" to session.theme
             )))
         }
 
@@ -769,7 +787,8 @@ fun Application.configureRouting() {
                 "position" to position,
                 "score" to score,
                 "totalPlayers" to totalPlayers,
-                "questionIndex" to questionIndex
+                "questionIndex" to questionIndex,
+                "theme" to session.theme
             )))
         }
 
@@ -825,7 +844,8 @@ fun Application.configureRouting() {
                 "gameId" to gameId,
                 "position" to position,
                 "score" to score,
-                "totalPlayers" to totalPlayers
+                "totalPlayers" to totalPlayers,
+                "theme" to session.theme
             )))
         }
     }

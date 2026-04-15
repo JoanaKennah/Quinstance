@@ -3,6 +3,87 @@
 <head>
     <title>Leaderboard</title>
 
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+        }
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .content {
+            margin: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .leaderboard-section {
+            width: 70%;
+        }
+        .leaderboard-title {
+            font-size: 28px;
+            color: #2DC84D;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 2px solid #2DC84D;
+            color: #2DC84D;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #2DC84D;
+            color: #2DC84D;
+        }
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .controls {
+            width: 25%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .controls form {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        .control-btn {
+            width: 80%;
+            padding: 12px;
+            background-color: black;
+            color: #2DC84D;
+            border: 2px solid #2DC84D;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .control-btn:hover {
+            background-color: #2DC84D;
+            color: black;
+        }
+    </style>
+    {% else %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -93,6 +174,7 @@
             color: white;
         }
     </style>
+    {% endif %}
 </head>
 
 <body>
