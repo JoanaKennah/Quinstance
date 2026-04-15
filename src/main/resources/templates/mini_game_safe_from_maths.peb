@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Safe from Maths Mini-Game</title>
+
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+            color: #2dc84d;
+        }
+
+        .navbar {
+            background-color: #2dc84d;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .box {
+            border: 2px solid #2dc84d;
+            border-radius: 10px;
+            padding: 30px;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .score-label {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .score {
+            font-size: 40px;
+            font-weight: bold;
+        }
+    </style>
+
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            color: black;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar a {
+        color: black;
+        text-decoration: none;
+        font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 30px;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .score-label {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .score {
+            font-size: 40px;
+            font-weight: bold;
+            color: #e63973;
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+    <div class="navbar">
+        <a href="/home">Logout</a>
+    </div>
+
+    <div class="container">
+        <div class="box">
+            <h1>You are safe!</h1>
+            <div class="score-label">Total Score:</div>
+            <div class="score">{{ score }}</div>
+        </div>
+    </div>
+</body>
+</html>
