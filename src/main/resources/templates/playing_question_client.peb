@@ -53,6 +53,7 @@
             let data = {
                 username: name,
                 chosenAnswer: answer,
+                timeRemaining: timeLeft
             };
             sendAnswerViaSocket(data);
         }
@@ -137,6 +138,11 @@
             background-color: #2DC84D;
             color: black;
         }
+        .timer {
+            margin-top: 30px;
+            font-size: 26px;
+            color: #2DC84D
+        }
     </style>
     {% else %}
     <style>
@@ -211,15 +217,24 @@
             background-color: #e63973;
             color: white;
         }
+
+        .timer {
+            margin-top: 30px;
+            font-size: 26px;
+            color: black;
+        }
+
     </style>
     {% endif %}
 
     <script>
-        let timeLeft = 30;
+        let timeLeft = {{ timeLimit }};
 
         function startTimer() {
+            const timerDisplay = document.getElementById("timer");
             const countdown = setInterval(() => {
                 timeLeft--;
+                timerDisplay.textContent = timeLeft;
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
                     //checks player hasn't clicked to avoid a dupe answer
@@ -291,6 +306,9 @@
                 onclick="selectAnswer(3)">
             </button>
         </div>
+    </div>
+    <div class="timer">
+        <span id="timer">{{ timeLimit }}</span>
     </div>
 </div>
 

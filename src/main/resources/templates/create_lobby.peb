@@ -127,12 +127,12 @@
     </style>
 
     <script>
-        function selectTime(seconds) {
+        function selectTime(element, seconds) {
             // Highlight selected button
             document.querySelectorAll(".time-btn").forEach(btn => {
                 btn.classList.remove("selected");
             });
-            event.target.classList.add("selected");
+            element.classList.add("selected");
 
             // Store selected time in hidden input
             document.getElementById("timeLimit").value = seconds;
@@ -177,16 +177,16 @@
                 <h2>Settings</h2>
                 <div class="time-label">Time to answer Questions:</div>
                 <div class="time-options">
-                    <button type="button" class="time-btn" onclick="selectTime(15)">15s</button>
-                    <button type="button" class="time-btn selected" onclick="selectTime(30)">30s</button>
-                    <button type="button" class="time-btn" onclick="selectTime(60)">60s</button>
-                    <button type="button" class="time-btn" onclick="selectTime(0)">Unlimited</button>
+                    <button type="button" class="time-btn" onclick="selectTime(this, 15)">15s</button>
+                    <button type="button" class="time-btn selected" onclick="selectTime(this, 30)">30s</button>
+                    <button type="button" class="time-btn" onclick="selectTime(this, 60)">60s</button>
+                    <button type="button" class="time-btn" onclick="selectTime(this, 0)">Unlimited</button>
                 </div>
 
                 <div class="theme-label" style="margin-top: 20px; font-size: 16px; color: black;">
                     Spooky theme:
                     <input type="checkbox" name="theme" value="spooky" style="margin-left: 8px;">
-                <div>
+                </div>
 
             </div>
 

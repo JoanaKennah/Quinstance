@@ -17,6 +17,7 @@ import org.jetbrains.exposed.v1.core.and
 import kotlinx.serialization.json.Json
 import io.ktor.websocket.Frame
 import kotlinx.coroutines.delay
+import kotlin.math.roundToInt
 
 import com.password4j.Password
 import com.example.database.objects.*
@@ -148,7 +149,8 @@ fun Application.configureRouting() {
                 "username" to session.username,
                 "quizName" to quiz.quiz_name,
                 "gameId" to gameId,
-                "theme" to session.theme
+                "theme" to session.theme,
+                "timeLimit" to (activeSessions[gameId]?.timeLimit ?: 30)
             )))
         }
 
@@ -374,13 +376,14 @@ fun Application.configureRouting() {
 
             val parameters = call.receiveParameters()
             val timeLimit = parameters["timeLimit"]?.toIntOrNull() ?: 30
+            println("Time limit received: ${parameters["timeLimit"]}, parsed as: $timeLimit")
             //read and update theme from checkbox
             val theme = if (parameters["theme"] == "spooky") "spooky" else "default"
             call.sessions.set(session.copy(theme = theme))
 
             val game = addGame(quiz)
             val questions = retrieveQuizQuestions(quiz)
-            val gameSession = GameSession(gameId = game.id.value, questions = questions)
+            val gameSession = GameSession(gameId = game.id.value, questions = questions, timeLimit = timeLimit)
             activeSessions[game.id.value] = gameSession
 
             val roomCode = generateRoomCode()
@@ -537,7 +540,8 @@ fun Application.configureRouting() {
                 "questionNumber" to 1,
                 "questionText" to questions[0].question,
                 "gameId" to gameId,
-                "theme" to session.theme
+                "theme" to session.theme,
+                "timeLimit" to gameSession.timeLimit
             )))
         }
 
@@ -573,7 +577,8 @@ fun Application.configureRouting() {
                     "quizName" to quiz.quiz_name,
                     "questionNumber" to gameSession.currentQuestionIndex + 1,
                     "questionText" to nextQuestion.question,
-                    "gameId" to gameId
+                    "gameId" to gameId,
+                    "timeLimit" to gameSession.timeLimit
                 )))
             }
 
@@ -646,12 +651,17 @@ fun Application.configureRouting() {
             val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@post call.respondText("No answer found for question")
 
             val answers = UserAnswers.allUserAnswers()
-            for (answerData in answers) {
-                if (answerData.chosenAnswer == correctAnswer) {
-                    val user = retrieveUser(answerData.username)
-                    if (user != null) {
-                        val userScore = retrieveUserScore(game, user)
-                        if (userScore != null) userScore.score += 1
+            transaction(TransactionManager.defaultDatabase) {
+                for (answerData in answers) {
+                    if (answerData.chosenAnswer == correctAnswer) {
+                        val user = retrieveUser(answerData.username)
+                        if (user != null) {
+                            val userScore = retrieveUserScore(game, user)
+                            if (userScore != null) {
+                                val pointsEarned = (100 + ((answerData.timeRemaining.toDouble() / gameSession.timeLimit.toDouble()) * 900)).roundToInt()
+                                userScore.score += pointsEarned
+                            }
+                        }
                     }
                 }
             }

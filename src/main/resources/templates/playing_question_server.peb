@@ -97,10 +97,9 @@
         {% endif %}
 
         <script>
-            let timeLeft = 30;
 
             function startTimer() {
-                const endTime = Date.now() + 30000;
+                const endTime = Date.now() + {{ timeLimit }}000;
                 localStorage.setItem("quizEndTime", endTime);
                  
                 const timerDisplay = document.getElementById("timer");
@@ -141,7 +140,7 @@
         </div>
 
         <div class="timer">
-            <span id="timer">30</span>
+            <span id="timer">{{ timeLimit }}</span>
         </div>
 
     </div>
