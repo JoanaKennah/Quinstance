@@ -138,7 +138,7 @@
 
 <body>
     <div class="navbar">
-        <a href="/logout">Logout</a>
+        <a href="/home">Logout</a>
     </div>
 
     <div class="content">
