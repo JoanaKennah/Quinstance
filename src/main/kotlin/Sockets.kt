@@ -33,6 +33,7 @@ data class QuestionData(
 data class SentAnswerData(
     val username: String,
     val chosenAnswer: String, // actual text as the questions are jumbled up
+    val timeRemaining: Int
 )
 
 data class GameSession(
@@ -42,6 +43,7 @@ data class GameSession(
     var isAdvanced: Boolean = false,                //flag for advancing question
     var isStarted: Boolean = false,
     var isFinished: Boolean = false,
+    val timeLimit: Int = 30,
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet())
 )
 
@@ -85,6 +87,8 @@ fun Application.configureSockets() {
         try {
             for (frame in incoming) {
                 if (frame is Frame.Text) {
+                    val rawText = frame.readText()
+                    println("Raw frame recieved: $rawText")
                     try {
                         val answerData = Json.decodeFromString<SentAnswerData>(frame.readText())
                         UserAnswers.addAnswer(answerData)
