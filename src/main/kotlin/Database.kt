@@ -49,6 +49,17 @@ fun retrieveUser(username: String) : User? {
 }
 
 /**
+ * Retrieves user from UserTable using their ID, returns null if no user found
+ */
+fun retrieveUserById(userId: Int): User? {
+    require(userId > 0) { "User ID must be positive" }
+
+    return transaction(TransactionManager.defaultDatabase) {
+        User.findById(userId)
+    }
+}
+
+/**
  * Adds a new User to UserTable. Returns null if user already exists
  */
 fun addUser(username: String, password: String, name: String, email: String, key_stage: String, role: String) : User? {
