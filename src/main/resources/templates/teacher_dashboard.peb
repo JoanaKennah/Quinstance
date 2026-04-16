@@ -62,7 +62,9 @@
 <body>
 
 <div class="navbar">
-<a>Profile</a>
+    <form method="post" action="/logout">
+        <button type="submit" style="background: none; border: none; cursor: pointer; font-weight: bold; font-size: 14px; padding: 0;">Logout</button>
+    </form>
 </div>
 
 <h1>Hello {{ username }}!</h1>
@@ -71,7 +73,7 @@
 <button onclick="window.location.href='/join-lobby'">Join a Lobby</button>
 <button onclick="window.location.href='/create-quiz'">Create a Quiz</button>
 <button onclick="window.location.href='/view-quizzes'">View Quizzes</button>
-<button>View Statistics</button>
+<button onclick="window.location.href='/user-stats'">View Statistics</button>
 <button onclick="window.location.href='/signup'">Create a Student Account</button>
 </div>
 

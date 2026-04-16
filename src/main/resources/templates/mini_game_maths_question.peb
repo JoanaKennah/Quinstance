@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Maths Question</title>
+
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+            color: #2dc84d;
+            text-align: center;
+        }
+
+        .navbar {
+            background-color: #2dc84d;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            margin: 40px;
+        }
+
+        .question-box {
+            border: 2px solid #2dc84d;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: block;
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 28px;
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(2, 200px);
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px;
+            font-size: 18px;
+            background-color: black;
+            color: #2dc84d;
+            border: 2px solid #2dc84d;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #2dc84d;
+            color: black;
+        }
+    </style>
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            text-align: center;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            margin: 40px;
+        }
+
+        .question-box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: block;
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 28px;
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(2, 200px);
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px;
+            font-size: 18px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+    <div class="navbar">
+        <a>Maths Mini-Game</a>
+    </div>
+
+    <div class="content">
+        <h2>Answer as quickly as possible to avoid becoming a ghost!</h2>
+
+        <div class="question-box">
+            {{ question }} <!--- DIFFERENT QUESTION AND ANSWERS AT EACH LOADING --->
+        </div>
+
+        <div class="answers"> <!--- NEED TO CHECK ON HOW TO CHECK ANSWERS --->
+            <button class="btn" onclick="checkAnswer('{{ option1 }}')">{{ option1 }}</button>
+            <button class="btn" onclick="checkAnswer('{{ option2 }}')">{{ option2 }}</button>
+            <button class="btn" onclick="checkAnswer('{{ option3 }}')">{{ option3 }}</button>
+            <button class="btn" onclick="checkAnswer('{{ option4 }}')">{{ option4 }}</button>
+        </div>
+    </div>
+
+    <script>
+        function checkAnswer(selected) {
+            const correct = "{{ correct_answer }}";
+
+            if (selected === correct) {
+                window.location.href = "/mini_game_maths_question";
+            } else {
+                window.location.href = "/mini_game_maths_incorrect_ans";
+            }
+        }
+    </script>
+</body>
+</html>

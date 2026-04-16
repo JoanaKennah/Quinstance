@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Maths</title>
+
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+            color: #2dc84d;
+        }
+
+        .navbar {
+            background-color: #2dc84d;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .title-box {
+            border: 2px solid #2dc84d;
+            border-radius: 10px;
+            padding: 20px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .description {
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-list {
+            width: 30%;
+            font-size: 20px;
+        }
+
+        .countdown {
+            font-size: 60px;
+            font-weight: bold;
+        }
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .title-box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 20px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .description {
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-list {
+            width: 30%;
+            font-size: 20px;
+        }
+
+        .countdown {
+            font-size: 60px;
+            font-weight: bold;
+            color: #e63973;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+    <div class="navbar">
+      <form method="post" action="/logout">
+          <button type="submit" class="logout-btn">Logout</button>
+      </form>
+    </div>
+
+    <div class="content">
+        <div class="title-box">
+            <h1>Maths</h1>
+        </div>
+
+        <div class="description">
+            Complete as many maths questions as possible to avoid becoming a ghost!
+        </div>
+
+        <div class="main-container">
+            <div class="player-list">
+                {% for user in left_users %}
+                    <div>{{ user }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="countdown" id="timer">30</div>
+
+            <div class="player-list">
+                {% for user in right_users %}
+                    <div>{{ user }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 30;
+        const timerElement = document.getElementById("timer");
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerElement.textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                window.location.href = "/mini_game_maths_server_ghost";
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

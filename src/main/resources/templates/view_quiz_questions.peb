@@ -89,6 +89,24 @@
             margin-bottom: 10px;
             color: black;
         }
+
+        .bottom-bar {
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
     </style>
 
     <script>
@@ -134,13 +152,18 @@
     <div class="questions-container">
 
         {% for question in questions %}
-            <div class="question-box">
+            <div class="question-box" onclick="window.location.href='/add-question/{{ quiz.id }}'">
                 {{ loop.index + 1 }}. {{ question.question }}
             </div>
         {% endfor %}
 
     </div>
+    <div class="bottom-bar">
+        <button class="btn" onclick="window.location.href='{{ returnURL }}'">Return</button>
+    </div>
 </div>
+
+
 
 </body>
 </html>
