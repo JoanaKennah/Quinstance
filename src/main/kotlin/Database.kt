@@ -18,6 +18,11 @@ import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
     - https://stackoverflow.com
  */
 
+data class UserAttemptView(
+    val quizName: String,
+    val score: Int
+)
+
 /**
  * Creates all required tables if they do not already exist.
  */
@@ -452,6 +457,18 @@ fun retrieveAllUserScores(game: Game): List<Triple<Int, String, Int>> {
             .sortedByDescending { it.score }
             .map { userScore ->
                 Triple<Int, String, Int>(userScore.user.id.value, userScore.user.username, userScore.score)
+        }
+    }
+}
+
+fun retrieveUserAttempts(user: User): List<UserAttemptView> {
+    return transaction(TransactionManager.defaultDatabase) {
+        UserScore.find { UserScoreTable.user eq user.id }
+            .map {
+                UserAttemptView(
+                    quizName = it.game.quiz.quiz_name,
+                    score = it.score
+                )
             }
     }
 }
