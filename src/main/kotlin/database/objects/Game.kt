@@ -9,6 +9,7 @@ class Game(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Game>(GameTable)
 
     var quiz by Quiz referencedOn GameTable.quiz
+    var timeStamp by GameTable.timeStamp
 
     override fun toString() = id.toString()
 }
