@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Maths Result</title>
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+            color: #2dc84d;
+        }
+
+        .navbar {
+            background-color: #2dc84d;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .top-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .title-box {
+            border: 2px solid #2dc84d;
+            border-radius: 10px;
+            padding: 15px 25px;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .btn-next {
+            justify-self: end;
+            padding: 6px 14px;
+            font-size: 14px;
+            background-color: black;
+            color: #2dc84d;
+            border: 2px solid #2dc84d;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-next:hover {
+            background-color: #2dc84d;
+            color: black;
+        }
+
+        .message {
+            font-size: 22px;
+            margin-bottom: 30px;
+        }
+
+        .loser {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .top-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .title-box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 15px 25px;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .btn-next {
+            justify-self: end;
+            padding: 6px 14px;
+            font-size: 14px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-next:hover {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .message {
+            font-size: 22px;
+            margin-bottom: 30px;
+        }
+
+        .loser {
+            font-size: 36px;
+            font-weight: bold;
+            color: #e63973;
+        }
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+    <div class="navbar">
+      <form method="post" action="/logout">
+          <button type="submit" class="logout-btn">Logout</button>
+      </form>
+    </div>
+
+    <div class="content">
+        <div class="top-row">
+            <div></div>
+
+            <div class="title-box">
+                <h1>Maths</h1>
+            </div>
+
+            <button class="btn-next" onclick="goNext()">Next</button>
+        </div>
+
+        <div class="message">
+            Uh oh! You scored the least…you have now become a ghost!
+        </div>
+
+        <div class="loser">
+            {{ lowest_user }}
+        </div>
+    </div>
+
+    <script>
+        function goNext() {
+            window.location.href = "/playing_question_server";
+        }
+    </script>
+</body>
+</html>

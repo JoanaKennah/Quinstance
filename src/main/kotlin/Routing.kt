@@ -557,15 +557,18 @@ fun Application.configureRouting() {
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID") 
             val game = retrieveGame(gameId) ?: return@post call.respondText("Game not found")
 
+            //always delete room code when lobby is closed
             deleteInUseCode(game)
 
-            // This will change in the future so have left this for now :3
-            transaction(TransactionManager.defaultDatabase) {                                                                   //delete all user scores from this game
-                UserScore.find { UserScoreTable.game eq game.id }.forEach { it.delete() }
-            }
+            // IF game did not start, delete game and scores
+            if (activeSessions[gameId]?.isStarted != true) {
+                transaction(TransactionManager.defaultDatabase) {                                                                   //delete all user scores from this game
+                    UserScore.find { UserScoreTable.game eq game.id }.forEach { it.delete() }
+                }
 
-            transaction(TransactionManager.defaultDatabase) {                                                                   //delete game last
-                game.delete()
+                transaction(TransactionManager.defaultDatabase) {                                                                   //delete game last
+                    game.delete()
+                }
             }
 
             call.respondRedirect("/teacher-dashboard")
@@ -626,7 +629,8 @@ fun Application.configureRouting() {
 
             if (gameSession.currentQuestionIndex >= gameSession.questions.size) {
                 gameSession.isFinished = true
-                activeSessions.remove(gameId)           //cut game and go to leaderboard
+                activeSessions.remove(gameId)           //cut game and go to leaderboard 
+                deleteInUseCode(game)
                 call.respondRedirect("/leaderboard/$gameId") 
 
             } else {
@@ -910,5 +914,12 @@ fun Application.configureRouting() {
                 "theme" to session.theme
             )))
         }
+
+        //clear session and redirect to home
+        post("/logout") {
+            call.sessions.clear<UserSession>()
+            call.respondRedirect("/")
+        }
+
     }
 }

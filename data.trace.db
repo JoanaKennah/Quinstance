@@ -588,3 +588,10 @@ Caused by: java.lang.AssertionError: 14
 	at org.h2.mvstore.FileStore.executeFileStoreOperation(FileStore.java:1894)
 	at org.h2.mvstore.MVStore.executeFilestoreOperation(MVStore.java:1044)
 	... 95 more
+2026-04-15 21:43:37.370528Z jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "IN_USE_TABLE" not found; SQL statement:
+SELECT * FROM IN_USE_TABLE [42102-240]
+2026-04-15 22:27:39.348794Z jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM GAME\000a[*]SELECT * FROM GAME"; SQL statement:
+SELECT * FROM GAME
+SELECT * FROM GAME [42000-240]

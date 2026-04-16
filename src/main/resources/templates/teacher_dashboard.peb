@@ -62,7 +62,9 @@
 <body>
 
 <div class="navbar">
-<a>Profile</a>
+    <form method="post" action="/logout">
+        <button type="submit" style="background: none; border: none; cursor: pointer; font-weight: bold; font-size: 14px; padding: 0;">Logout</button>
+    </form>
 </div>
 
 <h1>Hello {{ username }}!</h1>
