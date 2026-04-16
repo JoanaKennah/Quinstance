@@ -119,6 +119,16 @@
             }
             return true;
         }
+
+        function deleteQuestion() {
+            var choice;
+            if (confirm("This quiz already has questions. If you import a file, these will be deleted. Is that ok?")) {
+                choice = true;
+            } else {
+                choice = false;
+            }
+            document.getElementById("csvChoice").value = choice;
+        }
     </script>
 </head>
 
@@ -142,12 +152,15 @@
 
         <div class="csv-container">
             <b class="csv-text">Already have some questions? Submit a .csv file:</b>
+
             <form method="post"
                   action="/view-quiz-questions/{{ quizId }}"
-                  enctype="multipart/form-data">
+                  enctype="multipart/form-data"
+                  onsubmit=csvChoice>
                 <input type="file" class="csv-button" name="filename">
                 <input type="hidden" name="quizId" value={{ quizId }}>
-                <input type="submit">
+                <input type="hidden" name="resetQuestions" id="csvChoice">
+                <input {% if questions is not empty %}onclick="deleteQuestion()"{% endif %} type="submit">
             </form>
         </div>
 
