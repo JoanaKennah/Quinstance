@@ -225,8 +225,9 @@
                 <button type="submit" class="btn btn-start">Start Quiz</button>
             </form>
 
-            <form>
-                <button type="button" class="btn">Settings</button>
+            <form method="get" action="/settings/{{ gameId }}">
+                <input type="hidden" name="return" value="/lobby-server/{{ gameId }}">
+                <button type="submit" class="btn">Settings</button>
             </form>
 
             <form method="post" action="/close-lobby/{{ gameId }}">

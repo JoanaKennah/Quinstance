@@ -215,10 +215,11 @@ fun Application.configureRouting() {
             val description = parameters["description"] ?: return@post call.respondText("Please enter a description")
             val keystage = parameters["keystage"] ?: return@post call.respondText("Please enter a key stage")
             val category = parameters["category"] ?: return@post call.respondText("Please enter a category")
+            val minigamesEnabled = parameters["miniGames"] == "true"
             
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
 
-            val quiz = addQuiz(user, quizName, description, category, keystage)
+            val quiz = addQuiz(user, quizName, description, category, keystage, minigamesEnabled = minigamesEnabled)
 
             call.respondRedirect("/view-quiz-questions/${quiz.id.value}")
         }
@@ -410,7 +411,8 @@ fun Application.configureRouting() {
                 "quizName" to quiz.quiz_name, 
                 "numQuestions" to quiz.num_of_questions, 
                 "category" to categoryDisplay, 
-                "keyStage" to keyStageDisplay
+                "keyStage" to keyStageDisplay,
+                "minigamesEnabled" to quiz.minigames_enabled
                 )))
 
         }
@@ -426,11 +428,21 @@ fun Application.configureRouting() {
             println("Time limit received: ${parameters["timeLimit"]}, parsed as: $timeLimit")
             //read and update theme from checkbox
             val theme = if (parameters["theme"] == "spooky") "spooky" else "default"
+            val miniGamesEnabled = parameters["minigames"] == "true"
+            val activeMinigames = parameters.getAll("activeMinigames") ?: emptyList()
+            
             call.sessions.set(session.copy(theme = theme))
 
             val game = addGame(quiz)
             val questions = retrieveQuizQuestions(quiz)
-            val gameSession = GameSession(gameId = game.id.value, questions = questions, timeLimit = timeLimit)
+            val gameSession = GameSession(
+                gameId = game.id.value, 
+                questions = questions, 
+                timeLimit = timeLimit,
+                miniGamesEnabled = miniGamesEnabled,
+                activeMinigames = activeMinigames,
+                theme = theme
+            )
             activeSessions[game.id.value] = gameSession
 
             val roomCode = generateRoomCode()
@@ -492,6 +504,10 @@ fun Application.configureRouting() {
             }
             val game = retrieveInUseCodeGame(inUseCode) ?: return@post call.respondText("Game not found")
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
+
+            val gameSession = activeSessions[game.id.value]
+            val theme = gameSession?.theme ?: "default"
+            call.sessions.set(session.copy(theme = theme))
 
             addUserScore(game, user)
             call.respondRedirect("/lobby-client/${game.id.value}")
@@ -924,5 +940,46 @@ fun Application.configureRouting() {
                 PebbleContent("user_view_stats.peb", mapOf("attempts" to attempts, "returnURL" to returnURL))
             )
         }
+
+        //gets game session details, populated and serves settings page
+        get("/settings/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val returnUrl = call.request.queryParameters["return"] ?: "/lobby-server/$gameId"
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+
+            call.respond(PebbleContent("settings.peb", mapOf(
+                "gameId" to gameId,
+                "returnUrl" to returnUrl,
+                "timeLimit" to gameSession.timeLimit,
+                "minigamesEnabled" to gameSession.miniGamesEnabled,
+                "mathsEnabled" to gameSession.activeMinigames.contains("maths"),
+                "potionsEnabled" to gameSession.activeMinigames.contains("potions"),
+                "roomsEnabled" to gameSession.activeMinigames.contains("rooms"),
+                "wordsEnabled" to gameSession.activeMinigames.contains("words")
+            )))
+        }
+
+        //updates game session w/ new settings & redirects
+        post("/settings/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
+            val returnUrl = call.request.queryParameters["return"] ?: "/lobby-server/$gameId"
+            val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found")
+
+            val parameters = call.receiveParameters()
+            val timeLimit = parameters["timeLimit"]?.toIntOrNull() ?: gameSession.timeLimit
+            val minigamesEnabled = parameters["minigames"] == "true"
+            val activeMinigames = parameters.getAll("activeMinigames") ?: emptyList()
+
+            activeSessions[gameId] = gameSession.copy(
+                timeLimit = timeLimit,
+                miniGamesEnabled = minigamesEnabled,
+                activeMinigames = activeMinigames
+            )
+
+            call.respondRedirect(returnUrl)
+        }
+
     }
 }

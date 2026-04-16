@@ -178,7 +178,7 @@ fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
 /**
  * Creates and adds a new Quiz to QuizTable
  */
-fun addQuiz(user: User, quiz_name: String, description: String, category: String, key_stage: String, num_of_questions: Int = 0) : Quiz {
+fun addQuiz(user: User, quiz_name: String, description: String, category: String, key_stage: String, num_of_questions: Int = 0, minigamesEnabled: Boolean = false) : Quiz {
     // Checks the User exists
     require(retrieveUser(user.username) != null) { "User must not be null" }
     require(num_of_questions >= 0) { "Number of questions must be greater than or equal to 0" }
@@ -195,6 +195,7 @@ fun addQuiz(user: User, quiz_name: String, description: String, category: String
             this.category = category
             this.key_stage = key_stage
             this.num_of_questions = num_of_questions
+            this.minigames_enabled = minigamesEnabled
         }
     }
 }

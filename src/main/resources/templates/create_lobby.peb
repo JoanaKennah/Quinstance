@@ -104,6 +104,21 @@
             color: white;
         }
 
+        .minigame-btn {
+            padding: 8px 16px;
+            border: 2px solid #e63973;
+            border-radius: 6px;
+            background-color: white;
+            color: black;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .minigame-btn.selected {
+            background-color: #e63973;
+            color: white;
+        }
+
         .bottom-bar {
             margin-top: 40px;
             display: flex;
@@ -128,14 +143,23 @@
 
     <script>
         function selectTime(element, seconds) {
-            // Highlight selected button
             document.querySelectorAll(".time-btn").forEach(btn => {
                 btn.classList.remove("selected");
             });
             element.classList.add("selected");
-
-            // Store selected time in hidden input
             document.getElementById("timeLimit").value = seconds;
+        }
+
+        function toggleMinigames() {
+            const toggle = document.getElementById("minigamesToggle");
+            const options = document.getElementById("minigameOptions");
+            options.style.display = toggle.checked ? "block" : "none";
+        }
+
+        function toggleMinigame(btn, game) {
+            btn.classList.toggle("selected");
+            const input = document.getElementById(game + "-input");
+            input.disabled = !btn.classList.contains("selected");
         }
     </script>
 </head>
@@ -154,7 +178,6 @@
 
     <form method="post" action="/create-lobby/{{ quizId }}">
 
-        <!-- Hidden field so the selected time travels with the form -->
         <input type="hidden" id="timeLimit" name="timeLimit" value="30">
 
         <div class="container">
@@ -175,6 +198,7 @@
 
             <div class="right">
                 <h2>Settings</h2>
+
                 <div class="time-label">Time to answer Questions:</div>
                 <div class="time-options">
                     <button type="button" class="time-btn" onclick="selectTime(this, 15)">15s</button>
@@ -183,9 +207,35 @@
                     <button type="button" class="time-btn" onclick="selectTime(this, 0)">Unlimited</button>
                 </div>
 
-                <div class="theme-label" style="margin-top: 20px; font-size: 16px; color: black;">
+                <div style="margin-top: 20px; font-size: 16px; color: black;">
                     Spooky theme:
                     <input type="checkbox" name="theme" value="spooky" style="margin-left: 8px;">
+                </div>
+
+                <div style="margin-top: 20px; font-size: 16px; color: black;">
+                    Mini Games:
+                    <input type="checkbox" 
+                        id="minigamesToggle" 
+                        name="minigames" 
+                        value="true" 
+                        style="margin-left: 8px;"
+                        onchange="toggleMinigames()"
+                        {% if minigamesEnabled %}checked{% endif %}>
+                </div>
+
+                <div id="minigameOptions" style="margin-top: 10px; display: {% if minigamesEnabled %}block{% else %}none{% endif %};">
+                    <div style="font-size: 14px; color: black; margin-bottom: 8px;">Select minigames:</div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'maths')">Maths</button>
+                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'potions')">Potions</button>
+                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'rooms')">Rooms</button>
+                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'words')">Words</button>
+                    </div>
+
+                    <input type="hidden" id="maths-input" name="activeMinigames" value="maths">
+                    <input type="hidden" id="potions-input" name="activeMinigames" value="potions">
+                    <input type="hidden" id="rooms-input" name="activeMinigames" value="rooms">
+                    <input type="hidden" id="words-input" name="activeMinigames" value="words">
                 </div>
 
             </div>
@@ -193,8 +243,7 @@
         </div>
 
         <div class="bottom-bar">
-            <button type="button" class="btn"
-                onclick="window.location.href='/view-quizzes'">
+            <button type="button" class="btn" onclick="window.location.href='/view-quizzes'">
                 Return to View Quizzes
             </button>
             <button type="submit" class="btn">Create Lobby!</button>

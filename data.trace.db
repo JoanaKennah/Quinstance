@@ -595,3 +595,6 @@ SELECT * FROM IN_USE_TABLE [42102-240]
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM GAME\000a[*]SELECT * FROM GAME"; SQL statement:
 SELECT * FROM GAME
 SELECT * FROM GAME [42000-240]
+2026-04-16 19:54:25.781328Z jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SHOW [*]COUMNS FROM QUIZ"; SQL statement:
+SHOW COUMNS FROM QUIZ [42000-240]

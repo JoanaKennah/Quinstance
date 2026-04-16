@@ -218,8 +218,9 @@
             <button class="control-btn">Continue</button>
         </form>
 
-        <form action="">
-            <button class="control-btn">Settings</button>
+        <form method="get" action="/settings/{{ gameId }}">
+            <input type="hidden" name="return" value="/show-positions/{{ gameId }}">
+            <button type="submit" class="control-btn">Settings</button>
         </form>
 
         <form action="/create-lobby/{{ quizId }}" method="get">
