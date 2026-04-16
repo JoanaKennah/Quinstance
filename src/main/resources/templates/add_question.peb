@@ -173,8 +173,10 @@
             const checked = document.querySelectorAll("input[name='correct']:checked");
 
             let filledAnswers = 0;
+            let trimmedAnswers = [];
             answers.forEach(a => {
                 if (a.value.trim() !== "") filledAnswers++;
+                trimmedAnswers.push(a.value.trim())
             });
 
             if (question === "") {
@@ -189,6 +191,13 @@
 
             if (checked.length !== 1) {
                 alert("Please select exactly one correct answer.");
+                return false;
+            }
+
+            let removedRepeats = new Set(trimmedAnswers);
+
+            if (trimmedAnswers.length != removedRepeats.size) {
+                alert("You cannot have repeated answers");
                 return false;
             }
 

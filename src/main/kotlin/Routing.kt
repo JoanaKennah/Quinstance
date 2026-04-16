@@ -158,7 +158,13 @@ fun Application.configureRouting() {
         get("/create-quiz") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
 
-            call.respond(PebbleContent("create_quiz.peb", mapOf<String, Any>()))
+            val returnURL = when (session.role) {
+                "teacher" -> "/teacher-dashboard"
+                "student" -> "/student-dashboard"
+                else -> return@get call.respondRedirect("/login")
+            }
+
+            call.respond(PebbleContent("create_quiz.peb", mapOf("returnURL" to returnURL)))
         }
 
         //saves created quiz to db, redirects to add Qs page
@@ -186,7 +192,7 @@ fun Application.configureRouting() {
             val quiz = retrieveQuiz(quizId) ?: return@get call.respondText("Quiz not found")
             val questions = retrieveQuizQuestions(quiz)
 
-            call.respond(PebbleContent("view_quiz_questions.peb", mapOf("quizName" to quiz.quiz_name, "questions" to questions, "quizId" to quizId)))
+            call.respond(PebbleContent("view_quiz_questions.peb", mapOf("quizName" to quiz.quiz_name, "questions" to questions, "quizId" to quizId, "returnURL" to "/view-quizzes")))
         }
 
         //serves add question to quiz form
@@ -230,6 +236,8 @@ fun Application.configureRouting() {
 
             call.respondRedirect("/view-quiz-questions/$quizId")
         }
+
+
 
         //serves list of quizzes created by user
         get ("/view-quizzes") {
@@ -867,9 +875,14 @@ fun Application.configureRouting() {
                 ?: return@get call.respondRedirect("/login")
 
             val attempts = retrieveUserAttempts(user)
+            val returnURL = when(session.role) {
+                "teacher" -> "/teacher-dashboard"
+                "student" -> "/student-dashboard"
+                else -> return@get call.respondRedirect("/login")
+            }
 
             call.respond(
-                PebbleContent("user_view_stats.peb", mapOf("attempts" to attempts))
+                PebbleContent("user_view_stats.peb", mapOf("attempts" to attempts, "returnURL" to returnURL))
             )
         }
     }

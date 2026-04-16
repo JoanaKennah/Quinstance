@@ -73,7 +73,7 @@
 <button onclick="window.location.href='/join-lobby'">Join a Lobby</button>
 <button onclick="window.location.href='/create-quiz'">Create a Quiz</button>
 <button onclick="window.location.href='/view-quizzes'">View Quizzes</button>
-<button onclick="window.location.href='/user-stst'">View Statistics</button>
+<button onclick="window.location.href='/user-stats'">View Statistics</button>
 <button onclick="window.location.href='/signup'">Create a Student Account</button>
 </div>
 
