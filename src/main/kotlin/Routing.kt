@@ -23,12 +23,10 @@ import com.password4j.Password
 import com.example.database.objects.*
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
-import io.ktor.util.cio.writeChannel
-import io.ktor.utils.io.copyAndClose
-import io.ktor.utils.io.core.Input
+import io.ktor.utils.io.copyTo
+import io.ktor.utils.io.jvm.javaio.toInputStream
 import java.io.File
 import java.io.InputStream
-import java.nio.file.Files
 
 
 fun Application.configureRouting() {
@@ -199,30 +197,58 @@ fun Application.configureRouting() {
 
         post("/view-quiz-questions/{quidId}") {
             // Gets a .csv file!!!
+            // References: https://tahaben.com.ly/2023/04/ktor-server-for-beginners-uploading-files/
+            // https://ryanharrison.co.uk/2018/09/20/ktor-file-upload-download.html
+
             val multipart = call.receiveMultipart()
-            var quizId: String? = null
+            var quizId: Int? = null
+            var deleteQuestions: Boolean? = null
+            var data: List<ReadQuestionData>? = null
             val inputStream = InputStream.nullInputStream()
 
             multipart.forEachPart { part ->
-                if(part is PartData.FileItem) {
-                    val fileName = part.originalFileName!!
-                    val file = File("copy_$fileName")
-                    part.provider().copyAndClose(file.writeChannel())
-                    Files.copy(inputStream, file.toPath())
-                }
-                if(part is PartData.FormItem) {
-                    if(part.name == "quizId") {
-                        quizId = part.value
+                when (part) {
+                    is PartData.FileItem -> {
+                        val fileName = part.originalFileName!!
+                        val fileData = part.provider().toInputStream()
+                        println("received file: $fileName")
+
+                        data = readCsv(fileData)
                     }
+                    is PartData.FormItem -> {
+                        when (part.name) {
+                            "quizId" -> quizId = part.value.toInt()
+                            "resetQuestions" -> deleteQuestions = part.value.toBoolean()
+                        }
+                    }
+                    else -> Unit
                 }
                 part.dispose()
             }
+            if (quizId != null) {
+                val quiz = retrieveQuiz(quizId) ?: return@post call.respondText("Quiz not found")
+                if (deleteQuestions != null && deleteQuestions) {
+                    val questions = retrieveQuizQuestions(quiz)
+                    for (q in questions) {
+                        deleteQuestion(q)
+                    }
+                }
+                if (data != null) {
+                    for (question in data) {
+                        val questionId = addQuestion(quiz, question.question, question.keyStage)
+                        addAnswer(questionId,
+                            question.option1,
+                            question.option2,
+                            question.option3,
+                            question.option4,
+                            question.correctOption.toInt(),)
+                    }
+                } else call.respondRedirect("/view-quiz-questions/${quiz.id.value}") // WILL NEED TO RETURN ERROR MESSAGE
+                val questions = retrieveQuizQuestions(quiz)
+                println(questions)
+                call.respond(PebbleContent("view_quiz_questions.peb", mapOf("quizName" to quiz.quiz_name, "questions" to questions, "quizId" to quizId)))
 
-            for (i in readCsv(inputStream)) {
-                println(i)
-            }
-
-            // read data
+            } else return@post call.respondText("Invalid quizId")
         }
 
         //serves add question to quiz form
