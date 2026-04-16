@@ -227,5 +227,20 @@ fun Application.configureRouting() {
 
             call.respond(PebbleContent("quiz_created.peb", mapOf("quizId" to quizId, "returnURL" to returnURL)))
         }
+
+        get("/user-stats") {
+            val username = "Student" // TODO: get from session
+            val user = retrieveUser(username!!) ?: return@get call.respondRedirect("/login")
+            val attempts = retrieveUserAttempts(user)
+
+            call.respond(
+                PebbleContent(
+                    "user_view_stats.peb",
+                    mapOf(
+                        "attempts" to attempts,
+                    )
+                )
+            )
+        }
     }
 }

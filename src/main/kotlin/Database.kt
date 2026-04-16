@@ -260,3 +260,14 @@ fun retrieveQuestionAnswer(question: Question) : Answer? {
         return@transaction answer
     }
 }
+
+/**
+ * Retrieves a user's attempted scores on quizzes
+ * Used for view statistics
+ */
+
+fun retrieveUserAttempts(user: User): List<UserScore> {
+    return transaction(ProjectDatabase.database) {
+        UserScore.find { UserScoreTable.userID eq user.id }.toList()
+    }
+}

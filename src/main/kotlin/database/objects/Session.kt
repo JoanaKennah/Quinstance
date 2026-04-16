@@ -10,6 +10,7 @@ class Session(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Session>(SessionTable)
 
     var quizID by Quiz referencedOn QuizTable.id
+    var quiz by Quiz referencedOn SessionTable.quizID
 
     override fun toString() = id.toString()
 }
