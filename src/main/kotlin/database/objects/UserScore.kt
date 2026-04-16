@@ -14,8 +14,5 @@ class UserScore(id: EntityID<Int>) : IntEntity(id) {
     var userID by User referencedOn UserTable.id
     var score by UserScoreTable.score
 
-    var session by Session referencedOn UserScoreTable.sessionID
-    var score by User referencedOn UserScoreTable.userID
-
     override fun toString() = score.toString()
 }
