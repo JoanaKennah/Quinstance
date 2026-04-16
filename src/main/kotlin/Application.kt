@@ -2,11 +2,11 @@ package com.example
 
 import io.ktor.server.application.*
 import io.ktor.server.sessions.*
+import io.ktor.util.hex
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import com.example.database.ProjectDatabase
 import com.example.database.TestDatabase
 import io.ktor.server.websocket.*
-import kotlin.time.Duration.Companion.seconds
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -24,7 +24,15 @@ fun Application.module() {
 fun Application.configureSessions() {
     install(Sessions) {
         cookie<UserSession>("user_session") {
+            cookie.path = "/"
             cookie.httpOnly = true
+
+            transform(
+                SessionTransportTransformerEncrypt(
+                    hex("00112233445566778899aabbccddeeff"),
+                    hex("8899aabbccddeeff0011223344556677")
+                )
+            )
         }
     }
 }
