@@ -311,6 +311,7 @@ fun addGame(quiz: Quiz): Game {
     return transaction(TransactionManager.defaultDatabase) {
         Game.new {
             this.quiz = quiz
+            this.timeStamp = java.time.LocalDateTime.now().toString()
         }
     }
 }
