@@ -115,7 +115,7 @@
 
 <body>
     <div class="navbar">
-        <a href="/home">Logout</a>
+        <a>Maths Mini-Game</a>
     </div>
 
     <div class="container">
