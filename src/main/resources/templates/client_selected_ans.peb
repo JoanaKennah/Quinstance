@@ -3,6 +3,45 @@
 <head>
     <title>Selected Answer</title>
 
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+        }
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+        .title {
+            color: #2DC84D;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .answer-box {
+            border: 4px solid #2DC84D;
+            background-color: black;
+            color: #2DC84D;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            min-width: 300px;
+            font-size: 18px;
+        }
+    </style>
+    {% else %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -43,23 +82,27 @@
             font-size: 18px;
         }
     </style>
+    {% endif %}
 
 </head>
 
 <script>
-    function checkTime() {
-        const endTime = localStorage.getItem("quizEndTime");
-        if (!endTime) return;
-        const interval = setInterval(() => {
-            const timeLeft = parseInt(endTime) - Date.now();
-            if (timeLeft <= 0) {
-                clearInterval(interval);
-                localStorage.removeItem("quizEndTime");
-                <!--- ROUTING --->
-            }
-        }, 200);
+
+    //connect to game, wait for server to advance to next Q
+    const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+    const socket = new WebSocket(protocol + "//" + location.host + "/game/{{ gameId }}");
+
+    socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if (data.redirect) {
+            window.location.href = data.redirect;
+        }
     }
-    window.onload = checkTime;
+
+    socket.onerror = function(error) {
+        console.log("WebSocket error: " + error);
+    }
+
 </script>
 
 <body>

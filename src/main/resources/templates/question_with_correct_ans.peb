@@ -3,6 +3,74 @@
 <head>
     <title>Correct Answer</title>
 
+    {% if theme ==  "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+        }
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+        .question-title {
+            color: #2DC84D;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .question-box {
+            border: 4px solid #2DC84D;
+            background-color: black;
+            color: #2DC84D;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 20px;
+        }
+        .answer-label {
+            margin-top: 30px;
+            font-size: 22px;
+            color: #2DC84D;
+        }
+        .answer-box {
+            margin-top: 15px;
+            border: 4px solid #2DC84D;
+            background-color: black;
+            color: #2DC84D;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            min-width: 250px;
+            font-size: 18px;
+        }
+        .next-btn {
+            margin-top: 40px;
+            padding: 10px 20px;
+            background-color: black;
+            color: #2DC84D;
+            border: 2px solid #2DC84D;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .next-btn:hover {
+            background-color: #2DC84D;
+            color: black;
+        }
+    </style>
+    {% else %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -79,6 +147,26 @@
         }
 
     </style>
+    {% endif %}
+
+    <script>
+        {% if not isHost %}
+        //client waits for host to advance
+        const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        const socket = new WebSocket(protocol + "//" + location.host + "/game/{{ gameId }}");
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if(data.redirect) {
+                window.location.href = data.redirect
+            }
+        }
+
+        socket.onerror = function(error) {
+            console.log("WebSocket Error: " + error);
+        }
+        {% endif %}
+    </script>
 
 </head>
 
@@ -95,7 +183,7 @@
     </div>
 
     <div class="question-box">
-        {{ question.text }}
+        {{ questionText }}
     </div>
 
     <div class="answer-label">
@@ -105,10 +193,12 @@
     <div class="answer-box">
         {{ correctAnswer }}
     </div>
-  
-    <form method="get" action=""> <!--- NEED TO ADD ROUTING --->
+    
+    {% if isHost %}
+    <form method="post" action="/show-positions/{{ gameId }}">
         <button type="submit" class="next-btn">Next</button>
     </form>
+    {% endif %}
 
 </div>
 

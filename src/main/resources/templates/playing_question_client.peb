@@ -3,6 +3,148 @@
 <head>
     <title>Play Quiz for Client</title>
 
+    <script>
+        //ALL OF THIS IS JUST TO TEST HOW WEBSOCKETS WORK
+        let serverURL;
+        let socket;
+        let answered = false;
+
+        function setupSocket() {
+            const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+            socket = new WebSocket(protocol + "//" + location.host + "/game/{{ gameId }}");
+
+            socket.onopen = logOpenToConsole;
+            socket.onclose = logCloseToConsole;
+            socket.onmessage = retrieveQuestion;
+        }
+
+        function logOpenToConsole() {
+            console.log("Web socket connection opened");
+        }
+
+        function logCloseToConsole() {
+            console.log("Web socket connection closed");
+        }
+
+        function retrieveQuestion(event) {
+            let data = JSON.parse(event.data);
+
+            // check for redirect instruction
+            if (data.redirect) {
+                window.location.href = data.redirect;
+                return;
+            }
+
+            // if not - handle as question data
+            answered = false;
+            console.log(`Retrieved question: ${data.questionText}`);
+            console.log(`Retrieved answers: ${data.answerOne}, ${data.answerTwo}, ${data.answerThree}, ${data.answerFour} `);
+
+            document.getElementById('questionNum').innerHTML = "Question " + data.questionNumber + ":";
+            document.getElementById('questionText').innerHTML = data.questionText;
+
+            setAnswer("answer-0", data.answerOne);
+            setAnswer("answer-1", data.answerTwo);
+            setAnswer("answer-2", data.answerThree);
+            setAnswer("answer-3", data.answerFour);
+        }
+
+        function buildAnswer(name, answer) {
+            let data = {
+                username: name,
+                chosenAnswer: answer,
+                timeRemaining: timeLeft
+            };
+            sendAnswerViaSocket(data);
+        }
+
+        function sendAnswerViaSocket(data) {
+            socket.send(JSON.stringify(data));
+        }
+
+        function setAnswer(id, text) {
+            const btn = document.getElementById(id);
+            if (text) {
+                btn.textContent = text;
+                btn.style.display = "block";
+            } else {
+                btn.style.display = "none";
+            }
+        }
+
+    </script>
+
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+        }
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+        .question-title {
+            color: #2DC84D;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .question-box {
+            border: 4px solid #2DC84D;
+            background-color: black;
+            color: #2DC84D;
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 20px;
+        }
+        .answers {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .column {
+            width: 45%;
+        }
+        .answer-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: black;
+            color: #2DC84D;
+            border: 2px solid #2DC84D;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .answer-btn:hover {
+            background-color: #2DC84D;
+            color: black;
+        }
+        .answer-btn.selected {
+            background-color: #2DC84D;
+            color: black;
+        }
+        .timer {
+            margin-top: 30px;
+            font-size: 26px;
+            color: #2DC84D
+        }
+    </style>
+    {% else %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -75,38 +217,61 @@
             background-color: #e63973;
             color: white;
         }
+
+        .timer {
+            margin-top: 30px;
+            font-size: 26px;
+            color: black;
+        }
+
     </style>
+    {% endif %}
 
     <script>
-        let timeleft = 30;
+        let timeLeft = {{ timeLimit }};
 
         function startTimer() {
+            const timerDisplay = document.getElementById("timer");
             const countdown = setInterval(() => {
                 timeLeft--;
+                timerDisplay.textContent = timeLeft;
                 if (timeLeft <= 0) {
                     clearInterval(countdown);
-                    <!--- ROUTE TO NEXT PAGE --->
+                    //checks player hasn't clicked to avoid a dupe answer
+                    if (!answered) {                            
+                        answered = true;
+                        //sends empty string as answer
+                        buildAnswer("{{ username }}", "");
+                    }
                 }
             }, 1000)
         }
 
         function selectAnswer(index) {
-            <!--- to stop multiple clicks and traffic --->
-            const buttons = document.querySelectorAll(".answer-btn");
+            //to stop multiple clicks and traffic --->
+            if (answered) return;
+            answered = true;
+            localStorage.removeItem("quizEndTime");                         //clear old timer
+
+            const buttons= document.querySelectorAll(".answer-btn");
             buttons.forEach(btn => btn.disabled = true);
 
             const selected = document.getElementById("answer-" + index);
             selected.classList.add("selected");
 
-            setTimeout(() => {}, 500); <!--- NEED TO ADD ROUTING --->
+            const selectedText = selected.textContent.trim();
+
+            buildAnswer("{{ username }}", selectedText);
+
+            //take user towaiting screen showing selected answer, handles special characters
+            window.location.href = "/selected-answer/{{ gameId }}?answer=" + encodeURIComponent(selectedText);
         }
 
-        window.onload = startTimer;
     </script>
 
 </head>
 
-<body>
+<body onload='setupSocket(); startTimer();'>
 
 <div class="navbar">
     <a>{{ quizName }}</a>
@@ -115,46 +280,35 @@
 <div class="content">
 
     <div class="question-title">
-        Question {{ questionNumber }}:
+        <div id=questionNum></div>
     </div>
 
     <div class="question-box">
-        {{ question.text }}
+        <div id=questionText></div>
     </div>
 
     <div class="answers">
 
         <div class="column">
-            {% if answers[0] is defined %}
-                <button id="answer-0" class="answer-btn"
-                        onclick="selectAnswer(0)">
-                    {{ answers[0] }}
-                </button>
-            {% endif %}
-            {% if answers[2] is defined %}
-                <button id="answer-2" class="answer-btn"
-                        onclick="selectAnswer(2)">
-                    {{ answers[2] }}
-                </button>
-            {% endif %}
-
+            <button id="answer-0" class="answer-btn"
+                onclick="selectAnswer(0)">
+            </button>
+            <button id="answer-2" class="answer-btn"
+                onclick="selectAnswer(2)">
+            </button>
         </div>
 
         <div class="column">
-            {% if answers[1] is defined %}
-                <button id="answer-1" class="answer-btn"
-                        onclick="selectAnswer(1)">
-                    {{ answers[1] }}
-                </button>
-            {% endif %}
-            {% if answers[3] is defined %}
-                <button id="answer-3" class="answer-btn"
-                        onclick="selectAnswer(3)">
-                    {{ answers[3] }}
-                </button>
-            {% endif %}
-
+            <button id="answer-1" class="answer-btn"
+                onclick="selectAnswer(1)">
+            </button>
+            <button id="answer-3" class="answer-btn"
+                onclick="selectAnswer(3)">
+            </button>
         </div>
+    </div>
+    <div class="timer">
+        <span id="timer">{{ timeLimit }}</span>
     </div>
 </div>
 

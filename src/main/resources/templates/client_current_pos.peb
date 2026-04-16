@@ -3,6 +3,56 @@
 <head>
     <title>Position</title>
 
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+        }
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+        .title {
+            font-size: 28px;
+            color: #2DC84D;
+            margin-bottom: 20px;
+        }
+        .position {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2DC84D;
+            margin-bottom: 10px;
+        }
+        .out-of {
+            color: #2DC84D;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .score-title {
+            font-size: 22px;
+            color: #2DC84D;
+            margin-bottom: 10px;
+        }
+        .score {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2DC84D;
+        }
+    </style>
+    {% else %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,7 +107,36 @@
             font-weight: bold;
             color: black;
         }
+
+        .timer {
+            margin-top: 30px;
+            font-size: 18px;
+            color: #e63973
+        }
+
     </style>
+    {% endif %}
+
+    <script>
+        //replace timer with polling approach
+        const currentIndex = {{ questionIndex }};
+
+        const pollSend = setInterval(() => {
+            fetch("/question-index/{{ gameId }}")
+            .then(response => response.json())
+            .then(data => {
+                if (data.finished) {
+                    clearInterval(pollSend);
+                    window.location.href = "/end-game/{{ gameId }}";
+                } else if (data.index > currentIndex) {
+                    clearInterval(pollSend);
+                    window.location.href = "/game/{{ gameId }}";
+                }
+            })
+            .catch(err => console.log("Polling error: " + err));
+        }, 500);
+
+    </script>
 
 </head>
 
@@ -67,7 +146,7 @@
     <a>{{ quizName }}</a>
 </div>
 
-<div class="content"> <!--- NEED TO COORDINATE ROUTING TO CHANGE WHEN SERVER SIDE CHANGES --->
+<div class="content">
 
     <div class="title">
         You are currently:

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Final Position</title>
+
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+        }
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+        .title {
+            font-size: 28px;
+            color: #2DC84D;
+            margin-bottom: 20px;
+        }
+        .position {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2DC84D;
+            margin-bottom: 10px;
+        }
+        .out-of {
+            color: #2DC84D;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .score-title {
+            font-size: 22px;
+            color: #2DC84D;
+            margin-bottom: 10px;
+        }
+        .score {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2DC84D;
+            margin-bottom: 40px;
+        }
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 14px 28px;
+            font-size: 16px;
+            background-color: black;
+            color: #2DC84D;
+            border: 2px solid #2DC84D;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        .btn:hover {
+            background-color: #2DC84D;
+            color: black;
+        }
+    </style>
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+      
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+      
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 28px;
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        .position {
+            font-size: 36px;
+            font-weight: bold;
+            color: black;
+            margin-bottom: 10px;
+        }
+
+        .out-of {
+            color: #e63973;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+
+        .score-title {
+            font-size: 22px;
+            color: black;
+            margin-bottom: 10px;
+        }
+
+        .score {
+            font-size: 36px;
+            font-weight: bold;
+            color: black;
+            margin-bottom: 40px;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            font-size: 16px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+
+    </style>
+    {% endif %}
+</head>
+
+<body>
+  
+<div class="navbar">
+    <a>{{ quizName }}</a>
+</div>
+
+<div class="content">
+
+    <div class="title">
+        Final Position:
+    </div>
+    <div class="position">
+        {{ position }}
+    </div>
+
+    <div class="out-of">
+        Out of {{ totalPlayers }}
+    </div>
+
+    <div class="score-title">
+        Total Score:
+    </div>
+    <div class="score">
+        {{ score }}
+    </div>
+
+    <div class="button-row">
+        <form action="/join-lobby" method="get">
+            <button class="btn">New Quiz</button>
+        </form>
+
+        <form action="/leaderboard-quit/{{ gameId }}" method="post">
+            <button class="btn">Quit</button>
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>

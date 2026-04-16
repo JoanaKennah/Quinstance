@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Final Leaderboard</title>
+
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+        }
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .content {
+            margin: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .leaderboard-section {
+            width: 70%;
+        }
+        .leaderboard-title {
+            font-size: 28px;
+            color: #2DC84D;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 2px solid #2DC84D;
+            color: #2DC84D;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #2DC84D;
+            color: #2DC84D;
+        }
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .controls {
+            width: 25%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .controls form {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        .control-btn {
+            width: 80%;
+            padding: 12px;
+            background-color: black;
+            color: #2DC84D;
+            border: 2px solid #2DC84D;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .control-btn:hover {
+            background-color: #2DC84D;
+            color: black;
+        }
+    </style>
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+      
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+      
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .leaderboard-section {
+            width: 70%;
+        }
+
+        .leaderboard-title {
+            font-size: 28px;
+            color: black;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 2px solid #e63973;
+            color: black;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .controls {
+            width: 25%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+      
+        .controls form {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .control-btn {
+            width: 80%;
+            padding: 12px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .control-btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+  
+<div class="navbar">
+    <a>{{ quizName }}</a>
+</div>
+
+<div class="content">
+
+    <div class="leaderboard-section">
+        <div class="leaderboard-title">
+            Final Leaderboard:
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Position:</th>
+                        <th>Username:</th>
+                        <th>Score:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player in players %}
+                        <tr>
+                            <td>{{ loop.index + 1 }}</td>
+                            <td>{{ player.username }}</td>
+                            <td>{{ player.score }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="controls">
+
+        <form action="/view-quizzes" method="get">
+            <button class="control-btn">New Quiz</button>
+        </form>
+
+        <form action="">
+            <button class="control-btn">Settings</button>
+        </form>
+
+        <form action="/create-lobby/{{ quizId }}" method="get">
+            <button class="control-btn">Restart</button>
+        </form>
+
+        <form action="/leaderboard-quit/{{ gameId }}" method="post">
+            <button class="control-btn">Quit</button>
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>

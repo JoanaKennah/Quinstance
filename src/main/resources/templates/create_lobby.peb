@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Create a Lobby</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+        }
+
+        .title-box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+            color: black;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .left, .right {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 25px;
+            width: 45%;
+        }
+
+        .detail {
+            color: #e63973;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .detail:first-child {
+            margin-top: 0;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            color: black;
+            margin-top: 5px;
+        }
+
+        .right h2 {
+            text-align: center;
+            text-decoration: underline;
+            color: black;
+            margin-top: 0;
+        }
+
+        .time-label {
+            font-size: 16px;
+            color: black;
+            margin-bottom: 10px;
+        }
+
+        .time-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .time-btn {
+            padding: 8px 16px;
+            border: 2px solid #e63973;
+            border-radius: 6px;
+            background-color: white;
+            color: black;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .time-btn:hover, .time-btn.selected {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .bottom-bar {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            font-size: 16px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+    </style>
+
+    <script>
+        function selectTime(element, seconds) {
+            // Highlight selected button
+            document.querySelectorAll(".time-btn").forEach(btn => {
+                btn.classList.remove("selected");
+            });
+            element.classList.add("selected");
+
+            // Store selected time in hidden input
+            document.getElementById("timeLimit").value = seconds;
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="navbar">
+    <a>Create a Lobby</a>
+</div>
+
+<div class="content">
+
+    <div class="title-box">
+        <h1>Create a Lobby</h1>
+    </div>
+
+    <form method="post" action="/create-lobby/{{ quizId }}">
+
+        <!-- Hidden field so the selected time travels with the form -->
+        <input type="hidden" id="timeLimit" name="timeLimit" value="30">
+
+        <div class="container">
+
+            <div class="left">
+                <div class="detail">Quiz:</div>
+                <div class="detail-value">{{ quizName }}</div>
+
+                <div class="detail">Number of Questions:</div>
+                <div class="detail-value">{{ numQuestions }}</div>
+
+                <div class="detail">Category:</div>
+                <div class="detail-value">{{ category }}</div>
+
+                <div class="detail">Key Stage:</div>
+                <div class="detail-value">{{ keyStage }}</div>
+            </div>
+
+            <div class="right">
+                <h2>Settings</h2>
+                <div class="time-label">Time to answer Questions:</div>
+                <div class="time-options">
+                    <button type="button" class="time-btn" onclick="selectTime(this, 15)">15s</button>
+                    <button type="button" class="time-btn selected" onclick="selectTime(this, 30)">30s</button>
+                    <button type="button" class="time-btn" onclick="selectTime(this, 60)">60s</button>
+                    <button type="button" class="time-btn" onclick="selectTime(this, 0)">Unlimited</button>
+                </div>
+
+                <div class="theme-label" style="margin-top: 20px; font-size: 16px; color: black;">
+                    Spooky theme:
+                    <input type="checkbox" name="theme" value="spooky" style="margin-left: 8px;">
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="bottom-bar">
+            <button type="button" class="btn"
+                onclick="window.location.href='/view-quizzes'">
+                Return to View Quizzes
+            </button>
+            <button type="submit" class="btn">Create Lobby!</button>
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+    <title>Lobby</title>
+
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+        }
+
+        .navbar {
+            background-color: #2dc84d;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .title-box {
+            border: 2px solid #2dc84d;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+            color: #2dc84d;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .players-section {
+            flex-grow: 1;
+        }
+
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .player-name {
+            color: #2dc84d;
+            font-weight: bold;
+            font-size: 36px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 180px;
+        }
+
+        .btn {
+            padding: 14px 22px;
+            font-size: 16px;
+            background-color: black;
+            color: #2dc84d;
+            border: 2px solid #2dc84d;
+            cursor: pointer;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #2dc84d;
+            color: black;
+        }
+
+        .btn-start {
+            background-color: #2dc84d;
+            color: black;
+        }
+
+        .btn-start:hover {
+            background-color: #23A03D;
+        }
+
+        .content {
+            margin: 40px;
+        }
+    </style>
+
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+        }
+
+        .title-box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+            color: black;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .players-section {
+            flex-grow: 1;
+        }
+
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .player-name {
+            color: #e63973;
+            font-weight: bold;
+            font-size: 32px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 180px;
+        }
+
+        .btn {
+            padding: 14px 22px;
+            font-size: 16px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .btn-start {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background-color: #d6285f;
+        }
+
+        .content {
+            margin: 40px;
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+
+<div class="navbar">
+    <a>{{ quizName }}</a>
+</div>
+
+<div class="content">
+
+    <div class="title-box">
+        <h1>Room Code: {{ roomCode }}</h1>
+    </div>
+
+    <div class="main-container">
+
+        <div class="players-section">
+            <div class="player-grid" id="player-grid">
+                {% for player in players %}
+                    <div class="player-name">{{ player }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="controls">
+            <form method="post" action="/start-game/{{ gameId }}">
+                <button type="submit" class="btn btn-start">Start Quiz</button>
+            </form>
+
+            <form>
+                <button type="button" class="btn">Settings</button>
+            </form>
+
+            <form method="post" action="/close-lobby/{{ gameId }}">
+                <button type="submit" class="btn">Close Lobby</button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+    //polls for joined players once per sec
+    const pollPlayers = setInterval(() => {
+        fetch("/lobby-players/{{ gameId }}")
+            .then(response => response.json())
+            .then(players => {
+                const grid = document.getElementById("player-grid");
+                grid.innerHTML = players
+                    .map(p => `<div class="player-name">${p}</div>`)
+                    .join("");
+            })
+            .catch(err => console.log("Player poll error: " + err));
+    }, 1000);
+</script>
+
+</body>
+</html>

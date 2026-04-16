@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Join a Lobby</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .title-box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 40px;
+            display: inline-block;
+            width: 80%;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+            color: black;
+        }
+
+        .subtitle {
+            color: #e63973;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+
+        .code-input {
+            width: 60%;
+            padding: 15px;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid #e63973;
+            border-radius: 8px;
+            color: #e63973;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .code-input::placeholder {
+            color: #e63973;
+            opacity: 0.5;
+        }
+
+        .error {
+            color: #e63973;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
+            min-height: 24px; /* keeps layout stable when no error */
+        }
+
+        .join-btn {
+            display: block;
+            width: 200px;
+            margin: 0 auto 10px auto;
+            padding: 14px;
+            font-size: 18px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .join-btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .bottom-bar {
+            margin-top: 60px;
+            text-align: left;
+        }
+
+        .return-btn {
+            padding: 12px 22px;
+            font-size: 16px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .return-btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <a>Join a Lobby</a>
+</div>
+
+<div class="content">
+
+    <div class="title-box">
+        <h1>Join a Lobby!</h1>
+    </div>
+
+    <div class="subtitle">
+        Enter 8-character Room Code below to join a quiz lobby!
+    </div>
+
+    <form method="post" action="/join-lobby">
+
+        <input type="text"
+               name="roomCode"
+               class="code-input"
+               placeholder="Enter Room Code"
+               maxlength="8"
+               value="{{ roomCode }}"
+               required>
+
+        <button type="submit" class="join-btn">Join</button>
+
+        <!-- Shows error message if code was invalid, empty otherwise -->
+        <div class="error">{{ errorMessage }}</div>
+
+    </form>
+
+    <div class="bottom-bar">
+        <button class="return-btn"
+                onclick="window.location.href='{{ returnURL }}'">
+            Return to Dashboard
+        </button>
+    </div>
+
+</div>
+
+</body>
+</html>

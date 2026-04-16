@@ -135,7 +135,7 @@
 
         {% for question in questions %}
             <div class="question-box">
-                {{ loop.index }}. {{ question.question }}
+                {{ loop.index + 1 }}. {{ question.question }}
             </div>
         {% endfor %}
 
