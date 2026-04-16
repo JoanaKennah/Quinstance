@@ -114,7 +114,7 @@
                     {% for attempt in attempts %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ attempt.game.quiz.quiz_name }}</td>
+                            <td>{{ attempt.quizName }}</td>
                             <td>{{ attempt.score }}</td>
                         </tr>
                     {% endfor %}
@@ -123,10 +123,9 @@
         </div>
     {% endif %}
 
-    <div class="bottom-bar"> <!--- NEED TO ADD ROUTING --->
-        <form action="">
-            <button class="control-btn">Return to Dashboard</button>
-        </form>
+    <div class="bottom-bar">
+        <button class="btn" onclick="window.location.href='{{ returnURL }}'">Return</button>
+        <!-- PLACEHOLDER: just returns to dashboard for now, will use session role when ready -->
     </div>
 
 </div>
