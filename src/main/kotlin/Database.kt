@@ -452,7 +452,15 @@ fun retrieveAllUserScores(game: Game): List<Triple<Int, String, Int>> {
             .sortedByDescending { it.score }
             .map { userScore ->
                 Triple<Int, String, Int>(userScore.user.id.value, userScore.user.username, userScore.score)
-            }
->>>>>>> origin/main
+        }
+    }
+}
+
+fun retrieveUserAttempts(user: User): List<UserScore> {
+    require(retrieveUser(user.username) != null) { "User must exist" }
+
+    return transaction(TransactionManager.defaultDatabase) {
+        UserScore.find { UserScoreTable.user eq user.id }
+            .toList()
     }
 }

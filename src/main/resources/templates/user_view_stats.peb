@@ -114,7 +114,7 @@
                     {% for attempt in attempts %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ attempt.session.quiz.quiz_name }}</td>
+                            <td>{{ attempt.game.quiz.quiz_name }}</td>
                             <td>{{ attempt.score }}</td>
                         </tr>
                     {% endfor %}

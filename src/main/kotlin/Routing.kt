@@ -859,6 +859,18 @@ fun Application.configureRouting() {
             call.respondRedirect("/")
         }
 
->>>>>>> origin/main
+        get("/user-stats") {
+            val session = call.sessions.get<UserSession>()
+                ?: return@get call.respondRedirect("/login")
+
+            val user = retrieveUser(session.username)
+                ?: return@get call.respondRedirect("/login")
+
+            val attempts = retrieveUserAttempts(user)
+
+            call.respond(
+                PebbleContent("user_view_stats.peb", mapOf("attempts" to attempts))
+            )
+        }
     }
 }
