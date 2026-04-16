@@ -76,6 +76,19 @@
             font-size: 36px;
             font-weight: bold;
         }
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
     </style>
     {% else %}
     <style>
@@ -150,13 +163,28 @@
             font-weight: bold;
             color: #e63973;
         }
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
     </style>
     {% endif %}
 </head>
 
 <body>
     <div class="navbar">
-        <a href="/home">Logout</a>
+      <form method="post" action="/logout">
+          <button type="submit" class="logout-btn">Logout</button>
+      </form>
     </div>
 
     <div class="content">
