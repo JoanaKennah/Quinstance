@@ -279,12 +279,42 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
         }
 
         val allOptions = listOfNotNull(option1, option2, option3, option4)
+        val correctOption = allOptions[correctIndex]
+        var finalOption2: String = ""
+        var finalOption3: String? = null
+        var finalOption4: String? = null
+
+        // Not happy about this implementation but avoids issues found in developing csv reading. Ensures there are
+        // no duplicate answers.
+        when (correctOption) {
+            option1 -> {
+                finalOption2 = option2
+                if (option3 != null) finalOption3 = option3
+                if (option4 != null) finalOption4 = option4
+            }
+            option2 -> {
+                finalOption2 = option1
+                if (option3 != null) finalOption3 = option3
+                if (option4 != null) finalOption4 = option4
+            }
+            option3 -> {
+                finalOption2 = option1
+                finalOption3 = option2
+                finalOption4 = option4
+            }
+            option4 -> {
+                finalOption2 = option1
+                finalOption3 = option2
+                finalOption4 = option3
+            }
+        }
+
         val newAnswer = Answer.new {
             this.question = question
             this.correct_answer = allOptions[correctIndex]
-            this.option2 = option2 
-            this.option3 = option3
-            this.option4 = option4
+            this.option2 = finalOption2
+            this.option3 = finalOption3
+            this.option4 = finalOption4
         }
         return@transaction newAnswer
     }

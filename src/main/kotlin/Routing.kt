@@ -237,63 +237,119 @@ fun Application.configureRouting() {
             val quiz = retrieveQuiz(quizId) ?: return@get call.respondText("Quiz not found")
             val questions = retrieveQuizQuestions(quiz)
 
-            call.respond(PebbleContent("view_quiz_questions.peb", mapOf("quizName" to quiz.quiz_name, "questions" to questions, "quizId" to quizId, "returnURL" to "/view-quizzes")))
+            call.respond(PebbleContent("view_quiz_questions.peb",
+                mapOf("quizName" to quiz.quiz_name,
+                    "questions" to questions,
+                    "quizId" to quizId,
+                    "returnURL" to "/view-quizzes",
+                    "error" to "none")))
         }
 
         post("/view-quiz-questions/{quidId}") {
-            // Gets a .csv file!!!
             // References: https://tahaben.com.ly/2023/04/ktor-server-for-beginners-uploading-files/
             // https://ryanharrison.co.uk/2018/09/20/ktor-file-upload-download.html
 
             val multipart = call.receiveMultipart()
             var quizId: Int? = null
+            var quiz: Quiz? = null
             var deleteQuestions: Boolean? = null
             var data: List<ReadQuestionData>? = null
-            val inputStream = InputStream.nullInputStream()
+            var csvReadError = "none"
 
             multipart.forEachPart { part ->
                 when (part) {
+                    // If the data retrieved is a file item, separate the data into a file name and the actual data.
                     is PartData.FileItem -> {
                         val fileName = part.originalFileName!!
                         val fileData = part.provider().toInputStream()
-                        println("received file: $fileName")
 
+                        // Returns a list of question data to be converted into a Question and Answer object.
                         data = readCsv(fileData)
                     }
+                    // If the data is an item sent with the form (i.e. quizId and resetQuestions).
                     is PartData.FormItem -> {
                         when (part.name) {
                             "quizId" -> quizId = part.value.toInt()
                             "resetQuestions" -> deleteQuestions = part.value.toBoolean()
                         }
                     }
+                    // Return an empty unit if nothing is sent.
                     else -> Unit
                 }
+                // Dispose of part so it can't be accessed by accident.
                 part.dispose()
             }
-            if (quizId != null) {
-                val quiz = retrieveQuiz(quizId) ?: return@post call.respondText("Quiz not found")
+            if (data != null) {
+                // If readCsv returns an empty list of data.
+                if (data!!.isEmpty()) csvReadError = "empty"
+                if (quizId == null) return@post call.respondText("Invalid quizId")
+                quiz = retrieveQuiz(quizId) ?: return@post call.respondText("Quiz not found")
+
+                // Delete all questions from the given quiz if the user imports a .csv file over it.
                 if (deleteQuestions != null && deleteQuestions) {
                     val questions = retrieveQuizQuestions(quiz)
                     for (q in questions) {
                         deleteQuestion(q)
                     }
                 }
-                if (data != null) {
-                    for (question in data) {
+
+                // If readCsv returns valid data (a list of ReadQuestionData) add Question & Answer to database
+                for (question in data) {
+                    // If option1 or option2 are empty, continue to next question.
+                    if (question.option1 == "" || question.option2 == "") continue
+
+                    // Check to see if there are any repeated answers (usually completed in add_question.peb file).
+                    val checkAnswerDupes =
+                        mutableSetOf(question.option1, question.option2, question.option3, question.option4)
+                        .toList().filterNot { it == ""}
+                    val listOfAns = mutableListOf(question.option1, question.option2, question.option3, question.option4)
+                            .filterNot { it == ""}
+
+                    if (checkAnswerDupes == listOfAns) {
                         val questionId = addQuestion(quiz, question.question, question.keyStage)
-                        addAnswer(questionId,
+
+                        // Format option3 and option4 so they are accepted by the database.
+                        val option3 = when (question.option3) {
+                            "" -> null
+                            else -> question.option3
+                        }
+                        val option4 = when (question.option3) {
+                            "" -> null
+                            else -> question.option3
+                        }
+                        // Add Answer to database.
+                        addAnswer(
+                            questionId,
                             question.option1,
                             question.option2,
-                            question.option3,
-                            question.option4,
-                            question.correctOption.toInt(),)
-                    }
-                } else call.respondRedirect("/view-quiz-questions/${quiz.id.value}") // WILL NEED TO RETURN ERROR MESSAGE
-                val questions = retrieveQuizQuestions(quiz)
-                println(questions)
-                call.respond(PebbleContent("view_quiz_questions.peb", mapOf("quizName" to quiz.quiz_name, "questions" to questions, "quizId" to quizId)))
+                            option3,
+                            option4,
+                            question.correctOption.toInt()
+                        )
+                    } else csvReadError = "repeatAnswers"
+                }
+            } else csvReadError = "invalid"
 
+            if (quiz != null) {
+                // Retrieve quiz questions and check to see if they're still empty, results in empty error if true.
+                val questions = retrieveQuizQuestions(quiz)
+                if (questions.isEmpty()) csvReadError = "empty"
+
+                call.respond(PebbleContent("view_quiz_questions.peb",
+                    mapOf("quizName" to quiz.quiz_name,
+                        "questions" to questions,
+                        "quizId" to quiz.id,
+                        "error" to csvReadError,
+                        "returnURL" to "/view-quizzes")))
             } else return@post call.respondText("Invalid quizId")
+        }
+
+        get("/questionTemplate") {
+            // Reference: https://ryanharrison.co.uk/2018/09/20/ktor-file-upload-download.html
+            val file = File("src/main/resources/questionTemplate.csv")
+            if (file.exists()) {
+                call.respondFile(file)
+            } else call.respondText("questionTemplate.csv does not exist")
         }
 
         //serves add question to quiz form

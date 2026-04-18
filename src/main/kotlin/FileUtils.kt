@@ -1,6 +1,7 @@
 package com.example
 
 import java.io.InputStream
+import java.util.Locale
 
 /**
  * Question data from a .csv file, includes Question info (question, keyStage) and Answer info (correctAnswer, option2,
@@ -18,15 +19,14 @@ data class ReadQuestionData (
 
 /**
  * Reads file input and converts data into ReadQuestionData so they can be turned into Questions. Returns null
- * if data cannot be read correctly or file is empty.
- * MAY REQUIRE MORE ERROR HANDLING
+ * if data cannot be read correctly or file is empty. Returns a DISTINCT list of ReadQuestionData
  */
 fun readCsv(inputStream: InputStream): List<ReadQuestionData>? {
     val reader = inputStream.bufferedReader()
-    val header = reader.readLine()
 
-    // If there is no header (file is empty)
-    if (header.isEmpty()) return null
+    // If file is empty (aka no header), return an empty list.
+    val header = reader.readLine() ?: return emptyList()
+
     try {
         val headerData = header.split(',', ignoreCase = false, limit = 7)
 
@@ -38,7 +38,6 @@ fun readCsv(inputStream: InputStream): List<ReadQuestionData>? {
         return null
     }
     // Check to see if header is accurate.
-    println("HELLO")
     try {
         val questionList = reader.lineSequence()
             .filter { it.isNotBlank() }
@@ -48,6 +47,18 @@ fun readCsv(inputStream: InputStream): List<ReadQuestionData>? {
                 val (question, option1, option2, option3) = data.chunked(4)[0]
                 val (option4, correctOption, keyStage, _) = data.chunked(4)[1]
 
+                // Ensures key stage is in the correct format as best as I could think of.
+                val formattedKeyStage = when (keyStage.trim().uppercase()) {
+                    "KS1", "Key Stage 1" -> "keystage1"
+                    "KS2", "Key Stage 2" -> "keystage2"
+                    "KS3", "Key Stage 3" -> "keystage3"
+                    "KS4", "Key Stage 4" -> "keystage4"
+                    "KS5", "Key Stage 5" -> "keystage5"
+                    "Further Education" -> "Further Education"
+                    "nonapplicable" -> "N/A"
+                    else -> "nonapplicable"
+                }
+
                 // Creates ReadQuestionData object to make storing this information simpler.
                 ReadQuestionData(
                     question.trim(),
@@ -56,9 +67,9 @@ fun readCsv(inputStream: InputStream): List<ReadQuestionData>? {
                     option3.trim(),
                     option4.trim(),
                     correctOption.trim(),
-                    keyStage.trim()
+                    formattedKeyStage
                 )
-            }.toList()
+            }.toList().distinct()
         return questionList
     } catch (e: Exception) {
         println("Exception while reading CSV")

@@ -121,9 +121,40 @@
             border-radius: 5px;
         }
 
+        .btn-download {
+            padding: 5px 20px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 5px;
+            height: 40px;
+        }
+
         .btn:hover {
             background-color: #e63973;
             color: white;
+        }
+
+        input[type=file]::file-selector-button {
+            position: relative;
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 15px;
+
+        }
+
+        input[type=file]::file-selector-button:hover {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .error-text {
+            text-align:center;
         }
     </style>
 
@@ -138,14 +169,18 @@
             return true;
         }
 
-        function deleteQuestion() {
+        function deleteQuestions() {
             var choice;
             if (confirm("This quiz already has questions. If you import a file, these will be deleted. Is that ok?")) {
                 choice = true;
+                document.getElementById("csvChoice").value = choice;
+                return true;
             } else {
                 choice = false;
+                document.getElementById("csvChoice").value = choice;
+                return false;
             }
-            document.getElementById("csvChoice").value = choice;
+
         }
     </script>
 </head>
@@ -171,14 +206,16 @@
         <div class="csv-container">
             <b class="csv-text">Already have some questions? Submit a .csv file:</b>
 
+            <button class="btn-download" onclick="window.location.href='/questionTemplate'">Template</button>
+
             <form method="post"
                   action="/view-quiz-questions/{{ quizId }}"
                   enctype="multipart/form-data"
-                  onsubmit=csvChoice>
+                  onsubmit={% if questions is not empty %}"return deleteQuestions()"{% endif %}>
                 <input type="file" class="csv-button" name="filename">
                 <input type="hidden" name="quizId" value={{ quizId }}>
                 <input type="hidden" name="resetQuestions" id="csvChoice">
-                <input {% if questions is not empty %}onclick="deleteQuestion()"{% endif %} type="submit">
+                <button class="btn" type="submit">Submit</button>
             </form>
         </div>
 
@@ -191,14 +228,24 @@
 
     </div>
 
+    <div class="error-text">
+        {% if error == "invalid" %}
+            <b class="csv-text">Error! Invalid file. Please ensure you are submitting a .csv file!</b>
+        {% elseif error == "empty" %}
+            <b class="csv-text">Error! Empty file. Please create some questions then try again!</b>
+        {% elseif error == "repeatAnswers" %}
+            <b class="csv-text">Error! Please ensure there are no repeated answers for questions.</b>
+        {% endif %}
+    </div>
+
     <div class="questions-container">
-
-        {% for question in questions %}
-            <div class="question-box" onclick="window.location.href='/add-question/{{ quiz.id }}'">
-                {{ loop.index + 1 }}. {{ question.question }}
-            </div>
-        {% endfor %}
-
+        {% if error == "none" %}
+            {% for question in questions %}
+                <div class="question-box" onclick="window.location.href='/add-question/{{ quiz.id }}'">
+                    {{ loop.index + 1 }}. {{ question.question }}
+                </div>
+            {% endfor %}
+        {% endif %}
     </div>
     <div class="bottom-bar">
         <button class="btn" onclick="window.location.href='{{ returnURL }}'">Return</button>
