@@ -131,7 +131,7 @@
             height: 40px;
         }
 
-        .btn:hover {
+        .btn:hover, .btn-download:hover {
             background-color: #e63973;
             color: white;
         }
