@@ -247,9 +247,9 @@
     </span>
     </div>
 
-    <div class="bottom-bar"> <!--- NEED TO ADD ROUTING --->
+    <div class="bottom-bar">
 
-        <a class="cancel" href="/teacher-dashboard">Cancel</a>
+        <a class="cancel" href={{ returnURL }}>Cancel</a>
 
         <button type="submit">Next</button>
 

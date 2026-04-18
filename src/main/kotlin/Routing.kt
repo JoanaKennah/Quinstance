@@ -69,7 +69,12 @@ fun Application.configureRouting() {
             val checkPassword = Password.check(password, user.password).withScrypt()
 
             if (checkPassword) {
-                call.sessions.set(UserSession(username = user.username, role = user.role.lowercase()))
+                call.sessions.set(
+                    UserSession(
+                        username = user.username,
+                        role = user.role.lowercase()
+                    )  
+                )      
                 when (user.role.lowercase()) {
                     "student" -> {
                         call.respondRedirect("/student-dashboard")
@@ -77,8 +82,11 @@ fun Application.configureRouting() {
                     "teacher", "admin" -> {
                         call.respondRedirect("/teacher-dashboard")
                     }
-                }
-            } else {
+                    else -> {
+                        call.respondText("Unknown role")
+                    }  
+                }   
+            }  else {
                 call.respondText("Incorrect password")
             }
         }
@@ -106,22 +114,31 @@ fun Application.configureRouting() {
             }
 
             val name = "$firstname $lastname"
-            val newUserRole = when (val newUser = addUser(username, password, name, email, keystage, role)) {
-                null -> "USERNAME_EXISTS"
-                else ->  newUser.role.lowercase()
-            }
+            val createdUser = addUser(username, password, name, email, keystage, role)
+            val newUserRole = createdUser?.role?.lowercase() ?: "USERNAME_EXISTS"
+            
 
             when (newUserRole) {
                 "USERNAME_EXISTS" -> {
                     call.respondText("Username already exists")
                 }
                 "student" -> {
-                    call.sessions.set(UserSession(username = username, role = role))
-                    call.respondRedirect("/student-dashboard")
+                    call.sessions.set(
+                        UserSession(
+                            username = createdUser!!.username,
+                            role = createdUser.role.lowercase()
+                        )
+                    )
+                    call.respondRedirect("/student-dashboard")    
                 }
                 "teacher", "admin" -> {
-                    call.sessions.set(UserSession(username = username, role = role))
-                    call.respondRedirect("/teacher-dashboard")
+                    call.sessions.set(
+                        UserSession(
+                            username = createdUser!!.username,
+                            role = createdUser.role.lowercase()
+                        )
+                    )
+                    call.respondRedirect("/teacher-dashboard")    
                 }
                 else -> {
                     call.respondText("Failed to create new user")
@@ -129,20 +146,42 @@ fun Application.configureRouting() {
             }
         }
 
+        get("/logout") {
+            call.sessions.clear<UserSession>()
+            call.respondRedirect("/login")
+        }
+
         //serves teacher dash
         get("/teacher-dashboard") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
 
-            call.respond(PebbleContent("teacher_dashboard.peb", mapOf("username" to session.username)))
+            if (session.role != "teacher" && session.role != "admin") {
+                return@get call.respondText("You do not have permission to access the teacher dashboard")
+            }
+
+            call.respond(
+                PebbleContent(
+                    "teacher_dashboard.peb",
+                    mapOf("username" to session.username)
+                )
+            )    
         }
 
         //serves student dash
         get("/student-dashboard") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             
-            call.respond(PebbleContent("student_dashboard.peb", mapOf("username" to session.username)))
-        }
+            if (session.role != "student") {
+                return@get call.respondText("You do not have permission to access the student dashboard")
+            }
 
+            call.respond(
+                PebbleContent(
+                    "student_dashboard.peb",
+                    mapOf("username" to session.username)
+                )    
+            )
+        }    
 
         //serves question page client-side, websocket connects here during game
         get("/game/{gameId}") {
@@ -164,7 +203,13 @@ fun Application.configureRouting() {
         get("/create-quiz") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
 
-            call.respond(PebbleContent("create_quiz.peb", mapOf<String, Any>()))
+            val returnURL = when (session.role) {
+                "teacher" -> "/teacher-dashboard"
+                "student" -> "/student-dashboard"
+                else -> return@get call.respondRedirect("/login")
+            }
+
+            call.respond(PebbleContent("create_quiz.peb", mapOf("returnURL" to returnURL)))
         }
 
         //saves created quiz to db, redirects to add Qs page
@@ -192,7 +237,7 @@ fun Application.configureRouting() {
             val quiz = retrieveQuiz(quizId) ?: return@get call.respondText("Quiz not found")
             val questions = retrieveQuizQuestions(quiz)
 
-            call.respond(PebbleContent("view_quiz_questions.peb", mapOf("quizName" to quiz.quiz_name, "questions" to questions, "quizId" to quizId)))
+            call.respond(PebbleContent("view_quiz_questions.peb", mapOf("quizName" to quiz.quiz_name, "questions" to questions, "quizId" to quizId, "returnURL" to "/view-quizzes")))
         }
 
         post("/view-quiz-questions/{quidId}") {
@@ -292,6 +337,8 @@ fun Application.configureRouting() {
 
             call.respondRedirect("/view-quiz-questions/$quizId")
         }
+
+
 
         //serves list of quizzes created by user
         get ("/view-quizzes") {
@@ -921,5 +968,23 @@ fun Application.configureRouting() {
             call.respondRedirect("/")
         }
 
+        get("/user-stats") {
+            val session = call.sessions.get<UserSession>()
+                ?: return@get call.respondRedirect("/login")
+
+            val user = retrieveUser(session.username)
+                ?: return@get call.respondRedirect("/login")
+
+            val attempts = retrieveUserAttempts(user)
+            val returnURL = when(session.role) {
+                "teacher" -> "/teacher-dashboard"
+                "student" -> "/student-dashboard"
+                else -> return@get call.respondRedirect("/login")
+            }
+
+            call.respond(
+                PebbleContent("user_view_stats.peb", mapOf("attempts" to attempts, "returnURL" to returnURL))
+            )
+        }
     }
 }
