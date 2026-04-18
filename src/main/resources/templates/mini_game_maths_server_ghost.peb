@@ -76,6 +76,7 @@
             font-size: 36px;
             font-weight: bold;
         }
+
         .logout-btn {
             background: none;
             border: none;
@@ -83,7 +84,7 @@
             font-weight: bold;
             font-size: 14px;
             padding: 0;
-            text-decoration: none;
+            color: black;
         }
 
         .logout-btn:hover {
@@ -163,6 +164,7 @@
             font-weight: bold;
             color: #e63973;
         }
+
         .logout-btn {
             background: none;
             border: none;
@@ -170,7 +172,6 @@
             font-weight: bold;
             font-size: 14px;
             padding: 0;
-            text-decoration: none;
         }
 
         .logout-btn:hover {
@@ -182,9 +183,9 @@
 
 <body>
     <div class="navbar">
-      <form method="post" action="/logout">
-          <button type="submit" class="logout-btn">Logout</button>
-      </form>
+        <form method="post" action="/logout">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
     </div>
 
     <div class="content">
@@ -195,22 +196,19 @@
                 <h1>Maths</h1>
             </div>
 
-            <button class="btn-next" onclick="goNext()">Next</button>
+            <form method="post" action="/next-question/{{ gameId }}">
+                <button type="submit" class="btn-next">Next</button>
+            </form>
         </div>
 
         <div class="message">
             Uh oh! You scored the least…you have now become a ghost!
         </div>
 
-        <div class="loser">
-            {{ lowest_user }}
-        </div>
+        {% for ghost in ghostPlayers %}
+            <div class="loser">{{ ghost }}</div>
+        {% endfor %}
     </div>
 
-    <script>
-        function goNext() {
-            window.location.href = "/playing_question_server";
-        }
-    </script>
 </body>
 </html>

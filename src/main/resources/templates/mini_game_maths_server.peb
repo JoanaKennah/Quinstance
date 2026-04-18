@@ -163,7 +163,7 @@
     {% endif %}
 </head>
 
-<body>
+<body onload='startTimer();'>
     <div class="navbar">
       <form method="post" action="/logout">
           <button type="submit" class="logout-btn">Logout</button>
@@ -198,17 +198,20 @@
 
     <script>
         let timeLeft = 30;
-        const timerElement = document.getElementById("timer");
 
-        const countdown = setInterval(() => {
-            timeLeft--;
-            timerElement.textContent = timeLeft;
+        function startTimer() {
+            const timerDisplay = document.getElementById("timer");
+            const countdown = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
 
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
-                window.location.href = "/mini_game_maths_server_ghost";
-            }
-        }, 1000);
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    fetch("/minigame-end/{{ gameId }}", { method: "POST" })
+                        .then(() => window.location.href = "/minigame-end-host/{{ gameId }}");
+                }
+            }, 1000);
+        }
     </script>
 </body>
 </html>

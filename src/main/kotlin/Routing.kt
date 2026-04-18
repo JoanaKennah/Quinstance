@@ -621,6 +621,9 @@ fun Application.configureRouting() {
 
             val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found for this game")
 
+            // clear maths game state ready for next question
+            gameSession.mathsGameState = null
+
             if (gameSession.isAdvanced) {
                 return@post call.respondText("Already advancing")
             }
@@ -645,7 +648,8 @@ fun Application.configureRouting() {
                     "questionNumber" to gameSession.currentQuestionIndex + 1,
                     "questionText" to nextQuestion.question,
                     "gameId" to gameId,
-                    "timeLimit" to gameSession.timeLimit
+                    "timeLimit" to gameSession.timeLimit,
+                    "theme" to session.theme
                 )))
             }
 
@@ -1055,7 +1059,147 @@ fun Application.configureRouting() {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
             val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+
+            val mathsState = gameSession.mathsGameState ?: return@get call.respondText("No minigame active")
+
+            val questionIndex = mathsState.questionIndex.getOrDefault(session.username, 0)
+            val mathsQuestion = mathsState.questions.getOrNull(questionIndex)
+                ?: return@get call.respondText("No questions available")
+
+            val options: List<String> = listOf(
+                mathsQuestion.correctAnswer,
+                mathsQuestion.option2,
+                mathsQuestion.option3,
+                mathsQuestion.option4
+            ).shuffled()
+
+            call.respond(PebbleContent("mini_game_maths_question.peb", mapOf(
+                "gameId" to gameId,
+                "question" to mathsQuestion.question,
+                "correct_answer" to mathsQuestion.correctAnswer,
+                "option1" to options[0],
+                "option2" to options[1],
+                "option3" to options[2],
+                "option4" to options[3],
+                "theme" to session.theme
+            )))
         }
 
+        get("/minigame-correct/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+
+            val mathsState = gameSession.mathsGameState ?: return@get call.respondText("No minigame active")
+
+            mathsState.mathsScores[session.username] =
+                (mathsState.mathsScores.getOrDefault(session.username, 0)) + 1
+
+            val currentIndex = mathsState.questionIndex.getOrDefault(session.username, 0)
+            mathsState.questionIndex[session.username] = currentIndex + 1
+
+            call.respondRedirect("/minigame-question/$gameId")
+        }
+
+        get("/minigame-incorrect/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+
+            call.respond(PebbleContent("mini_game_maths_incorrect_ans.peb", mapOf(
+                "gameId" to gameId,
+                "theme" to session.theme
+            )))
+        }
+
+        post("/minigame-end/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found")
+
+            val mathsState = gameSession.mathsGameState ?: return@post call.respondText("No minigame active")
+
+            val dangerScores = gameSession.lastIncorrectPlayers.associateWith { username ->
+                mathsState.mathsScores.getOrDefault(username, 0)
+            }
+
+            val minScore = dangerScores.values.minOrNull() ?: 0
+
+            mathsState.ghostPlayers = dangerScores
+                .filter { it.value == minScore }
+                .map { it.key }
+
+            gameSession.connections.forEach { connection ->
+                connection.send(Frame.Text(Json.encodeToString(mapOf(
+                    "redirect" to "/minigame-result/$gameId"
+                ))))
+            }
+
+            call.respond(HttpStatusCode.OK)
+        }
+
+        get("/minigame-end-host/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+
+            val mathsState = gameSession.mathsGameState ?: return@get call.respondText("No minigame active")
+
+            call.respond(PebbleContent("mini_game_maths_server_ghost.peb", mapOf(
+                "gameId" to gameId,
+                "theme" to session.theme,
+                "ghostPlayers" to mathsState.ghostPlayers
+            )))
+        }
+
+        get("/minigame-result/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
+
+            val mathsState = gameSession.mathsGameState ?: return@get call.respondText("No minigame active")
+
+            val userScore = retrieveUserScore(game, user)?.score ?: 0
+
+            if (session.username in mathsState.ghostPlayers) {
+                call.respond(PebbleContent("mini_game_maths_ur_ghost.peb", mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme
+                )))
+            } else {
+                call.respond(PebbleContent("mini_game_maths_ur_safe.peb", mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme
+                )))
+            }
+        }
+
+        get("/leaderboard-return/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+
+            val scores = transaction(TransactionManager.defaultDatabase) {
+                UserScore.find { UserScoreTable.game eq game.id }
+                    .sortedByDescending { it.score }
+                    .map { userScore ->
+                        mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score)
+                    }
+            }
+
+            call.respond(PebbleContent("leaderboard.peb", mapOf(
+                "quizName" to quiz.quiz_name,
+                "players" to scores,
+                "gameId" to gameId,
+                "quizId" to quiz.id,
+                "theme" to session.theme
+            )))
+        }
     }
 }
