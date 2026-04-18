@@ -4,7 +4,8 @@ data class MathsGameState(
     val questions: List<MathsQuestion> = MathsQuestions.shuffleAnswers(),
     val questionIndex: MutableMap<String, Int> = mutableMapOf(),
     val mathsScores: MutableMap<String, Int> = mutableMapOf(),
-    var ghostPlayers: List<String> = emptyList()
+    var ghostPlayers: List<String> = emptyList(),
+    var isFinished: Boolean = false
 )
 
 data class MathsQuestion(

@@ -223,7 +223,7 @@
             <button type="submit" class="control-btn">Settings</button>
         </form>
 
-        <form action="/create-lobby/{{ quizId }}" method="get">
+        <form action="/create-lobby/{{ quizId }}" method="get">OKay
             <button class="control-btn">Restart</button>
         </form>
 

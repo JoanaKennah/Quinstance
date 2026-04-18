@@ -193,5 +193,19 @@
             }
         }
     </script>
+
+    <script>
+        const pollMinigame = setInterval(() => {
+            fetch("/minigame-active/{{ gameId }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.active) {
+                        clearInterval(pollMinigame);
+                        window.location.href = "/minigame-result/{{ gameId }}";
+                    }
+                })
+                .catch(err => console.log("Poll error: " + err));
+        }, 500);
+    </script>
 </body>
 </html>

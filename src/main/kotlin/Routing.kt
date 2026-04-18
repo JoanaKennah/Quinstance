@@ -1129,6 +1129,9 @@ fun Application.configureRouting() {
                 .filter { it.value == minScore }
                 .map { it.key }
 
+            //mark minigame finished
+            mathsState.isFinished = true
+
             gameSession.connections.forEach { connection ->
                 connection.send(Frame.Text(Json.encodeToString(mapOf(
                     "redirect" to "/minigame-result/$gameId"
@@ -1170,7 +1173,7 @@ fun Application.configureRouting() {
                     "theme" to session.theme
                 )))
             } else {
-                call.respond(PebbleContent("mini_game_maths_ur_safe.peb", mapOf(
+                call.respond(PebbleContent("mini_games_maths_ur_safe.peb", mapOf(
                     "gameId" to gameId,
                     "score" to userScore,
                     "theme" to session.theme
@@ -1200,6 +1203,13 @@ fun Application.configureRouting() {
                 "quizId" to quiz.id,
                 "theme" to session.theme
             )))
+        }
+
+        //polling endpoint - returns minigame state
+        get("/minigame-active/{gameId}") {
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("{\"active\":false}", ContentType.Application.Json) 
+            val active = activeSessions[gameId]?.mathsGameState?.isFinished == false
+            call.respondText("{\"active\":$active}", ContentType.Application.Json)
         }
     }
 }
