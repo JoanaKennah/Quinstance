@@ -47,6 +47,9 @@ data class GameSession(
     val miniGamesEnabled: Boolean = false,
     val activeMinigames: List<String> = listOf("maths", "potions", "rooms", "words"),
     val theme: String = "default",
+    var lastCorrectPlayers: List<String> = emptyList(),
+    var lastIncorrectPlayers: List<String> = emptyList(),
+    var mathsGameState: MathsGameState? = null,
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet())
 )
 

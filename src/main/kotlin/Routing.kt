@@ -732,6 +732,19 @@ fun Application.configureRouting() {
                     }
                 }
             }
+            
+            //store (in)correct answering players before clearing answers
+            //randomly select 6 players who answered wrong
+            val dangerPlayers = answers
+                .filter { it.chosenAnswer != correctAnswer }
+                .map { it.username }
+                .shuffled()
+                .take(6)
+            
+            gameSession.lastIncorrectPlayers = dangerPlayers
+            gameSession.lastCorrectPlayers = answers
+                .map { it.username }
+                .filter {it !in dangerPlayers }
 
             // Clear answers ready for next question
             UserAnswers.clearAnswers()
@@ -783,8 +796,10 @@ fun Application.configureRouting() {
 
             val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
 
+            //get current Q plus correct ans
             val currentQuestion = gameSession.questions[gameSession.currentQuestionIndex]
             val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@get call.respondText("No answer found for question")
+
 
             call.respond(PebbleContent("question_with_correct_ans.peb", mapOf(
                 "quizName" to quiz.quiz_name,
@@ -814,20 +829,50 @@ fun Application.configureRouting() {
                     }
             }
 
-            //send each client to position page
-            gameSession.connections.forEach { connection -> 
-                connection.send(Frame.Text(Json.encodeToString(
-                    mapOf("redirect" to "/client-position/$gameId")
+            // conditions for minigame occurring
+            val triggerMinigame = gameSession.miniGamesEnabled
+                && gameSession.lastIncorrectPlayers.size >= 2
+                && gameSession.activeMinigames.isNotEmpty()
+                && (0..1).random() == 1
+
+            if (triggerMinigame) {
+                // pick a minigame
+                val selectedMinigame = gameSession.activeMinigames.random()
+                // initialise maths minigame
+                gameSession.mathsGameState = MathsGameState()
+
+                // redirect all players, split by correct answers in minigame-start route
+                gameSession.connections.forEach { connection -> 
+                    connection.send(Frame.Text(Json.encodeToString(mapOf(
+                        "redirect" to "/minigame-start/$gameId"
+                    ))))    
+                }
+
+                // serve host the maths server view
+                call.respond(PebbleContent("mini_game_maths_server.peb", mapOf(
+                    "quizName" to quiz.quiz_name,
+                    "gameId" to gameId,
+                    "theme" to session.theme,
+                    "left_users" to gameSession.lastIncorrectPlayers.take(3),
+                    "right_users" to gameSession.lastIncorrectPlayers.drop(3)
+                )))
+
+            } else {
+                // send each client to position page
+                gameSession.connections.forEach { connection -> 
+                    connection.send(Frame.Text(Json.encodeToString(
+                        mapOf("redirect" to "/client-position/$gameId")
+                    )))
+                }
+
+                call.respond(PebbleContent("leaderboard.peb", mapOf(
+                    "quizName" to quiz.quiz_name,
+                    "players" to scores,
+                    "gameId" to gameId,
+                    "quizId" to quiz.id,
+                    "theme" to session.theme
                 )))
             }
-
-            call.respond(PebbleContent("leaderboard.peb", mapOf(
-                "quizName" to quiz.quiz_name,
-                "players" to scores,
-                "gameId" to gameId,
-                "quizId" to quiz.id,
-                "theme" to session.theme
-            )))
         }
 
         // Serves personal position and score to each player, personalised
@@ -979,6 +1024,37 @@ fun Application.configureRouting() {
             )
 
             call.respondRedirect(returnUrl)
+        }
+
+        //sends clients to uh-oh or safe screen, split by dangerPlayers
+        get("/minigame-start/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
+
+            val userScore = retrieveUserScore(game, user)?.score ?: 0
+
+            if (session.username in gameSession.lastIncorrectPlayers) {
+                call.respond(PebbleContent("mini_game_uhoh.peb",mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme
+                )))
+            } else {
+                call.respond(PebbleContent("mini_game_safe_from_maths.peb", mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme
+                 )))
+            }
+        }
+
+        get("/minigame-question/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
         }
 
     }

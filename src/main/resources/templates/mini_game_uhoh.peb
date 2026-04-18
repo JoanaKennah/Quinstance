@@ -125,5 +125,16 @@
             <div class="score">{{ score }}</div>
         </div>
     </div>
+
+    <script>
+        let timeLeft = 5;
+        const countdown = setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                window.location.href = "/minigame-question/{{ gameId }}";
+            }
+        }, 1000);
+    </script>
 </body>
 </html>
