@@ -150,6 +150,9 @@
     <div class="container">
         <div class="box">
             <h1>You are safe!</h1>
+            {% if isExistingGhost %}
+                <div style="font-size: 18px; margin-bottom: 15px;">(inside the veil)</div>
+            {% endif %}
             <div class="score-label">Total Score:</div>
             <div class="score">{{ score }}</div>
         </div>

@@ -722,15 +722,24 @@ fun Application.configureRouting() {
             val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@post call.respondText("No answer found for question")
 
             val answers = UserAnswers.allUserAnswers()
+
+            gameSession.revivedPlayers.clear()
+
             transaction(TransactionManager.defaultDatabase) {
                 for (answerData in answers) {
                     if (answerData.chosenAnswer == correctAnswer) {
                         val user = retrieveUser(answerData.username)
                         if (user != null) {
-                            val userScore = retrieveUserScore(game, user)
-                            if (userScore != null) {
-                                val pointsEarned = (100 + ((answerData.timeRemaining.toDouble() / gameSession.timeLimit.toDouble()) * 900)).roundToInt()
-                                userScore.score += pointsEarned
+                            //check if player isghost
+                            if (answerData.username in gameSession.ghostPlayers) {
+                                gameSession.ghostPlayers.remove(answerData.username)
+                                gameSession.revivedPlayers.add(answerData.username)
+                            } else {
+                                val userScore = retrieveUserScore(game, user)
+                                if (userScore != null) {
+                                    val pointsEarned = (100 + ((answerData.timeRemaining.toDouble() / gameSession.timeLimit.toDouble()) * 900)).roundToInt()
+                                    userScore.score += pointsEarned
+                                }
                             }
                         }
                     }
@@ -741,6 +750,7 @@ fun Application.configureRouting() {
             //randomly select 6 players who answered wrong
             val dangerPlayers = answers
                 .filter { it.chosenAnswer != correctAnswer }
+                .filter { it.username !in gameSession.ghostPlayers }
                 .map { it.username }
                 .shuffled()
                 .take(6)
@@ -779,6 +789,19 @@ fun Application.configureRouting() {
 
             val currentQuestion = gameSession.questions[gameSession.currentQuestionIndex]
             val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@get call.respondText("No answer found for question")
+
+            //check if player was revived
+            if (session.username in gameSession.revivedPlayers) {
+                val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
+                val userScore = retrieveUserScore(game, user)?.score ?: 0
+
+                call.respond(PebbleContent("revival.peb", mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme
+                )))
+                return@get
+            }
 
             call.respond(PebbleContent("question_with_correct_ans.peb", mapOf(
                 "quizName" to quiz.quiz_name,
@@ -1129,6 +1152,44 @@ fun Application.configureRouting() {
                 .filter { it.value == minScore }
                 .map { it.key }
 
+            //consolation points for winning minigame, if players > 3
+            if (gameSession.lastIncorrectPlayers.size >= 3) {
+                //sort scores descending, disclude 0s
+                val topScorers = mathsState.mathsScores
+                    .filter { it.value > 0}
+                    .entries
+                    .sortedByDescending { it.value }
+
+                transaction(TransactionManager.defaultDatabase) {
+                    //winner - 200 points
+                    topScorers.getOrNull(0)?.let { (username, _) -> 
+                        val bonusUser = retrieveUser(username)
+                        val bonusGame = retrieveGame(gameId)
+                        if (bonusUser != null && bonusGame != null) {
+                            val userScore = retrieveUserScore(bonusGame, bonusUser)
+                            if (userScore != null) {
+                                userScore.score += 200
+                            }
+                        }
+                    }
+
+                    //second - 100 points
+                    topScorers.getOrNull(1)?.let { (username, _) -> 
+                        val bonusUser = retrieveUser(username)
+                        val bonusGame = retrieveGame(gameId)
+                        if (bonusUser != null && bonusGame != null) {
+                            val userScore = retrieveUserScore(bonusGame, bonusUser)
+                            if (userScore != null) {
+                                userScore.score += 100
+                            }
+                        }
+                    }
+                }
+            }
+
+            //add new ghosts to master list of ghosts in GameSession
+            gameSession.ghostPlayers.addAll(mathsState.ghostPlayers)
+
             //mark minigame finished
             mathsState.isFinished = true
 
@@ -1166,6 +1227,9 @@ fun Application.configureRouting() {
 
             val userScore = retrieveUserScore(game, user)?.score ?: 0
 
+            //check if players is already ghost
+            val isExistingGhost = session.username in gameSession.ghostPlayers && session.username !in mathsState.ghostPlayers
+
             if (session.username in mathsState.ghostPlayers) {
                 call.respond(PebbleContent("mini_game_maths_ur_ghost.peb", mapOf(
                     "gameId" to gameId,
@@ -1176,7 +1240,8 @@ fun Application.configureRouting() {
                 call.respond(PebbleContent("mini_games_maths_ur_safe.peb", mapOf(
                     "gameId" to gameId,
                     "score" to userScore,
-                    "theme" to session.theme
+                    "theme" to session.theme,
+                    "isExistingGhost" to isExistingGhost
                 )))
             }
         }

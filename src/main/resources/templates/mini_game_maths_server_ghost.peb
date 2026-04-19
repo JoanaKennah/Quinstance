@@ -196,7 +196,7 @@
                 <h1>Maths</h1>
             </div>
 
-            <form method="post" action="/next-question/{{ gameId }}">
+            <form method="post" action="/show-positions/{{ gameId }}">
                 <button type="submit" class="btn-next">Next</button>
             </form>
         </div>
