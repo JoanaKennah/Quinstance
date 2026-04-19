@@ -161,5 +161,28 @@
             </form>
         </div>
     </div>
+    <script>
+        let timeLeft = 30;
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                // pick a random potion and submit automatically
+                const randomPotion = Math.floor(Math.random() * 4) + 1;
+                const form = document.createElement("form");
+                form.method = "POST";
+                form.action = "/potions-pick/{{ gameId }}";
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "potion";
+                input.value = randomPotion;
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }, 1000);
+    </script>
 </body>
 </html>
