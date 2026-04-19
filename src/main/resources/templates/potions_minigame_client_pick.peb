@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Potions</title>
+
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+            color: #2DC84D;
+        }
+
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            color: black;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 44px);
+        }
+
+        .card {
+            border: 3px solid #2DC84D;
+            border-radius: 20px;
+            padding: 50px 80px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .btn-potion {
+            display: block;
+            width: 220px;
+            padding: 14px;
+            margin: 12px auto;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: black;
+            color: #2DC84D;
+            border: 2px solid #2DC84D;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-potion:hover {
+            background-color: #2DC84D;
+            color: black;
+        }
+    </style>
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 44px);
+        }
+
+        .card {
+            border: 3px solid #e63973;
+            border-radius: 20px;
+            padding: 50px 80px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: black;
+            margin-bottom: 30px;
+        }
+
+        .btn-potion {
+            display: block;
+            width: 220px;
+            padding: 14px;
+            margin: 12px auto;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-potion:hover {
+            background-color: #e63973;
+            color: white;
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+    <div class="navbar">
+        <form method="post" action="/logout">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <div class="title">Pick a potion to drink!</div>
+            <form method="post" action="/potions-pick/{{ gameId }}">
+                <button type="submit" name="potion" value="1" class="btn-potion">Potion 1</button>
+                <button type="submit" name="potion" value="2" class="btn-potion">Potion 2</button>
+                <button type="submit" name="potion" value="3" class="btn-potion">Potion 3</button>
+                <button type="submit" name="potion" value="4" class="btn-potion">Potion 4</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
