@@ -34,6 +34,7 @@ dependencies {
     implementation("io.ktor:ktor-client-websockets")
     implementation("io.ktor:ktor-server-websockets")
     implementation(libs.ktor.server.sessions)
+    implementation("org.apache.commons:commons-csv:1.5")
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.kotest.assertions.core)

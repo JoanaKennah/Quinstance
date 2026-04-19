@@ -11,14 +11,14 @@
         }
 
         .navbar {
-            background-color: #cfe9c6;
+            background-color: #20882E;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
         }
 
         .navbar a {
-            color: black;
+            color: white;
             text-decoration: none;
             font-weight: bold;
         }
@@ -45,6 +45,15 @@
             align-items: flex-start;
         }
 
+        select {
+            padding: 5px 10px;
+            background-color: white;
+            color: black;
+            border: 2px solid #176321;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
         label {
             color: #a2d192;
             font-weight: bold;
@@ -53,10 +62,11 @@
         input, select {
             width: 200px;
             margin-top: 5px;
+            border: 1px solid #176321;
         }
 
         .full-width input {
-            width: 440px;
+            width: 447px;
         }
 
         .single {
@@ -86,88 +96,102 @@
         button {
             margin-top: 25px;
             padding: 10px 25px;
-            background-color: #a2d192;
-            color: black;
+            background-color: #176321;
+            color: white;
             border: none;
             cursor: pointer;
         }
 
         button:hover {
-            background-color: green;
+            background-color: #20882E;
             color: white;
         }
 
     </style>
+
+    <script>
+        function checkPasswords() {
+            console.log("hi")
+            var userPass = document.getElementById("password").value;
+            var confirmedPass = document.getElementById("confirmedPassword").value;
+
+            if (userPass != confirmedPass) {
+                alert("Passwords must be equal");
+                return false;
+            }
+            return true;
+        }
+    </script>
 </head>
 
 <body>
 
 <div class="navbar">
-<a href="/home">Home</a>
+    <a href="/home">Home</a>
 </div>
 
 <h1>Join Us!</h1>
 
-<form method="post" action="/signup">
-    
+<form method="post" action="/signup" onsubmit="return checkPasswords()">
+
     <div class="row">
-    <div class="field">
-    <label>First Name:</label>
-    <input type="text" name="firstname" required>
-    </div>
-    <div class="field">
-    <label>Last Name:</label>
-    <input type="text" name="lastname" required>
-    </div>
+        <div class="field">
+            <label>First Name:</label>
+            <input type="text" name="firstname" required>
+        </div>
+        <div class="field">
+            <label>Last Name:</label>
+            <input type="text" name="lastname" required>
+        </div>
     </div>
 
     <div class="single">
-    <div class="field full-width" style="align-items:center;">
-    <label>Email Address:</label>
-    <input type="email" name="email" required>
-    </div>
+        <div class="field full-width" style="align-items:center;">
+            <label>Email Address:</label>
+            <input type="email" name="email" required>
+        </div>
     </div>
 
     <div class="row">
-    <div class="field">
-    <label>Key Stage:</label>
-    <select name="keystage">
-    <option value="">Select...</option>
-    <option value="keystageone">KS1</option>
-    <option value="keystagetwo">KS2</option>
-    <option value="keystagethree">KS3</option>
-    <option value="keystagefour">KS4</option>
-    <option value="keystagefive">KS5</option>
-    <option value="furthereducation">Further Education</option>
-    <option value="nonapplicable">N/A</option>
-    </select>
-    </div>
-    <div class="field">
-    <label>Role:</label>
-    <select name="role">
-    <option value="">Select...</option>
-    <option value="student">Student</option>
-    <option value="teacher">Teacher</option>
-    </select>
-    </div>
+        <div class="field">
+            <label>Key Stage:</label>
+            <select name="keystage">
+                <option value="">Select...</option>
+                <option value="keystageone">KS1</option>
+                <option value="keystagetwo">KS2</option>
+                <option value="keystagethree">KS3</option>
+                <option value="keystagefour">KS4</option>
+                <option value="keystagefive">KS5</option>
+                <option value="furthereducation">Further Education</option>
+                <option value="nonapplicable">N/A</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Role:</label>
+            <select name="role">
+                <option value="">Select...</option>
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+            </select>
+        </div>
     </div>
 
     <div class="single">
-    <div class="field full-width" style="align-items:center;">
-    <label>Username:</label>
-    <input type="text" name="username" required>
-    </div>
+        <div class="field full-width" style="align-items:center;">
+            <label>Username:</label>
+            <input type="text" name="username" required>
+        </div>
     </div>
 
     <div class="row">
-    <div class="field">
-    <label>Password:</label>
-    <input type="password" name="password" required>
-    </div>
-    <div class="field">
-    <label>Confirm Password:</label>
-    <input type="password" name="confirmpassword" required>
-    </div>
+        <div class="field">
+            <label>Password:</label>
+            <input type="password" name="password" id="password" required>
+        </div>
+        <div class="field">
+            <label>Confirm Password:</label>
+            <input type="password" name="confirmpassword" id="confirmedPassword" required>
+        </div>
     </div>
 
     <button type="submit">Enter</button>
