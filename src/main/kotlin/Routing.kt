@@ -862,6 +862,8 @@ fun Application.configureRouting() {
                     }
             }
 
+            val testRandomValue = (0..1).random()
+            println(testRandomValue)
             when {
                 gameSession.miniGamesEnabled && gameSession.lastIncorrectPlayers.size == 1 -> {
                     val autoGhostedPlayer = gameSession.lastIncorrectPlayers[0]
@@ -886,9 +888,11 @@ fun Application.configureRouting() {
                 gameSession.miniGamesEnabled
                     && gameSession.lastIncorrectPlayers.size >= 2
                     && gameSession.activeMinigames.isNotEmpty()
-                    && (0..1).random() == 1 -> {
+                    && testRandomValue == 1 -> {
 
                     val selectedMinigame = gameSession.activeMinigames.random()
+
+                    println(selectedMinigame)
 
                     when (selectedMinigame) {
                         "maths" -> {
@@ -918,7 +922,7 @@ fun Application.configureRouting() {
                                 ))))
                             }
 
-                            call.respond(PebbleContent("potions_server.peb", mapOf(
+                            call.respond(PebbleContent("potions_minigame_server.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
                                 "gameId" to gameId,
                                 "theme" to session.theme,
@@ -1398,7 +1402,7 @@ fun Application.configureRouting() {
             val isExistingGhost = session.username in gameSession.ghostPlayers
 
             if (session.username in gameSession.lastIncorrectPlayers) {
-                call.respond(PebbleContent("potions_client.peb", mapOf(
+                call.respond(PebbleContent("potions_minigame_client_pick.peb", mapOf(
                     "gameId" to gameId,
                     "theme" to session.theme
                 )))
@@ -1439,7 +1443,7 @@ fun Application.configureRouting() {
 
             val potion = potionsState.playerPicks[session.username] ?: return@get call.respondText("No potion selectd")
 
-            call.respond(PebbleContent("potions_selected.peb", mapOf(
+            call.respond(PebbleContent("potions_minigame_client_selectd_ans.peb", mapOf(
                 "gameId" to gameId,
                 "potion" to potion,
                 "theme" to session.theme
@@ -1515,7 +1519,7 @@ fun Application.configureRouting() {
             val col2 = players.drop(2).take(2)
             val col3 = players.drop(4).take(2)
 
-            call.respond(PebbleContent("potions_server.peb", mapOf(
+            call.respond(PebbleContent("potions_minigame_server.peb", mapOf(
                 "quizName" to quiz.quiz_name,
                 "gameId" to gameId,
                 "theme" to session.theme,
