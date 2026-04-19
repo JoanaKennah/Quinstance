@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>Potions</title>
-
+    <!-- graphics from svgrepo -->
     {% if theme == "spooky" %}
     <style>
         body {
