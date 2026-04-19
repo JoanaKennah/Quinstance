@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Potions</title>
+    <!-- graphics from svgrepo -->
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+            color: #2DC84D;
+        }
+
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            color: black;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 44px);
+        }
+
+        .card {
+            border: 3px solid #2DC84D;
+            border-radius: 20px;
+            padding: 50px 80px;
+            text-align: center;
+            width: 50%;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .selected {
+            border: 2px solid #2DC84D;
+            border-radius: 8px;
+            padding: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #2DC84D;
+        }
+    </style>
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 44px);
+        }
+
+        .card {
+            border: 3px solid #e63973;
+            border-radius: 20px;
+            padding: 50px 80px;
+            text-align: center;
+            width: 50%;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: black;
+            margin-bottom: 30px;
+        }
+
+        .selected {
+            border: 2px solid #e63973;
+            border-radius: 8px;
+            padding: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            color: black;
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+    <div class="navbar">
+        <form method="post" action="/logout">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <div class="title">You selected:</div>
+            <div class="selected">Potion {{ potion }}</div>
+        </div>
+    </div>
+
+    <script>
+        const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        const socket = new WebSocket(protocol + "//" + location.host + "/game/{{ gameId }}");
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            }
+        }
+
+        socket.onerror = function(error) {
+            console.log("WebSocket error: " + error);
+        }
+    </script>
+</body>
+</html>

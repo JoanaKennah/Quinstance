@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Settings</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .settings-box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 30px;
+            width: 60%;
+        }
+
+        .settings-box h2 {
+            text-align: center;
+            text-decoration: underline;
+            color: black;
+            margin-top: 0;
+        }
+
+        .setting-label {
+            font-size: 16px;
+            color: black;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        .time-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .time-btn {
+            padding: 8px 16px;
+            border: 2px solid #e63973;
+            border-radius: 6px;
+            background-color: white;
+            color: black;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .time-btn:hover, .time-btn.selected {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .minigame-btn {
+            padding: 8px 16px;
+            border: 2px solid #e63973;
+            border-radius: 6px;
+            background-color: white;
+            color: black;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .minigame-btn.selected {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .bottom-bar {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            font-size: 16px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+    </style>
+
+    <script>
+        function selectTime(element, seconds) {
+            document.querySelectorAll(".time-btn").forEach(btn => {
+                btn.classList.remove("selected");
+            });
+            element.classList.add("selected");
+            document.getElementById("timeLimit").value = seconds;
+        }
+
+        function toggleMinigames() {
+            const toggle = document.getElementById("minigamesToggle");
+            const options = document.getElementById("minigameOptions");
+            options.style.display = toggle.checked ? "block" : "none";
+        }
+
+        function toggleMinigame(btn, game) {
+            btn.classList.toggle("selected");
+            const input = document.getElementById(game + "-input");
+            input.disabled = !btn.classList.contains("selected");
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="navbar">
+    <a>Settings</a>
+</div>
+
+<div class="content">
+    <div class="settings-box">
+        <h2>Settings</h2>
+
+        <form method="post" action="/settings/{{ gameId }}?return={{ returnUrl }}">
+
+            <input type="hidden" id="timeLimit" name="timeLimit" value="{{ timeLimit }}">
+
+            <div class="setting-label">Time to answer Questions:</div>
+            <div class="time-options">
+                <button type="button" class="time-btn {% if timeLimit == 15 %}selected{% endif %}" onclick="selectTime(this, 15)">15s</button>
+                <button type="button" class="time-btn {% if timeLimit == 30 %}selected{% endif %}" onclick="selectTime(this, 30)">30s</button>
+                <button type="button" class="time-btn {% if timeLimit == 60 %}selected{% endif %}" onclick="selectTime(this, 60)">60s</button>
+                <button type="button" class="time-btn {% if timeLimit == 0 %}selected{% endif %}" onclick="selectTime(this, 0)">Unlimited</button>
+            </div>
+
+            <div style="margin-top: 20px; font-size: 16px; color: black;">
+                Mini Games:
+                <input type="checkbox"
+                    id="minigamesToggle"
+                    name="minigames"
+                    value="true"
+                    style="margin-left: 8px;"
+                    onchange="toggleMinigames()"
+                    {% if minigamesEnabled %}checked{% endif %}>
+            </div>
+
+            <div id="minigameOptions" style="margin-top: 10px; display: {% if minigamesEnabled %}block{% else %}none{% endif %};">
+                <div style="font-size: 14px; color: black; margin-bottom: 8px;">Select minigames:</div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="button"
+                        class="minigame-btn {% if mathsEnabled %}selected{% endif %}"
+                        onclick="toggleMinigame(this, 'maths')">Maths</button>
+                    <button type="button"
+                        class="minigame-btn {% if potionsEnabled %}selected{% endif %}"
+                        onclick="toggleMinigame(this, 'potions')">Potions</button>
+                    <button type="button"
+                        class="minigame-btn {% if roomsEnabled %}selected{% endif %}"
+                        onclick="toggleMinigame(this, 'rooms')">Rooms</button>
+                    <button type="button"
+                        class="minigame-btn {% if wordsEnabled %}selected{% endif %}"
+                        onclick="toggleMinigame(this, 'words')">Words</button>
+                </div>
+
+                <input type="hidden" id="maths-input" name="activeMinigames" value="maths" {% if not mathsEnabled %}disabled{% endif %}>
+                <input type="hidden" id="potions-input" name="activeMinigames" value="potions" {% if not potionsEnabled %}disabled{% endif %}>
+                <input type="hidden" id="rooms-input" name="activeMinigames" value="rooms" {% if not roomsEnabled %}disabled{% endif %}>
+                <input type="hidden" id="words-input" name="activeMinigames" value="words" {% if not wordsEnabled %}disabled{% endif %}>
+            </div>
+
+            <div class="bottom-bar">
+                <button type="button" class="btn" onclick="window.location.href='{{ returnUrl }}'">
+                    Cancel
+                </button>
+                <button type="submit" class="btn">Save</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

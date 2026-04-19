@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Rooms</title>
+    <!-- graphics from svgrepo -->
+
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+            color: #2DC84D;
+        }
+
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            color: black;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .top-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .title-box {
+            border: 2px solid #2DC84D;
+            border-radius: 10px;
+            padding: 15px 30px;
+            display: inline-block;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .btn-next {
+            justify-self: end;
+            padding: 6px 14px;
+            font-size: 14px;
+            background-color: black;
+            color: #2DC84D;
+            border: 2px solid #2DC84D;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-next:hover {
+            background-color: #2DC84D;
+            color: black;
+        }
+
+        .description {
+            border: 2px solid #2DC84D;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+    </style>
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .top-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .title-box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 15px 30px;
+            display: inline-block;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .btn-next {
+            justify-self: end;
+            padding: 6px 14px;
+            font-size: 14px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-next:hover {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .description {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 40px;
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+    <div class="navbar">
+        <form method="post" action="/logout">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="content">
+
+        <div class="top-row">
+            <div></div>
+            <div class="title-box">
+                <h1>Rooms</h1>
+            </div>
+            <form method="post" action="/next-question/{{ gameId }}">
+                <button type="submit" class="btn-next">Next</button>
+            </form>
+        </div>
+
+        <div class="description">
+            Yay! You all picked the same room – you are all safe!
+        </div>
+
+        <svg width="200" height="200" viewBox="-13.22 0 122.88 122.88" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#2DC84D" fill-rule="evenodd" clip-rule="evenodd" d="M0,115.27h4.39V1.99V0h1.99h82.93h1.99v1.99v113.28h5.14v7.61H0V115.27L0,115.27z M13.88,8.32H81.8h0.83v0.83 v104.89h4.69V3.97H8.36v111.3h4.69V9.15V8.32H13.88L13.88,8.32z M15.94,114.04H75.1l-0.38-0.15l-27.76-3.79V33.9l32.79-20.66v-2.04 H15.94V114.04L15.94,114.04z M51.7,59.66l4.23-1.21v15.81l-4.23-1.53V59.66L51.7,59.66z"/>
+        </svg>
+
+    </div>
+</body>
+</html>

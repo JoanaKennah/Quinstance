@@ -67,6 +67,20 @@
             background-color: #2dc84d;
             color: black;
         }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            color: black;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
     </style>
     {% else %}
     <style>
@@ -130,23 +144,38 @@
             background-color: #e63973;
             color: white;
         }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
     </style>
     {% endif %}
 </head>
 
 <body>
     <div class="navbar">
-        <a>Maths Mini-Game</a>
+        <form method="post" action="/logout">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
     </div>
 
     <div class="content">
         <h2>Answer as quickly as possible to avoid becoming a ghost!</h2>
 
         <div class="question-box">
-            {{ question }} <!--- DIFFERENT QUESTION AND ANSWERS AT EACH LOADING --->
+            {{ question }}
         </div>
 
-        <div class="answers"> <!--- NEED TO CHECK ON HOW TO CHECK ANSWERS --->
+        <div class="answers">
             <button class="btn" onclick="checkAnswer('{{ option1 }}')">{{ option1 }}</button>
             <button class="btn" onclick="checkAnswer('{{ option2 }}')">{{ option2 }}</button>
             <button class="btn" onclick="checkAnswer('{{ option3 }}')">{{ option3 }}</button>
@@ -157,13 +186,26 @@
     <script>
         function checkAnswer(selected) {
             const correct = "{{ correct_answer }}";
-
             if (selected === correct) {
-                window.location.href = "/mini_game_maths_question";
+                window.location.href = "/minigame-correct/{{ gameId }}";
             } else {
-                window.location.href = "/mini_game_maths_incorrect_ans";
+                window.location.href = "/minigame-incorrect/{{ gameId }}";
             }
         }
+    </script>
+
+    <script>
+        const pollMinigame = setInterval(() => {
+            fetch("/minigame-active/{{ gameId }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.active) {
+                        clearInterval(pollMinigame);
+                        window.location.href = "/minigame-result/{{ gameId }}";
+                    }
+                })
+                .catch(err => console.log("Poll error: " + err));
+        }, 500);
     </script>
 </body>
 </html>
