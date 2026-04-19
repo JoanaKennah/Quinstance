@@ -52,6 +52,7 @@ data class GameSession(
     var mathsGameState: MathsGameState? = null,
     var ghostPlayers: MutableList<String> = mutableListOf(),
     var revivedPlayers: MutableList<String> = mutableListOf(),
+    var autoGhostedPlayer: String? = null,
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet())
 )
 
