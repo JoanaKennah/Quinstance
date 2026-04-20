@@ -40,20 +40,23 @@
 
         .csv-container {
             display: flex;
-            margin: 20px;
-            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
         }
 
         .csv-text {
-              color: #e63973;
-              margin: 10px;
-              font-size: 20px;
+            color: #e63973;
+            font-size: 18px;
+            margin: 0;
+            white-space: nowrap;
         }
 
-        .csv-button {
-              color: #e63973;
-              margin: 5px;
-              font-size: 20px;
+        .csv-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .button-bar {
@@ -211,8 +214,10 @@
             <form method="post"
                   action="/view-quiz-questions/{{ quizId }}"
                   enctype="multipart/form-data"
+                  class = "csv.form"
                   onsubmit={% if questions is not empty %}"return deleteQuestions()"{% endif %}>
-                <input type="file" class="csv-button" name="filename">
+                <input type="file" id="fileInput" name="filename" style="display:none;">
+                <button type="button" class="btn-download" onclick="document.getElementById('fileInput').click();">Choose File</button>
                 <input type="hidden" name="quizId" value={{ quizId }}>
                 <input type="hidden" name="resetQuestions" id="csvChoice">
                 <button class="btn" type="submit">Submit</button>
@@ -251,8 +256,5 @@
         <button class="btn" onclick="window.location.href='{{ returnURL }}'">Return</button>
     </div>
 </div>
-
-
-
 </body>
 </html>
