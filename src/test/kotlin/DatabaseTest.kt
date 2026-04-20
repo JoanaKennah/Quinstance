@@ -21,6 +21,15 @@ import io.kotest.matchers.string.shouldHaveLength
 class DatabaseTest: StringSpec({
     // Testing the functions used for Login / Signup
 
+    "Retrieving user with empty username throws an IllegalArgumentException" {
+        testApplication {
+            application { testModule() }
+            shouldThrow<IllegalArgumentException> {
+                retrieveUser("")
+            }
+        }
+    }
+
     "Retrieve correct user data for user with username 'linguin0'" {
         testApplication {
             application { testModule() }
@@ -74,15 +83,6 @@ class DatabaseTest: StringSpec({
             application { testModule() }
             val user = retrieveUser("testUser")
             user shouldBe null
-        }
-    }
-
-    "Retrieving user with empty username throws an IllegalArgumentException" {
-        testApplication {
-            application { testModule() }
-            shouldThrow<IllegalArgumentException> {
-                retrieveUser("")
-            }
         }
     }
 
