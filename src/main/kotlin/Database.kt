@@ -242,7 +242,6 @@ fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
     // Find all question ID's associated with the given Quiz
     return transaction(TransactionManager.defaultDatabase) {
         // Check to see if quiz actually exists
-        println("test ${quiz.id}")
         require( (Quiz.findById(quiz.id))?.id == quiz.id ) { "Quiz received does not exist" }
 
         val foundQuestionQuinstances = Quinstance.find { QuinstanceTable.quiz eq quiz.id }
@@ -275,9 +274,7 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
     // already exists
     return transaction(TransactionManager.defaultDatabase) {
         val check = Answer.find {AnswerTable.question eq question.id }
-        if (check.firstOrNull() != null) {
-            return@transaction null
-        }
+        if (check.firstOrNull() != null) return@transaction null
 
         val allOptions = listOfNotNull(option1, option2, option3, option4)
         val correctOption = allOptions[correctIndex]

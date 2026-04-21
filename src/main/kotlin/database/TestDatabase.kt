@@ -55,7 +55,7 @@ object TestDatabase {
 
             val hashedPasswordThree = Password.hash("password789").addRandomSalt(8).withScrypt()
             val userThree = UserTable.insertAndGetId {
-                it[username] = "MinghaoLe123"
+            it[username] = "MinghaoLe123"
                 it[password] = hashedPasswordThree.result
                 it[name] = "Minghao Le"
                 it[email] = "tgqj4326@leeds.ac.uk"

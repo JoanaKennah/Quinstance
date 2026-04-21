@@ -1,8 +1,14 @@
 package com.example
 
 import com.example.database.TestDatabase
+import com.example.database.objects.Question
+import com.example.database.objects.Quinstance
 import com.example.database.objects.Quiz
+import com.example.database.objects.User
+import com.example.database.tables.QuestionTable
+import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
+import com.example.database.tables.UserTable
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.core.eq
@@ -17,6 +23,7 @@ import io.ktor.server.testing.*
 import com.password4j.Password
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.string.shouldHaveLength
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 
 class DatabaseTest: StringSpec({
     // Testing the functions used for Login / Signup
@@ -253,13 +260,14 @@ class DatabaseTest: StringSpec({
                                 "furthereducation",
                                 "teacher")
             user shouldNotBe null
-            if (user != null) {
-                val retrievedUser = retrieveUser(user.username)
-                retrievedUser shouldNotBe null
-                if (retrievedUser != null) {
-                    retrievedUser.password shouldContain "\$100801\$"
-                    retrievedUser.password shouldHaveLength 109
-                }
+            
+            val retrievedUser = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq user!!.username }.firstOrNull()
+            }
+            retrievedUser shouldNotBe null
+            retrievedUser!!.let {
+                it.password shouldContain "\$100801\$"
+                it.password shouldHaveLength 109
             }
         }
     }
@@ -312,7 +320,7 @@ class DatabaseTest: StringSpec({
 
             val foundQuizzes = retrieveUserQuizzes("MinghaoLe123")
             foundQuizzes shouldNotBe null
-            if (foundQuizzes != null) foundQuizzes shouldHaveSize 0
+            foundQuizzes!! shouldHaveSize 0
         }
     }
 
@@ -329,15 +337,17 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val user = retrieveUser("MinghaoLe123")
-            if (user != null) {
-                val newQuiz = addQuiz(user,
-                    "My Quiz #1",
-                    "This is a test quiz",
-                    "other",
-                    "furthereducation")
-                newQuiz shouldNotBe null
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
             }
+            user shouldNotBe null
+
+            val newQuiz = addQuiz(user!!,
+                "My Quiz #1",
+                "This is a test quiz",
+                "other",
+                "furthereducation")
+            newQuiz shouldNotBe null
         }
     }
 
@@ -345,15 +355,17 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val user = retrieveUser("MinghaoLe123")
-            if (user != null) {
-                val newQuiz = addQuiz(user,
-                    "My really cool awesome quiz with many characters!!",
-                    "This is a test quiz",
-                    "other",
-                    "furthereducation")
-                newQuiz shouldNotBe null
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
             }
+            user shouldNotBe null
+
+            val newQuiz = addQuiz(user!!,
+                "My really cool awesome quiz with many characters!!",
+                "This is a test quiz",
+                "other",
+                "furthereducation")
+            newQuiz shouldNotBe null
         }
     }
 
@@ -361,15 +373,17 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val user = retrieveUser("MinghaoLe123")
-            if (user != null) {
-                shouldThrow<IllegalArgumentException> {
-                    addQuiz(user,
-                        "My really cool awesome quiz with many characters!! Uh oh!!",
-                        "This is a test quiz",
-                        "other",
-                        "furthereducation")
-                }
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+            }
+            user shouldNotBe null
+
+            shouldThrow<IllegalArgumentException> {
+                addQuiz(user!!,
+                    "My really cool awesome quiz with many characters!! Uh oh!!",
+                    "This is a test quiz",
+                    "other",
+                    "furthereducation")
             }
         }
     }
@@ -378,16 +392,18 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val user = retrieveUser("MinghaoLe123")
-            if (user != null) {
-                val newQuiz = addQuiz(user,
-                    "My really cool awesome quiz with many characters!!",
-                    "This is a really long, boring, very tedious description for testing purposes. 256 characters may be too little, may be too many, may even be the perfect amount of descriptions! Depends how much you like to type, say, yap, et cetera. I think this is done!!!",
-                    "other",
-                    "furthereducation")
-                newQuiz shouldNotBe null
-                newQuiz.description shouldHaveLength 256
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
             }
+            user shouldNotBe null
+
+            val newQuiz = addQuiz(user!!,
+                "My really cool awesome quiz with many characters!!",
+                "This is a really long, boring, very tedious description for testing purposes. 256 characters may be too little, may be too many, may even be the perfect amount of descriptions! Depends how much you like to type, say, yap, et cetera. I think this is done!!!",
+                "other",
+                "furthereducation")
+            newQuiz shouldNotBe null
+            newQuiz.description shouldHaveLength 256
         }
     }
 
@@ -395,15 +411,17 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val user = retrieveUser("MinghaoLe123")
-            if (user != null) {
-                shouldThrow<IllegalArgumentException> {
-                    addQuiz(user,
-                        "My Quiz #1",
-                        "This is a really long, boring, very tedious description for testing purposes. 256 characters may be too little, may be too many, may even be the perfect amount of descriptions! Depends how much you like to type, say, yap, et cetera. I think this is done!!! Uh oh!",
-                        "other",
-                        "furthereducation")
-                }
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+            }
+            user shouldNotBe null
+
+            shouldThrow<IllegalArgumentException> {
+                addQuiz(user!!,
+                    "My Quiz #1",
+                    "This is a really long, boring, very tedious description for testing purposes. 256 characters may be too little, may be too many, may even be the perfect amount of descriptions! Depends how much you like to type, say, yap, et cetera. I think this is done!!! Uh oh!",
+                    "other",
+                    "furthereducation")
             }
         }
     }
@@ -412,16 +430,18 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val user = retrieveUser("MinghaoLe123")
-            if (user != null) {
-                shouldThrow<IllegalArgumentException> {
-                    addQuiz(user,
-                        "My Quiz #1",
-                        "This is a test quiz",
-                        "other",
-                        "furthereducation",
-                        num_of_questions = -1)
-                }
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+            }
+            user shouldNotBe null
+
+            shouldThrow<IllegalArgumentException> {
+                addQuiz(user!!,
+                    "My Quiz #1",
+                    "This is a test quiz",
+                    "other",
+                    "furthereducation",
+                    num_of_questions = -1)
             }
         }
     }
@@ -430,13 +450,16 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            // Assumes Minghao only has one quiz. This may not be appropriate for a test tho
-            val retrievedQuizzes = retrieveUserQuizzes("JoanaKennah")
-            retrievedQuizzes shouldNotBe null
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "JoanaKennah"}.firstOrNull() }
+            user shouldNotBe null
 
-            val quiz = retrievedQuizzes!!.first()
+            val quiz = transaction(TestDatabase.db) {
+                Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+            }
+
             quiz shouldNotBe null
-            quiz.num_of_questions shouldBe 1
+            quiz!!.num_of_questions shouldBe 1
 
             val question = addQuestion(quiz,
                 "This is a test question",
@@ -451,13 +474,15 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            // Assumes Minghao only has one quiz. This may not be appropriate for a test tho
-            val retrievedQuizzes = retrieveUserQuizzes("JoanaKennah")
-            retrievedQuizzes shouldNotBe null
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "JoanaKennah"}.firstOrNull() }
+            user shouldNotBe null
 
-            val quiz = retrievedQuizzes!!.first()
+            val quiz = transaction(TestDatabase.db) {
+                Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+            }
             quiz shouldNotBe null
-            quiz.num_of_questions shouldBe 1
+            quiz!!.num_of_questions shouldBe 1
 
             val question = addQuestion(quiz,
                 "This is a test question. I don't know how to make this long to be honest. Hello examiner, how has your day been? Writing tests are very important but do you enjoy writing tests? I think I enjoy it but it can be quite tedious, but is important. What is 2+2?",
@@ -472,15 +497,18 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val retrievedQuizzes = retrieveUserQuizzes("JoanaKennah")
-            retrievedQuizzes shouldNotBe null
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "JoanaKennah"}.firstOrNull() }
+            user shouldNotBe null
 
-            val quiz = retrievedQuizzes!!.first()
+            val quiz = transaction(TestDatabase.db) {
+                Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+            }
             quiz shouldNotBe null
 
             shouldThrow<IllegalArgumentException> {
                 addQuestion(
-                    quiz,
+                    quiz!!,
                     "This is a test question. I don't know how to make this long to be honest. Hello examiner, how has your day been? Writing tests are very important but do you enjoy writing tests? I think I enjoy it but it can be quite tedious, but is important. What is 2+2????!",
                     "furthereducation")
             }
@@ -495,12 +523,15 @@ class DatabaseTest: StringSpec({
                 listOf("What is a process?", "furthereducation"),
                 listOf("What is a thread?", "furthereducation"))
 
-            val retrievedQuizzes = retrieveUserQuizzes("linguin0")
-            retrievedQuizzes shouldNotBe null
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "linguin0"}.firstOrNull() }
+            user shouldNotBe null
 
-            val quiz = retrievedQuizzes!!.first()
+            val quiz = transaction(TestDatabase.db) {
+                Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+            }
             quiz shouldNotBe null
-            quiz.quiz_name shouldBe "COMP2860 Quiz"
+            quiz!!.quiz_name shouldBe "COMP2860 Quiz"
 
             val quizQuestions = retrieveQuizQuestions(quiz)
             quizQuestions shouldNotBe null
@@ -518,12 +549,15 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val retrievedQuizzes = retrieveUserQuizzes("JoanaKennah")
-            retrievedQuizzes shouldNotBe null
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "JoanaKennah"}.firstOrNull() }
+            user shouldNotBe null
 
-            val quiz = retrievedQuizzes!!.first()
+            val quiz = transaction(TestDatabase.db) {
+                Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+            }
             quiz shouldNotBe null
-            quiz.quiz_name shouldBe "COMP2870 Quiz"
+            quiz!!.quiz_name shouldBe "COMP2870 Quiz"
 
             val quizQuestions = retrieveQuizQuestions(quiz)
             quizQuestions shouldNotBe null
@@ -538,21 +572,29 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val user = retrieveUser("MinghaoLe123")
-            if (user != null) {
-                val newQuiz = addQuiz(user,
-                    "Test Quiz",
-                    "This is a test quiz",
-                    "other",
-                    "furthereducation")
-                newQuiz shouldNotBe null
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123"}.firstOrNull() }
+            user shouldNotBe null
 
-                val retrievedQuizzes = retrieveUserQuizzes("MinghaoLe123")
-                retrievedQuizzes shouldNotBe null
-
-                val retrievedQuestions = retrieveQuizQuestions(newQuiz)
-                retrievedQuestions shouldBe emptyList()
+            val newQuiz = transaction(TestDatabase.db) {
+                Quiz.new {
+                    this.user = user!!
+                    this.quiz_name = "Test Quiz"
+                    this.description = "This is a test quiz"
+                    this.category = "other"
+                    this.key_stage = "furthereducation"
+                }
             }
+            newQuiz shouldNotBe null
+
+            val retrievedQuizzes = transaction(TestDatabase.db) {
+                Quiz.find { QuizTable.user eq user!!.id }.toList()
+            }
+            retrievedQuizzes shouldNotBe null
+            retrievedQuizzes shouldHaveSize 1
+
+            val retrievedQuestions = retrieveQuizQuestions(newQuiz)
+            retrievedQuestions shouldBe emptyList()
         }
     }
 
@@ -560,20 +602,24 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val user = retrieveUser("MinghaoLe123")
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123"}.firstOrNull() }
             user shouldNotBe null
 
-            val quiz = addQuiz(user!!,
-                "Test Quiz",
-                "This is a test quiz",
-                "other",
-                "furthereducation")
+            val newQuiz = transaction(TestDatabase.db) { Quiz.new {
+                this.user = user!!
+                this.quiz_name = "Test Quiz"
+                this.description = "This is a test quiz"
+                this.category = "other"
+                this.key_stage = "furthereducation"
+            }}
+            newQuiz shouldNotBe null
 
-            quiz shouldNotBe null
-            transaction(TestDatabase.db) { quiz.delete() } // To remove quiz from database so it can be invalid.
+            newQuiz shouldNotBe null
+            transaction(TestDatabase.db) { newQuiz.delete() } // To remove quiz from database so it can be invalid.
 
             shouldThrow<IllegalArgumentException> {
-                retrieveQuizQuestions(quiz)
+                retrieveQuizQuestions(newQuiz)
             }
         }
     }
@@ -588,9 +634,15 @@ class DatabaseTest: StringSpec({
                 "A program waiting to be executed"),
                 listOf("A small sequence of programmed instructions", "A piece of yarn or twine", null, null))
 
-            val userQuizzes = retrieveUserQuizzes("linguin0")
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "linguin0"}.firstOrNull()
+            }
+
+            val userQuizzes = transaction(TestDatabase.db) {
+                Quiz.find { QuizTable.user eq user!!.id }.toList()
+            }
             userQuizzes shouldNotBe null
-            userQuizzes!! shouldHaveSize 2
+            userQuizzes shouldHaveSize 2
 
             val quiz = userQuizzes.firstOrNull()
             quiz shouldNotBe null
@@ -617,14 +669,22 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val quizzes = retrieveUserQuizzes("JoanaKennah")
-            quizzes shouldNotBe null
-            quizzes!! shouldHaveSize 1
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "JoanaKennah"}.firstOrNull()
+            }
+
+            val quizzes = transaction(TestDatabase.db) {
+                Quiz.find { QuizTable.user eq user!!.id }.toList()
+            }
+            quizzes shouldHaveSize 1
 
             val quiz = quizzes.firstOrNull()
             quiz shouldNotBe null
 
-            val questions = retrieveQuizQuestions(quiz!!)
+            val questions = transaction(TestDatabase.db) {
+                val quinstances = Quinstance.find { QuinstanceTable.id eq quiz!!.id}.toList()
+                return@transaction buildList { for(q in quinstances) add(q.question) }
+            }
             questions shouldNotBe null
             questions shouldHaveSize 1
 
@@ -644,23 +704,194 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val user = retrieveUser("MinghaoLe123")
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123"}.firstOrNull()
+            }
             user shouldNotBe null
 
-            val quiz = addQuiz(user!!,
-                "Test Quiz",
-                "This is a test quiz",
-                "other",
-                "furthereducation")
+            val quiz = transaction(TestDatabase.db) {  Quiz.new {
+                this.user = user!!
+                this.quiz_name = "Test Quiz"
+                this.description = "This is a test quiz"
+                this.category = "other"
+                this.key_stage = "furthereducation"
+            }}
             quiz shouldNotBe null
 
-            val question = addQuestion(quiz,
-                "Test question",
-                "keystage1")
+            val question = transaction(TestDatabase.db) {
+                Question.new {
+                    this.question = "Test question"
+                    this.key_stage = "keystage1"
+                }
+            }
             question shouldNotBe null
 
             val answer = retrieveQuestionAnswer(question)
             answer shouldBe null
+        }
+    }
+
+    "Adding an Answer (normal data, first option is correct) to a Question without an existing Answer" {
+        testApplication {
+            application { testModule() }
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123"}.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val quiz = transaction(TestDatabase.db) {
+                Quiz.new {
+                    this.user = user!!
+                    this.quiz_name = "Test Quiz"
+                    this.description = "This is a test quiz"
+                    this.category = "other"
+                    this.key_stage = "furthereducation"
+                }
+            }
+            quiz shouldNotBe null
+
+            val question = transaction(TestDatabase.db) {
+                Question.new {
+                    this.question = "Test question"
+                    this.key_stage = "keystage1"
+                }
+            }
+            question shouldNotBe null
+
+            val answer = addAnswer(question,
+                "Option 1",
+                "Option 2",
+                "Option 3",
+                "Option 4",
+                0)
+            answer shouldNotBe null
+            answer!!.correct_answer shouldBe "Option 1"
+            answer.option2 shouldBe "Option 2"
+            answer.option3 shouldBe "Option 3"
+            answer.option4 shouldBe "Option 4"
+        }
+    }
+
+    "Add an Answer (normal data, second option is correct) to a Question without an existing Answer" {
+        testApplication {
+            application { testModule() }
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123"}.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val quiz = transaction(TestDatabase.db) {
+                Quiz.new {
+                    this.user = user!!
+                    this.quiz_name = "Test Quiz"
+                    this.description = "This is a test quiz"
+                    this.category = "other"
+                    this.key_stage = "furthereducation"
+                }
+            }
+            quiz shouldNotBe null
+
+            val question = transaction(TestDatabase.db) {
+                Question.new {
+                    this.question = "Test question"
+                    this.key_stage = "keystage1"
+                }
+            }
+            question shouldNotBe null
+
+            val answer = addAnswer(question,
+                "Option 1",
+                "Option 2",
+                "Option 3",
+                "Option 4",
+                1)
+            answer shouldNotBe null
+            answer!!.correct_answer shouldBe "Option 2"
+            answer.option2 shouldBe "Option 1"
+            answer.option3 shouldBe "Option 3"
+            answer.option4 shouldBe "Option 4"
+        }
+    }
+
+    "Add an Answer (normal data, third option is correct) to a Question without an existing Answer" {
+        testApplication {
+            application { testModule() }
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123"}.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val quiz = transaction(TestDatabase.db) {
+                Quiz.new {
+                    this.user = user!!
+                    this.quiz_name = "Test Quiz"
+                    this.description = "This is a test quiz"
+                    this.category = "other"
+                    this.key_stage = "furthereducation"
+                }
+            }
+            quiz shouldNotBe null
+
+            val question = transaction(TestDatabase.db) {
+                Question.new {
+                    this.question = "Test question"
+                    this.key_stage = "keystage1"
+                }
+            }
+            question shouldNotBe null
+
+            val answer = addAnswer(question,
+                "Option 1",
+                "Option 2",
+                "Option 3",
+                "Option 4",
+                2)
+            answer shouldNotBe null
+            answer!!.correct_answer shouldBe "Option 3"
+            answer.option2 shouldBe "Option 1"
+            answer.option3 shouldBe "Option 2"
+            answer.option4 shouldBe "Option 4"
+        }
+    }
+
+    "Add an Answer (normal data, fourth option is correct) to a Question without an existing Answer" {
+        testApplication {
+            application { testModule() }
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123"}.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val quiz = transaction(TestDatabase.db) {
+                Quiz.new {
+                    this.user = user!!
+                    this.quiz_name = "Test Quiz"
+                    this.description = "This is a test quiz"
+                    this.category = "other"
+                    this.key_stage = "furthereducation"
+                }
+            }
+            quiz shouldNotBe null
+
+            val question = transaction(TestDatabase.db) {
+                Question.new {
+                    this.question = "Test question"
+                    this.key_stage = "keystage1"
+                }
+            }
+            question shouldNotBe null
+
+            val answer = addAnswer(question,
+                "Option 1",
+                "Option 2",
+                "Option 3",
+                "Option 4",
+                3)
+            answer shouldNotBe null
+            answer!!.correct_answer shouldBe "Option 4"
+            answer.option2 shouldBe "Option 1"
+            answer.option3 shouldBe "Option 2"
+            answer.option4 shouldBe "Option 3"
         }
     }
 })
