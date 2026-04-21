@@ -109,73 +109,6 @@ fun deleteUser(user : User) {
 }
 
 /**
- * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1.
- */
-fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
-    for (parameter in listOf(question, key_stage)) {
-        require(parameter.isNotEmpty())
-    }
-    val newQuestion = transaction(TransactionManager.defaultDatabase) {
-        // Don't need to check if Question already exists
-        val question = Question.new {
-            this.question = question
-            this.key_stage = key_stage
-        }
-        // Creates Quinstance so we know which Quiz is associated with what Question
-        Quinstance.new {
-            this.quiz = quiz
-            this.question = question
-        }
-
-        quiz.num_of_questions += 1
-
-        return@transaction question
-    }
-    return newQuestion
-}
-
-/**
- * Deletes given question from QuestionTable. Returns true if the question is successfully deleted
- */
-fun deleteQuestion(question: Question): Boolean {
-    // Finds if the given question exists, then deletes it
-    return transaction(TransactionManager.defaultDatabase) {
-        val foundQuestion = Question.find { QuestionTable.id eq question.id }
-        if (foundQuestion.firstOrNull() != null) {
-            question.delete()
-            return@transaction true
-        }
-        return@transaction false
-    }
-}
-
-/**
- * Retrieves all Questions associated with the given Quiz. If there are no questions associated with the quiz,
- * a null value is returned.
- */
-fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
-    // Find all question ID's associated with the given Quiz
-    return transaction(TransactionManager.defaultDatabase) {
-        // Check to see if quiz actually exists
-        println("test ${quiz.id}")
-        require( (Quiz.findById(quiz.id))?.id == quiz.id ) { "Quiz received does not exist" }
-
-        val foundQuestionQuinstances = Quinstance.find { QuinstanceTable.quiz eq quiz.id }
-        val questionList = mutableListOf<Question>()
-
-        // Retrieves Question objects from the ID's found and appends them to a list, which is returned.
-        // Can be empty but never null
-        for (questionQuinstance in foundQuestionQuinstances) {
-            val question = Question.findById(questionQuinstance.id)
-            if (question != null) {
-                questionList.add(question)
-            }
-        }
-        return@transaction questionList
-    }
-}
-
-/**
  * Creates and adds a new Quiz to QuizTable
  */
 fun addQuiz(user: User, quiz_name: String, description: String, category: String, key_stage: String, num_of_questions: Int = 0, minigamesEnabled: Boolean = false) : Quiz {
@@ -257,6 +190,73 @@ fun retrieveUserQuizzes(username: String) : MutableList<Quiz>? {
             quizList.add(quiz)
         }
         return@transaction quizList
+    }
+}
+
+/**
+ * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1.
+ */
+fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
+    for (parameter in listOf(question, key_stage)) {
+        require(parameter.isNotEmpty())
+    }
+    val newQuestion = transaction(TransactionManager.defaultDatabase) {
+        // Don't need to check if Question already exists
+        val question = Question.new {
+            this.question = question
+            this.key_stage = key_stage
+        }
+        // Creates Quinstance so we know which Quiz is associated with what Question
+        Quinstance.new {
+            this.quiz = quiz
+            this.question = question
+        }
+
+        quiz.num_of_questions += 1
+
+        return@transaction question
+    }
+    return newQuestion
+}
+
+/**
+ * Deletes given question from QuestionTable. Returns true if the question is successfully deleted
+ */
+fun deleteQuestion(question: Question): Boolean {
+    // Finds if the given question exists, then deletes it
+    return transaction(TransactionManager.defaultDatabase) {
+        val foundQuestion = Question.find { QuestionTable.id eq question.id }
+        if (foundQuestion.firstOrNull() != null) {
+            question.delete()
+            return@transaction true
+        }
+        return@transaction false
+    }
+}
+
+/**
+ * Retrieves all Questions associated with the given Quiz. If there are no questions associated with the quiz,
+ * a null value is returned.
+ */
+fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
+    // Find all question ID's associated with the given Quiz
+    return transaction(TransactionManager.defaultDatabase) {
+        // Check to see if quiz actually exists
+        println("test ${quiz.id}")
+        require( (Quiz.findById(quiz.id))?.id == quiz.id ) { "Quiz received does not exist" }
+
+        val foundQuestionQuinstances = Quinstance.find { QuinstanceTable.quiz eq quiz.id }
+        val questionList = mutableListOf<Question>()
+
+        // Retrieves Question objects from the ID's found and appends them to a list, which is returned.
+        // Can be empty but never null
+        for (questionQuinstance in foundQuestionQuinstances) {
+            val question = Question.findById(questionQuinstance.id)
+            if (question != null) {
+                questionList.add(question)
+            }
+        }
+        return@transaction questionList
     }
 }
 
@@ -503,7 +503,12 @@ fun retrieveAllUserScores(game: Game): List<Triple<Int, String, Int>> {
     }
 }
 
+/**
+ * Retrieve all quizzes a user has played (or attempted to play) and return the quiz name and the user's score.
+ * Returns a list of UserAttemptView objects, can be empty.
+ */
 fun retrieveUserAttempts(user: User): List<UserAttemptView> {
+    require(retrieveUser(user.username) != null) { "User must exist" }
     return transaction(TransactionManager.defaultDatabase) {
         UserScore.find { UserScoreTable.user eq user.id }
             .map {
