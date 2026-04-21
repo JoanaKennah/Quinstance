@@ -555,4 +555,112 @@ class DatabaseTest: StringSpec({
             }
         }
     }
+
+    "Trying to retrieve questions from a non-existing Quiz throws an IllegalArgumentException" {
+        testApplication {
+            application { testModule() }
+
+            val user = retrieveUser("MinghaoLe123")
+            user shouldNotBe null
+
+            val quiz = addQuiz(user!!,
+                "Test Quiz",
+                "This is a test quiz",
+                "other",
+                "furthereducation")
+
+            quiz shouldNotBe null
+            transaction(TestDatabase.db) { quiz.delete() } // To remove quiz from database so it can be invalid.
+
+            shouldThrow<IllegalArgumentException> {
+                retrieveQuizQuestions(quiz)
+            }
+        }
+    }
+
+    "Retrieve each Answer for all questions in Quiz 'COMP2860 Quiz'" {
+        testApplication {
+            application { testModule() }
+
+            val questionAnswerData = listOf(listOf("A program in execution",
+                "Come to understand or accept something over a period of time",
+                "A summons or writ requiring a person to appear in court",
+                "A program waiting to be executed"),
+                listOf("A small sequence of programmed instructions", "A piece of yarn or twine", null, null))
+
+            val userQuizzes = retrieveUserQuizzes("linguin0")
+            userQuizzes shouldNotBe null
+            userQuizzes!! shouldHaveSize 2
+
+            val quiz = userQuizzes.firstOrNull()
+            quiz shouldNotBe null
+            quiz!!.quiz_name shouldBe "COMP2860 Quiz"
+
+            val questions = retrieveQuizQuestions(quiz)
+            questions shouldNotBe null
+            questions shouldHaveSize 2
+
+            for (i in 0..1) {
+                val answer = retrieveQuestionAnswer(questions[i])
+                answer shouldNotBe null
+
+                answer!!.correct_answer shouldBe questionAnswerData[i][0]
+                answer.option2 shouldBe questionAnswerData[i][1]
+                answer.option3 shouldBe questionAnswerData[i][2]
+                answer.option4 shouldBe questionAnswerData[i][3]
+            }
+
+        }
+    }
+
+    "Retrieve Answer for question in Quiz 'COMP2870'" {
+        testApplication {
+            application { testModule() }
+
+            val quizzes = retrieveUserQuizzes("JoanaKennah")
+            quizzes shouldNotBe null
+            quizzes!! shouldHaveSize 1
+
+            val quiz = quizzes.firstOrNull()
+            quiz shouldNotBe null
+
+            val questions = retrieveQuizQuestions(quiz!!)
+            questions shouldNotBe null
+            questions shouldHaveSize 1
+
+            val question = questions.firstOrNull()
+            question shouldNotBe null
+
+            val answer = retrieveQuestionAnswer(question!!)
+            answer shouldNotBe null
+            answer!!.correct_answer shouldBe "A model of computation with an extremely limited amount of memory"
+            answer.option2 shouldBe "A machine that only runs a finite amount of times"
+            answer.option3 shouldBe "I have ran out of fake answers"
+            answer.option4 shouldBe null
+        }
+    }
+
+    "Trying to retrieve an Answer from a Question with (somehow) no Answer returns null" {
+        testApplication {
+            application { testModule() }
+
+            val user = retrieveUser("MinghaoLe123")
+            user shouldNotBe null
+
+            val quiz = addQuiz(user!!,
+                "Test Quiz",
+                "This is a test quiz",
+                "other",
+                "furthereducation")
+            quiz shouldNotBe null
+
+            val question = addQuestion(quiz,
+                "Test question",
+                "keystage1")
+            question shouldNotBe null
+
+            val answer = retrieveQuestionAnswer(question)
+            answer shouldBe null
+        }
+    }
 })
