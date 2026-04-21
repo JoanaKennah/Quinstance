@@ -859,7 +859,11 @@ fun Application.configureRouting() {
                             } else {
                                 val userScore = retrieveUserScore(game, user)
                                 if (userScore != null) {
-                                    val pointsEarned = (100 + ((answerData.timeRemaining.toDouble() / gameSession.timeLimit.toDouble()) * 900)).roundToInt()
+                                    val pointsEarned = if (gameSession.timeLimit == 0) {
+                                        1000
+                                    } else {
+                                        (100 + ((answerData.timeRemaining.toDouble() / gameSession.timeLimit.toDouble()) * 900)).roundToInt()
+                                    }
                                     userScore.score += pointsEarned
                                 }
                             }
