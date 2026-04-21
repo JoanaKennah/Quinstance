@@ -711,7 +711,7 @@ fun Application.configureRouting() {
             gameSession.isStarted = true
             
             //redirect all connected players to game page
-            gameSession.connections.forEach { connection -> connection.send(Frame.Text(Json.encodeToString(mapOf("redirect" to "/game/$gameId")))) }
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/game/$gameId\"}"))}
 
             // Small delay allows clients to connect to new WebSocket
             kotlinx.coroutines.delay(1000)
@@ -890,7 +890,7 @@ fun Application.configureRouting() {
             UserAnswers.clearAnswers()
 
             // Send clients to correct ans page
-            gameSession.connections.forEach { connection -> connection.send(Frame.Text(Json.encodeToString(mapOf("redirect" to "/show-correct-answer-client/$gameId"))))}
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/show-correct-answer-client/$gameId\"}"))}
 
             //send host to correct ans view w/ next button
             call.respond(PebbleContent("question_with_correct_ans.peb", mapOf(
@@ -994,11 +994,7 @@ fun Application.configureRouting() {
                     gameSession.ghostPlayers.add(autoGhostedPlayer)
                     gameSession.autoGhostedPlayer = autoGhostedPlayer
 
-                    gameSession.connections.forEach { connection ->
-                        connection.send(Frame.Text(Json.encodeToString(mapOf(
-                            "redirect" to "/auto-ghost-result/$gameId"
-                        ))))
-                    }
+                    gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/auto-ghost-result/$gameId\"}")) }
 
                     call.respond(PebbleContent("leaderboard.peb", mapOf(
                         "quizName" to quiz.quiz_name,
@@ -1025,11 +1021,7 @@ fun Application.configureRouting() {
                         "maths" -> {
                             gameSession.mathsGameState = MathsGameState()
 
-                            gameSession.connections.forEach { connection ->
-                                connection.send(Frame.Text(Json.encodeToString(mapOf(
-                                    "redirect" to "/minigame-start/$gameId"
-                                ))))
-                            }
+                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/minigame-start/$gameId\"}")) }
 
                             call.respond(PebbleContent("mini_game_maths_server.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
@@ -1043,11 +1035,7 @@ fun Application.configureRouting() {
                         "potions" -> {
                             gameSession.potionsGameState = PotionsGameState()
 
-                            gameSession.connections.forEach { connection ->
-                                connection.send(Frame.Text(Json.encodeToString(mapOf(
-                                    "redirect" to "/potions-start/$gameId"
-                                ))))
-                            }
+                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/potions-start/$gameId\"}")) }
 
                             call.respond(PebbleContent("potions_minigame_server.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
@@ -1067,11 +1055,7 @@ fun Application.configureRouting() {
                         "rooms" -> {
                             gameSession.roomsGameState = RoomsGameState()
 
-                            gameSession.connections.forEach { connection -> 
-                                connection.send(Frame.Text(Json.encodeToString(mapOf(
-                                    "redirect" to "/rooms-start/$gameId"
-                                ))))
-                            }
+                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"//$gameId\"}")) }
 
                             call.respond(PebbleContent("rooms_minigame_server_playing.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
@@ -1082,9 +1066,7 @@ fun Application.configureRouting() {
 
                         else -> {
                             gameSession.connections.forEach { connection ->
-                                connection.send(Frame.Text(Json.encodeToString(
-                                    mapOf("redirect" to "/client-position/$gameId")
-                                )))
+                                connection.send(Frame.Text("{\"redirect\":\"/client-position/$gameId\"}"))
                             }
 
                             call.respond(PebbleContent("leaderboard.peb", mapOf(
@@ -1100,9 +1082,7 @@ fun Application.configureRouting() {
 
                 else -> {
                     gameSession.connections.forEach { connection ->
-                        connection.send(Frame.Text(Json.encodeToString(
-                            mapOf("redirect" to "/client-position/$gameId")
-                        )))
+                        connection.send(Frame.Text("{\"redirect\":\"/client-position/$gameId\"}"))
                     }
 
                     call.respond(PebbleContent("leaderboard.peb", mapOf(
@@ -1407,11 +1387,7 @@ fun Application.configureRouting() {
             //mark minigame finished
             mathsState.isFinished = true
 
-            gameSession.connections.forEach { connection ->
-                connection.send(Frame.Text(Json.encodeToString(mapOf(
-                    "redirect" to "/minigame-result/$gameId"
-                ))))
-            }
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/minigame-result/$gameId\"}")) }
 
             call.respond(HttpStatusCode.OK)
         }
@@ -1603,14 +1579,14 @@ fun Application.configureRouting() {
             val column2 = players.drop(2).take(2)
             val column3 = players.drop(4).take(2)
 
-            val json = Json.encodeToString(mapOf(
-                "column1" to column1,
-                "column2" to column2,
-                "column3" to column3,
-                "ghostUsers" to potionsState.newGhosts,
-                "isFinished" to potionsState.isFinished
-            ))
-            call.respondText(json, ContentType.Application.Json)
+            val response = PotionsPicksResponse(
+                column1 = column1,
+                column2 = column2,
+                column3 = column3,
+                ghostUsers = potionsState.newGhosts,
+                isFinished = potionsState.isFinished
+            )
+            call.respondText(Json.encodeToString(response), ContentType.Application.Json)
         }
 
         post("/potions-end/{gameId}") {
@@ -1639,11 +1615,7 @@ fun Application.configureRouting() {
             potionsState.isFinished = true
 
             // notify all clients to go to result page
-            gameSession.connections.forEach { connection ->
-                connection.send(Frame.Text(Json.encodeToString(mapOf(
-                    "redirect" to "/potions-result/$gameId"
-                ))))
-            }
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/potions-result/$gameId\"}")) }
 
             call.respond(HttpStatusCode.OK)
         }
@@ -1800,11 +1772,7 @@ fun Application.configureRouting() {
                 roomsState.allSafe = true
                 roomsState.isFinished = true
 
-                gameSession.connections.forEach { connection -> 
-                    connection.send(Frame.Text(Json.encodeToString(mapOf(
-                        "redirect" to "/rooms-result/$gameId"
-                    ))))
-                }
+                gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/rooms-result/$gameId\"}")) }
 
                 call.respond(HttpStatusCode.OK)
                 return@post
@@ -1826,11 +1794,7 @@ fun Application.configureRouting() {
             roomsState.isFinished = true
             
             //send all clients to results page
-            gameSession.connections.forEach { connection -> 
-                connection.send(Frame.Text(Json.encodeToString(mapOf(
-                    "redirect" to "/rooms-result/$gameId"
-                ))))
-            }
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/rooms-result/$gameId\"}")) }
 
             call.respond(HttpStatusCode.OK)
         }
