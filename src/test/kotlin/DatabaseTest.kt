@@ -634,21 +634,19 @@ class DatabaseTest: StringSpec({
                 "A program waiting to be executed"),
                 listOf("A small sequence of programmed instructions", "A piece of yarn or twine", null, null))
 
-            val user = transaction(TestDatabase.db) {
-                User.find { UserTable.username eq "linguin0"}.firstOrNull()
-            }
+            val quiz = transaction(TestDatabase.db) {
+                val user = User.find { UserTable.username eq "linguin0"}.firstOrNull()
+                user shouldNotBe null
 
-            val userQuizzes = transaction(TestDatabase.db) {
-                Quiz.find { QuizTable.user eq user!!.id }.toList()
+                Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
             }
-            userQuizzes shouldNotBe null
-            userQuizzes shouldHaveSize 2
-
-            val quiz = userQuizzes.firstOrNull()
             quiz shouldNotBe null
             quiz!!.quiz_name shouldBe "COMP2860 Quiz"
 
-            val questions = retrieveQuizQuestions(quiz)
+            val questions = transaction(TestDatabase.db) {
+                val quinstances = Quinstance.find { QuinstanceTable.quiz eq quiz.id}.toList()
+                return@transaction buildList { for(q in quinstances) add(q.question) }
+            }
             questions shouldNotBe null
             questions shouldHaveSize 2
 
@@ -669,29 +667,21 @@ class DatabaseTest: StringSpec({
         testApplication {
             application { testModule() }
 
-            val user = transaction(TestDatabase.db) {
-                User.find { UserTable.username eq "JoanaKennah"}.firstOrNull()
+            val quiz = transaction(TestDatabase.db) {
+                val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
             }
-
-            val quizzes = transaction(TestDatabase.db) {
-                Quiz.find { QuizTable.user eq user!!.id }.toList()
-            }
-            quizzes shouldHaveSize 1
-
-            val quiz = quizzes.firstOrNull()
             quiz shouldNotBe null
 
-            val questions = transaction(TestDatabase.db) {
-                val quinstances = Quinstance.find { QuinstanceTable.id eq quiz!!.id}.toList()
-                return@transaction buildList { for(q in quinstances) add(q.question) }
+            val question = transaction(TestDatabase.db) {
+                val quinstance = Quinstance.find { QuinstanceTable.id eq quiz!!.id}.firstOrNull()
+                quinstance shouldNotBe null
+                return@transaction quinstance!!.question
             }
-            questions shouldNotBe null
-            questions shouldHaveSize 1
-
-            val question = questions.firstOrNull()
             question shouldNotBe null
+            question.question shouldBe "What is a finite state automation?"
 
-            val answer = retrieveQuestionAnswer(question!!)
+            val answer = retrieveQuestionAnswer(question)
             answer shouldNotBe null
             answer!!.correct_answer shouldBe "A model of computation with an extremely limited amount of memory"
             answer.option2 shouldBe "A machine that only runs a finite amount of times"
@@ -709,17 +699,16 @@ class DatabaseTest: StringSpec({
             }
             user shouldNotBe null
 
-            val quiz = transaction(TestDatabase.db) {  Quiz.new {
-                this.user = user!!
-                this.quiz_name = "Test Quiz"
-                this.description = "This is a test quiz"
-                this.category = "other"
-                this.key_stage = "furthereducation"
-            }}
-            quiz shouldNotBe null
-
             val question = transaction(TestDatabase.db) {
-                Question.new {
+                Quiz.new {
+                    this.user = user!!
+                    this.quiz_name = "Test Quiz"
+                    this.description = "This is a test quiz"
+                    this.category = "other"
+                    this.key_stage = "furthereducation"
+                }
+
+                return@transaction Question.new {
                     this.question = "Test question"
                     this.key_stage = "keystage1"
                 }
@@ -739,7 +728,7 @@ class DatabaseTest: StringSpec({
             }
             user shouldNotBe null
 
-            val quiz = transaction(TestDatabase.db) {
+            val question = transaction(TestDatabase.db) {
                 Quiz.new {
                     this.user = user!!
                     this.quiz_name = "Test Quiz"
@@ -747,11 +736,8 @@ class DatabaseTest: StringSpec({
                     this.category = "other"
                     this.key_stage = "furthereducation"
                 }
-            }
-            quiz shouldNotBe null
 
-            val question = transaction(TestDatabase.db) {
-                Question.new {
+                return@transaction Question.new {
                     this.question = "Test question"
                     this.key_stage = "keystage1"
                 }
@@ -780,7 +766,7 @@ class DatabaseTest: StringSpec({
             }
             user shouldNotBe null
 
-            val quiz = transaction(TestDatabase.db) {
+            val question = transaction(TestDatabase.db) {
                 Quiz.new {
                     this.user = user!!
                     this.quiz_name = "Test Quiz"
@@ -788,11 +774,8 @@ class DatabaseTest: StringSpec({
                     this.category = "other"
                     this.key_stage = "furthereducation"
                 }
-            }
-            quiz shouldNotBe null
 
-            val question = transaction(TestDatabase.db) {
-                Question.new {
+                return@transaction Question.new {
                     this.question = "Test question"
                     this.key_stage = "keystage1"
                 }
@@ -814,6 +797,70 @@ class DatabaseTest: StringSpec({
     }
 
     "Add an Answer (normal data, third option is correct) to a Question without an existing Answer" {
+        testApplication {
+            application { testModule() }
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123"}.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val question = transaction(TestDatabase.db) {
+                Quiz.new {
+                    this.user = user!!
+                    this.quiz_name = "Test Quiz"
+                    this.description = "This is a test quiz"
+                    this.category = "other"
+                    this.key_stage = "furthereducation"
+                }
+
+                return@transaction Question.new {
+                    this.question = "Test question"
+                    this.key_stage = "keystage1"
+                }
+            }
+            question shouldNotBe null
+
+            val answer = addAnswer(question,
+                "Option 1",
+                "Option 2",
+                "Option 3",
+                "Option 4",
+                2)
+            answer shouldNotBe null
+            answer!!.correct_answer shouldBe "Option 3"
+            answer.option2 shouldBe "Option 1"
+            answer.option3 shouldBe "Option 2"
+            answer.option4 shouldBe "Option 4"
+        }
+    }
+
+    "Add an Answer (normal data, fourth option is correct) to a Question without an existing Answer" {
+        testApplication {
+            application { testModule() }
+
+            val question = transaction(TestDatabase.db) {
+                Question.new {
+                    this.question = "Test question"
+                    this.key_stage = "keystage1"
+                }
+            }
+            question shouldNotBe null
+
+            val answer = addAnswer(question,
+                "Option 1",
+                "Option 2",
+                "Option 3",
+                "Option 4",
+                3)
+            answer shouldNotBe null
+            answer!!.correct_answer shouldBe "Option 4"
+            answer.option2 shouldBe "Option 1"
+            answer.option3 shouldBe "Option 2"
+            answer.option4 shouldBe "Option 3"
+        }
+    }
+
+    "Add an Answer (normal data, fourth option is correct) to a Question without an existing Answer" {
         testApplication {
             application { testModule() }
             val user = transaction(TestDatabase.db) {
@@ -843,13 +890,13 @@ class DatabaseTest: StringSpec({
             val answer = addAnswer(question,
                 "Option 1",
                 "Option 2",
-                "Option 3",
+                null,
                 "Option 4",
-                2)
+                0)
             answer shouldNotBe null
-            answer!!.correct_answer shouldBe "Option 3"
-            answer.option2 shouldBe "Option 1"
-            answer.option3 shouldBe "Option 2"
+            answer!!.correct_answer shouldBe "Option 1"
+            answer.option2 shouldBe "Option 2"
+            answer.option3 shouldBe null
             answer.option4 shouldBe "Option 4"
         }
     }
@@ -885,13 +932,169 @@ class DatabaseTest: StringSpec({
                 "Option 1",
                 "Option 2",
                 "Option 3",
-                "Option 4",
-                3)
+                null,
+                0)
             answer shouldNotBe null
-            answer!!.correct_answer shouldBe "Option 4"
-            answer.option2 shouldBe "Option 1"
-            answer.option3 shouldBe "Option 2"
-            answer.option4 shouldBe "Option 3"
+            answer!!.correct_answer shouldBe "Option 1"
+            answer.option2 shouldBe "Option 2"
+            answer.option3 shouldBe "Option 3"
+            answer.option4 shouldBe null
+        }
+    }
+
+    "Adding an Answer to a Question which already has an Answer returns null" {
+        testApplication {
+            application { testModule() }
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "linguin0"}.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val quizzes = transaction(TestDatabase.db) {
+                Quiz.find { QuizTable.user eq user!!.id }.toList()
+            }
+            quizzes shouldHaveSize 2
+
+            val quiz = quizzes.firstOrNull()
+            quiz shouldNotBe null
+
+            val questions = transaction(TestDatabase.db) {
+                val quinstances = Quinstance.find { QuinstanceTable.quiz eq quiz!!.id}.toList()
+                return@transaction buildList { for(q in quinstances) { add( Question.findById(q.question.id)) }}
+            }
+            questions shouldNotBe null
+            questions shouldHaveSize 2
+
+            val answer = addAnswer(questions.first()!!,
+                "Option 1",
+                "Option 2",
+                "Option 3",
+                "Option 4",
+                0)
+
+            answer shouldBe null
+        }
+    }
+
+    "Adding an Answer to a Question that doesn't exist should throw an IllegalArgumentException" {
+        testApplication {
+            application { testModule() }
+
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "MinghaoLe123"}.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val quiz = transaction(TestDatabase.db) {
+                Quiz.new {
+                    this.user = user!!
+                    this.quiz_name = "Test Quiz"
+                    this.description = "This is a test quiz"
+                    this.category = "other"
+                    this.key_stage = "furthereducation"
+                }
+            }
+            quiz shouldNotBe null
+
+            val question = transaction(TestDatabase.db) {
+                Question.new {
+                    this.question = "Test question"
+                    this.key_stage = "keystage1"
+                }
+            }
+            question shouldNotBe null
+
+            transaction(TestDatabase.db) { question.delete() }
+
+            shouldThrow<IllegalArgumentException> {
+                val answer = addAnswer(question,
+                    "Option 1",
+                    "Option 2",
+                    "Option 3",
+                    "Option 4",
+                    0)
+            }
+        }
+    }
+
+    "Adding an Answer with an empty option 1 should throw an IllegalArgumentException" {
+        testApplication{
+            application { testModule() }
+
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val question = transaction(TestDatabase.db) {
+                val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                quiz shouldNotBe null
+
+                return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
+            }
+
+            shouldThrow<IllegalArgumentException> {
+                val answer = addAnswer(question,
+                    "",
+                    "Option 2",
+                    "Option 3",
+                    "Option 4",
+                    0)
+            }
+        }
+    }
+
+    "Adding an Answer with an empty option 2 should throw an IllegalArgumentException" {
+        testApplication{
+            application { testModule() }
+
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val question = transaction(TestDatabase.db) {
+                val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                quiz shouldNotBe null
+
+                return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
+            }
+
+            shouldThrow<IllegalArgumentException> {
+                val answer = addAnswer(question,
+                    "Option 1",
+                    "",
+                    "Option 3",
+                    "Option 4",
+                    0)
+            }
+        }
+    }
+
+    "Adding an Answer with an a negative correctIndex should throw an IllegalArgumentException" {
+        testApplication{
+            application { testModule() }
+
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val question = transaction(TestDatabase.db) {
+                val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                quiz shouldNotBe null
+
+                return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
+            }
+
+            shouldThrow<IllegalArgumentException> {
+                val answer = addAnswer(question,
+                    "Option 1",
+                    "Option 2",
+                    "Option 3",
+                    "Option 4",
+                    0)
+            }
         }
     }
 })
