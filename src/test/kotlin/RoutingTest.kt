@@ -421,7 +421,264 @@ class RoutingTest : StringSpec({
         }
     }
 
+    //Tests round two
+    //tests not requiring live game state
+    "GET /view-quiz-questions/{quizId} w/ valid ID returns 200 OK w/ HTML - view quiz questions page loads" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "linguin0", "password123")
+            val quiz = retrieveUserQuizzes("linguin0")!!.first()
+            val response = client.get("/view-quiz-questions/${quiz.id.value}")
+            checkForHtml(response)
+            response.bodyAsText() shouldContain "COMP2860 Quiz"
+            response.bodyAsText() shouldContain "What is a process?"
+        }
+    }
 
+    "GET /view-quiz/{quizId} w/ valid ID returns 200 OK w/ HTML - view quiz page loads" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "linguin0", "password123")
+            val quiz = retrieveUserQuizzes("linguin0")!!.first()
+            val response = client.get("/view-quiz/${quiz.id.value}")
+            checkForHtml(response)
+            response.bodyAsText() shouldContain "COMP2860 Quiz"
+            response.bodyAsText() shouldContain "Quiz to test my limited knowledge on COMP2860"
+        }
+    }
+
+    "POST /create-quiz w/ valid data redirects to quiz questions page - quiz creation works" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { 
+                install(HttpCookies)
+                //inspect http response directly not redirect
+                followRedirects = false
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val response = client.post("/create-quiz") {
+                //create quiz data
+                setBody(FormDataContent(Parameters.build {
+                    append("quizName", "Test Quiz")
+                    append("description", "A test quiz description")
+                    append("keystage", "furthereducation")
+                    append("category", "other")
+                }))
+            }
+            response.status shouldBe HttpStatusCode.Found
+            response.headers["Location"] shouldContain "/view-quiz-questions/"
+        }
+    }
+
+    "GET /create-lobby/{quizId} w/ valid ID returns 200 OK w/ HTML - create lobby page loads" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "JoanaKennah", "password456")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+            val response = client.get("/create-lobby/${quiz.id.value}")
+            checkForHtml(response)
+            response.bodyAsText() shouldContain "COMP2870 Quiz"
+        }
+    }
+
+    "GET /create-lobby/99999 w/ valid session returns error - missing quiz ID handled" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "JoanaKennah", "password456")
+            val response = client.get("/create-lobby/99999")
+            response.status shouldBe HttpStatusCode.OK
+            response.bodyAsText() shouldContain "Quiz not found"
+        }
+    }
+
+    "GET /create-lobby/{quizId} w/out session redirects back to login - protected route guard works" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { followRedirects = false }
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+            val response = client.get("/create-lobby/${quiz.id.value}")
+            checkForRedirect(response, "/login")
+        }
+    }
+
+    "POST /create-lobby/{quizId} w/ valid data redirects to lobby server - lobby creation works" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                //inspect http response directly not redirect
+                followRedirects = false
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+            val response = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    //build quiz data
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "false")
+                }))
+            }
+            response.status shouldBe HttpStatusCode.Found
+            response.headers["Location"] shouldContain "/lobby-server/"
+        }
+    }
+
+    "POST /create-lobby/99999 w/ valid session returns error - missing quiz ID handled" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val response = client.post("/create-lobby/99999") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "false")
+                }))
+            }
+            response.status shouldBe HttpStatusCode.OK
+            response.bodyAsText() shouldContain "Quiz not found"
+        }
+    }
+
+    "GET /lobby-server/{gameId} w/ valid ID returns 200 OK w/ HTML - lobby server page loads" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            // post to create-lobby to get valid gameId
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "false")
+                }))
+            }
+            //trim gameId off redirect location
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+
+            val response = client.get("/lobby-server/$gameId")
+            checkForHtml(response)
+            response.bodyAsText() shouldContain "COMP2870 Quiz"
+        }
+    }
+
+    "GET /lobby-server/99999 w/ valid session returns error - missing game ID handled" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "JoanaKennah", "password456")
+            val response = client.get("/lobby-server/99999")
+            response.status shouldBe HttpStatusCode.OK
+            response.bodyAsText() shouldContain "Game not found"
+        }
+    }
+
+    "POST /close-lobby/{gameId} w/ valid ID redirects to teacher dashboard - close lobby works" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            // create a lobby to get a valid gameId
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "false")
+                }))
+            }
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+
+            val response = client.post("/close-lobby/$gameId")
+            checkForRedirect(response, "/teacher-dashboard")
+        }
+    }
+
+    "POST /close-lobby/99999 w/ valid session returns error - missing game ID handled" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "JoanaKennah", "password456")
+            val response = client.post("/close-lobby/99999")
+            response.status shouldBe HttpStatusCode.OK
+            response.bodyAsText() shouldContain "Game not found"
+        }
+    }
+
+    "POST /close-lobby/{gameId} removes game session - game cleaned up after close" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "false")
+                }))
+            }
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+
+            // close lobby manually
+            client.post("/close-lobby/$gameId")
+
+            // verify game no longer exists in DB 
+            val response = client.get("/lobby-server/$gameId")
+            response.status shouldBe HttpStatusCode.OK
+            response.bodyAsText() shouldContain "Game not found"
+        }
+    }
+
+    //simple checks on authenticated routes with logged in user
+    "GET /user-stats w/ valid student session returns 200 OK w/ HTML - user stats page loads" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "linguin0", "password123")
+            val response = client.get("/user-stats")
+            checkForHtml(response)
+        }
+    }
+
+    "GET /user-stats w/ valid teacher session returns 200 OK w/ HTML - user stats page loads" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "JoanaKennah", "password456")
+            val response = client.get("/user-stats")
+            checkForHtml(response)
+        }
+    }
+
+    "GET /user-stats w/out session redirects to login - protected route guard works" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { followRedirects = false }
+            val response = client.get("/user-stats")
+            checkForRedirect(response, "/login")
+        }
+    }
 
 })
 
