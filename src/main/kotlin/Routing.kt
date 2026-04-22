@@ -711,7 +711,7 @@ fun Application.configureRouting() {
             gameSession.isStarted = true
             
             //redirect all connected players to game page
-            gameSession.connections.forEach { connection -> connection.send(Frame.Text(Json.encodeToString(mapOf("redirect" to "/game/$gameId")))) }
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/game/$gameId\"}"))}
 
             // Small delay allows clients to connect to new WebSocket
             kotlinx.coroutines.delay(1000)
@@ -742,7 +742,9 @@ fun Application.configureRouting() {
             // clear maths game &autoghost state ready for next question
             gameSession.mathsGameState = null
             gameSession.potionsGameState = null
+            gameSession.roomsGameState = null
             gameSession.autoGhostedPlayer = null
+            gameSession.minigameJustPlayed = false
 
             if (gameSession.isAdvanced) {
                 return@post call.respondText("Already advancing")
@@ -759,6 +761,10 @@ fun Application.configureRouting() {
 
             } else {
                 gameSession.isAdvanced = false          //reset flag for next Q
+                //added missing websocket redirect since broadcastQuestion doesn't redirect, only sends Q data
+                gameSession.connections.forEach { connection -> 
+                    connection.send(Frame.Text("{\"redirect\":\"/game/$gameId\"}"))
+                }
                 delay(1000)
                 broadcastQuestion(gameSession)
 
@@ -857,7 +863,11 @@ fun Application.configureRouting() {
                             } else {
                                 val userScore = retrieveUserScore(game, user)
                                 if (userScore != null) {
-                                    val pointsEarned = (100 + ((answerData.timeRemaining.toDouble() / gameSession.timeLimit.toDouble()) * 900)).roundToInt()
+                                    val pointsEarned = if (gameSession.timeLimit == 0) {
+                                        1000
+                                    } else {
+                                        (100 + ((answerData.timeRemaining.toDouble() / gameSession.timeLimit.toDouble()) * 900)).roundToInt()
+                                    }
                                     userScore.score += pointsEarned
                                 }
                             }
@@ -884,7 +894,7 @@ fun Application.configureRouting() {
             UserAnswers.clearAnswers()
 
             // Send clients to correct ans page
-            gameSession.connections.forEach { connection -> connection.send(Frame.Text(Json.encodeToString(mapOf("redirect" to "/show-correct-answer-client/$gameId"))))}
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/show-correct-answer-client/$gameId\"}"))}
 
             //send host to correct ans view w/ next button
             call.respond(PebbleContent("question_with_correct_ans.peb", mapOf(
@@ -988,11 +998,7 @@ fun Application.configureRouting() {
                     gameSession.ghostPlayers.add(autoGhostedPlayer)
                     gameSession.autoGhostedPlayer = autoGhostedPlayer
 
-                    gameSession.connections.forEach { connection ->
-                        connection.send(Frame.Text(Json.encodeToString(mapOf(
-                            "redirect" to "/auto-ghost-result/$gameId"
-                        ))))
-                    }
+                    gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/auto-ghost-result/$gameId\"}")) }
 
                     call.respond(PebbleContent("leaderboard.peb", mapOf(
                         "quizName" to quiz.quiz_name,
@@ -1003,11 +1009,14 @@ fun Application.configureRouting() {
                     )))
                 }
 
+                //Need to remember to change this value back to .5
                 gameSession.miniGamesEnabled
                     && gameSession.lastIncorrectPlayers.size >= 2
                     && gameSession.activeMinigames.isNotEmpty()
+                    && !gameSession.minigameJustPlayed
                     && testRandomValue == 1 -> {
 
+                    gameSession.minigameJustPlayed = true
                     val selectedMinigame = gameSession.activeMinigames.random()
 
                     println(selectedMinigame)
@@ -1016,11 +1025,7 @@ fun Application.configureRouting() {
                         "maths" -> {
                             gameSession.mathsGameState = MathsGameState()
 
-                            gameSession.connections.forEach { connection ->
-                                connection.send(Frame.Text(Json.encodeToString(mapOf(
-                                    "redirect" to "/minigame-start/$gameId"
-                                ))))
-                            }
+                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/minigame-start/$gameId\"}")) }
 
                             call.respond(PebbleContent("mini_game_maths_server.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
@@ -1034,11 +1039,7 @@ fun Application.configureRouting() {
                         "potions" -> {
                             gameSession.potionsGameState = PotionsGameState()
 
-                            gameSession.connections.forEach { connection ->
-                                connection.send(Frame.Text(Json.encodeToString(mapOf(
-                                    "redirect" to "/potions-start/$gameId"
-                                ))))
-                            }
+                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/potions-start/$gameId\"}")) }
 
                             call.respond(PebbleContent("potions_minigame_server.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
@@ -1055,11 +1056,21 @@ fun Application.configureRouting() {
                             )))
                         }
 
+                        "rooms" -> {
+                            gameSession.roomsGameState = RoomsGameState()
+
+                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/rooms-start/$gameId\"}")) }
+
+                            call.respond(PebbleContent("rooms_minigame_server_playing.peb", mapOf(
+                                "quizName" to quiz.quiz_name,
+                                "gameId" to gameId,
+                                "theme" to session.theme
+                            )))
+                        }
+
                         else -> {
                             gameSession.connections.forEach { connection ->
-                                connection.send(Frame.Text(Json.encodeToString(
-                                    mapOf("redirect" to "/client-position/$gameId")
-                                )))
+                                connection.send(Frame.Text("{\"redirect\":\"/client-position/$gameId\"}"))
                             }
 
                             call.respond(PebbleContent("leaderboard.peb", mapOf(
@@ -1075,9 +1086,7 @@ fun Application.configureRouting() {
 
                 else -> {
                     gameSession.connections.forEach { connection ->
-                        connection.send(Frame.Text(Json.encodeToString(
-                            mapOf("redirect" to "/client-position/$gameId")
-                        )))
+                        connection.send(Frame.Text("{\"redirect\":\"/client-position/$gameId\"}"))
                     }
 
                     call.respond(PebbleContent("leaderboard.peb", mapOf(
@@ -1382,11 +1391,7 @@ fun Application.configureRouting() {
             //mark minigame finished
             mathsState.isFinished = true
 
-            gameSession.connections.forEach { connection ->
-                connection.send(Frame.Text(Json.encodeToString(mapOf(
-                    "redirect" to "/minigame-result/$gameId"
-                ))))
-            }
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/minigame-result/$gameId\"}")) }
 
             call.respond(HttpStatusCode.OK)
         }
@@ -1578,14 +1583,14 @@ fun Application.configureRouting() {
             val column2 = players.drop(2).take(2)
             val column3 = players.drop(4).take(2)
 
-            val json = Json.encodeToString(mapOf(
-                "column1" to column1,
-                "column2" to column2,
-                "column3" to column3,
-                "ghostUsers" to potionsState.newGhosts,
-                "isFinished" to potionsState.isFinished
-            ))
-            call.respondText(json, ContentType.Application.Json)
+            val response = PotionsPicksResponse(
+                column1 = column1,
+                column2 = column2,
+                column3 = column3,
+                ghostUsers = potionsState.newGhosts,
+                isFinished = potionsState.isFinished
+            )
+            call.respondText(Json.encodeToString(response), ContentType.Application.Json)
         }
 
         post("/potions-end/{gameId}") {
@@ -1614,11 +1619,7 @@ fun Application.configureRouting() {
             potionsState.isFinished = true
 
             // notify all clients to go to result page
-            gameSession.connections.forEach { connection ->
-                connection.send(Frame.Text(Json.encodeToString(mapOf(
-                    "redirect" to "/potions-result/$gameId"
-                ))))
-            }
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/potions-result/$gameId\"}")) }
 
             call.respond(HttpStatusCode.OK)
         }
@@ -1685,5 +1686,185 @@ fun Application.configureRouting() {
             }
         }
 
+        get("/rooms-start/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
+
+            val userScore = retrieveUserScore(game, user)?.score ?: 0
+            val isExistingGhost = session.username in gameSession.ghostPlayers
+
+            if (session.username in gameSession.lastIncorrectPlayers) {
+                call.respond(PebbleContent("rooms_minigame_client_pick.peb", mapOf(
+                    "gameId" to gameId,
+                    "theme" to session.theme
+                )))
+            } else{
+                call.respond(PebbleContent("mini_games_maths_ur_safe.peb", mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme,
+                    "isExistingGhost" to isExistingGhost
+                )))
+            }
+        }
+
+        //records room pick and sends client to waiting screen
+        post("/rooms-pick/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found")
+
+            val roomsState = gameSession.roomsGameState ?: return@post call.respondText("No minigame active")
+
+            val parameters = call.receiveParameters()
+            val room = parameters["room"] ?: return@post call.respondText("Invalid selection")
+
+            // validation just in case
+            if (room !in listOf("A", "B", "C")) {
+                return@post call.respondText("Invalid selection")
+            }
+
+            //record pick
+            roomsState.playerPicks[session.username] = room
+
+            call.respondRedirect("/rooms-selected/$gameId")
+        }
+
+        get("/rooms-selected/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+
+            val roomsState = gameSession.roomsGameState ?: return@get call.respondText("No minigame active")
+
+            val room = roomsState.playerPicks[session.username] ?: return@get call.respondText("Invalid selection")
+
+            call.respond(PebbleContent("rooms_minigame_client_selectd.peb", mapOf(
+                    "gameId" to gameId,
+                    "room" to room,
+                    "theme" to session.theme,
+                )))
+        }
+
+        post("/rooms-end/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found")
+
+            val roomsState = gameSession.roomsGameState ?: return@post call.respondText("No minigame active")
+
+            //assign random room to late picks
+            gameSession.lastIncorrectPlayers.forEach { username -> 
+                if (!roomsState.playerPicks.containsKey(username)) {
+                    roomsState.playerPicks[username] = listOf("A", "B", "C").random()
+                }
+            }
+
+            //count picks per room
+            val roomCounts = mapOf(
+                "A" to roomsState.playerPicks.count { it.value == "A" },
+                "B" to roomsState.playerPicks.count { it.value == "B" },
+                "C" to roomsState.playerPicks.count { it.value == "C" }
+            )
+
+            //check if all players in same room
+            val uniqueRooms = roomsState.playerPicks.values.toSet()
+            if (uniqueRooms.size == 1) {
+                roomsState.allSafe = true
+                roomsState.isFinished = true
+
+                gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/rooms-result/$gameId\"}")) }
+
+                call.respond(HttpStatusCode.OK)
+                return@post
+            }
+
+            //find room w/ most players - ramdom pick if tie
+            val maxCount = roomCounts.values.maxOrNull() ?: 0
+            val busyRooms = roomCounts.filter { it.value == maxCount }.keys.toList()
+            roomsState.ghostRoom = busyRooms.random()
+
+            //determine players in ghost roomm
+            roomsState.newGhosts = roomsState.playerPicks
+                .filter { it.value == roomsState.ghostRoom }
+                .map { it.key }
+
+            //add new ghosts to list
+            gameSession.ghostPlayers.addAll(roomsState.newGhosts)
+
+            roomsState.isFinished = true
+            
+            //send all clients to results page
+            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/rooms-result/$gameId\"}")) }
+
+            call.respond(HttpStatusCode.OK)
+        }
+
+        get("/rooms-end-host/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found") 
+
+            val roomsState = gameSession.roomsGameState ?: return@get call.respondText("No minigame active")
+
+            if (roomsState.allSafe) {
+                call.respond(PebbleContent("rooms_minigame_server_outcome_allsafe.peb", mapOf(
+                    "gameId" to gameId,
+                    "theme" to session.theme
+                )))
+            } else {
+                val ghosts = roomsState.newGhosts
+                val leftCol1 = ghosts.take(4)
+                val rightCol1 = ghosts.drop(4).take(4)
+                val leftCol2 = ghosts.drop(8).take(4)
+                val rightCol2 = ghosts.drop(12).take(4)
+
+                call.respond(PebbleContent("rooms_minigame_server_outcome_ghost.peb", mapOf(
+                    "gameId" to gameId,
+                    "theme" to session.theme,
+                    "ghostRoom" to roomsState.ghostRoom,
+                    "left_col1" to leftCol1,
+                    "right_col1" to rightCol1,
+                    "left_col2" to leftCol2,
+                    "right_col2" to rightCol2
+                )))
+            }
+        }
+
+        get("/rooms-result/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
+
+            val roomsState = gameSession.roomsGameState ?: return@get call.respondText("No minigame active")
+
+            val userScore = retrieveUserScore(game, user)?.score ?: 0 
+            val isExistingGhost = session.username in gameSession.ghostPlayers
+                && session.username !in roomsState.newGhosts
+
+            if (session.username in roomsState.newGhosts
+                && session.username in gameSession.lastIncorrectPlayers) {
+                // newly ghosted
+                call.respond(PebbleContent("mini_game_maths_ur_ghost.peb", mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme
+                )))
+            } else {
+                // safe or existing ghost
+                call.respond(PebbleContent("mini_games_maths_ur_safe.peb", mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme,
+                    "isExistingGhost" to isExistingGhost
+                )))
+            }
+        }
     }
 }

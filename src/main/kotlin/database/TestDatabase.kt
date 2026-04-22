@@ -6,6 +6,9 @@ import com.example.database.tables.QuizTable
 import com.example.database.tables.QuestionTable
 import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.AnswerTable
+import com.example.database.tables.GameTable
+import com.example.database.tables.UserScoreTable
+import com.example.database.tables.InUseTable
 import com.password4j.Password
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -29,8 +32,8 @@ object TestDatabase {
     // Creates UserTable and three Users for testing purposes.
     fun create() {
         transaction(db) {
-            SchemaUtils.drop(UserTable, QuizTable, QuestionTable, AnswerTable, QuinstanceTable)
-            SchemaUtils.create(UserTable, QuizTable, QuestionTable, AnswerTable, QuinstanceTable)
+            SchemaUtils.drop(UserTable, QuizTable, QuestionTable, AnswerTable, QuinstanceTable, GameTable, UserScoreTable, InUseTable)
+            SchemaUtils.create(UserTable, QuizTable, QuestionTable, AnswerTable, QuinstanceTable, GameTable, UserScoreTable, InUseTable)
 
             // Doesn't use functions I developed to potentially avoid bugs
             val hashedPasswordOne = Password.hash("password123").addRandomSalt(8).withScrypt()
