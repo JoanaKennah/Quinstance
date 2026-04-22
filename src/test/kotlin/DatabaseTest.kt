@@ -1,29 +1,18 @@
 package com.example
 
 import com.example.database.TestDatabase
-import com.example.database.objects.Question
-import com.example.database.objects.Quinstance
-import com.example.database.objects.Quiz
-import com.example.database.objects.User
-import com.example.database.tables.QuestionTable
-import com.example.database.tables.QuinstanceTable
-import com.example.database.tables.QuizTable
-import com.example.database.tables.UserTable
+import com.example.database.objects.*
+import com.example.database.tables.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.core.eq
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.*
 import io.kotest.matchers.string.shouldContain
-import io.ktor.client.request.*
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.*
 import io.ktor.server.testing.*
 import com.password4j.Password
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.string.shouldHaveLength
-import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 
 class DatabaseTest: StringSpec({
     // Testing the functions used for Login / Signup
@@ -266,7 +255,7 @@ class DatabaseTest: StringSpec({
             }
             retrievedUser shouldNotBe null
             retrievedUser!!.let {
-                it.password shouldContain "\$100801\$"
+                it.password shouldContain "$100801$"
                 it.password shouldHaveLength 109
             }
         }
@@ -940,7 +929,7 @@ class DatabaseTest: StringSpec({
             transaction(TestDatabase.db) { question.delete() }
 
             shouldThrow<IllegalArgumentException> {
-                val answer = addAnswer(question,
+                addAnswer(question,
                     "Option 1",
                     "Option 2",
                     "Option 3",
@@ -967,7 +956,7 @@ class DatabaseTest: StringSpec({
             }
 
             shouldThrow<IllegalArgumentException> {
-                val answer = addAnswer(question,
+                addAnswer(question,
                     "",
                     "Option 2",
                     "Option 3",
@@ -994,7 +983,7 @@ class DatabaseTest: StringSpec({
             }
 
             shouldThrow<IllegalArgumentException> {
-                val answer = addAnswer(question,
+                addAnswer(question,
                     "Option 1",
                     "",
                     "Option 3",
@@ -1021,7 +1010,7 @@ class DatabaseTest: StringSpec({
             }
 
             shouldThrow<IllegalArgumentException> {
-                val answer = addAnswer(question,
+                addAnswer(question,
                     "Option 1",
                     "Option 2",
                     "Option 3",
@@ -1048,7 +1037,7 @@ class DatabaseTest: StringSpec({
             }
 
             shouldThrow<IllegalArgumentException> {
-                val answer = addAnswer(question,
+                addAnswer(question,
                     "Option 1",
                     "Option 2",
                     "Option 3",
@@ -1075,7 +1064,7 @@ class DatabaseTest: StringSpec({
             }
 
             shouldThrow<IllegalArgumentException> {
-                val answer = addAnswer(question,
+                addAnswer(question,
                     "Option 1",
                     "Option 2",
                     null,
