@@ -761,6 +761,10 @@ fun Application.configureRouting() {
 
             } else {
                 gameSession.isAdvanced = false          //reset flag for next Q
+                //added missing websocket redirect since broadcastQuestion doesn't redirect, only sends Q data
+                gameSession.connections.forEach { connection -> 
+                    connection.send(Frame.Text("{\"redirect\":\"/game/$gameId\"}"))
+                }
                 delay(1000)
                 broadcastQuestion(gameSession)
 
@@ -1055,7 +1059,7 @@ fun Application.configureRouting() {
                         "rooms" -> {
                             gameSession.roomsGameState = RoomsGameState()
 
-                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"//$gameId\"}")) }
+                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/rooms-start/$gameId\"}")) }
 
                             call.respond(PebbleContent("rooms_minigame_server_playing.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
