@@ -680,6 +680,249 @@ class RoutingTest : StringSpec({
         }
     }
 
+    //tests w/ live game state on game and question flow
+    //start-game calls websockets w/ no connected clients but we are just testing HTML response
+    //host view is served question via a call.respond(PebbleContent), independent of socket
+    "POST /start-game/{gameId} w/ valid ID returns 200 OK w/ HTML - game starts, question visible on host view" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            //create lobby to gen valid gameId
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "false")
+                }))
+            }
+            //trim URL to get ID
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+
+            //start game and check content passed
+            val response = client.post("/start-game/$gameId")
+            checkForHtml(response)
+            response.bodyAsText() shouldContain "COMP2870 Quiz"
+            response.bodyAsText() shouldContain "What is a finite state automation?"
+        }
+    }
+
+    "POST /start-game/99999 w/ valid session returns error - missing game ID handled" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "JoanaKennah", "password456")
+            val response = client.post("/start-game/99999")
+            response.status shouldBe HttpStatusCode.OK
+            response.bodyAsText() shouldContain "Game not found"
+        }
+    }
+
+    "POST /show-correct-answer/{gameId} w/ valid ID returns 200 OK w/ HTML - host sees correct answer page" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            //create and start game
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "false")
+                }))
+            }
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+            client.post("/start-game/$gameId")
+
+            //show correct answer
+            val response = client.post("/show-correct-answer/$gameId")
+            checkForHtml(response)
+            response.bodyAsText() shouldContain "COMP2870 Quiz"
+            response.bodyAsText() shouldContain "What is a finite state automation?"
+            response.bodyAsText() shouldContain "A model of computation with an extremely limited amount of memory"
+        }
+    }
+
+    "POST /show-correct-answer/99999 w/ valid session returns error - missing game ID handled" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "JoanaKennah", "password456")
+            val response = client.post("/show-correct-answer/99999")
+            response.status shouldBe HttpStatusCode.OK
+            response.bodyAsText() shouldContain "Game not found"
+        }
+    }
+
+    //models a full question flow, key test is intermediate leaderboard
+    "POST /show-positions/{gameId} w/ valid ID returns 200 OK w/ HTML - host sees leaderboard" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            // create and start game with minigames disabled
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "false")
+                }))
+            }
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+            client.post("/start-game/$gameId")
+            client.post("/show-correct-answer/$gameId")
+
+            // show positions
+            val response = client.post("/show-positions/$gameId")
+            checkForHtml(response)
+            response.bodyAsText() shouldContain "COMP2870 Quiz"
+        }
+    }
+
+    "POST /show-positions/99999 w/ valid session returns error - missing game ID handled" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "JoanaKennah", "password456")
+            val response = client.post("/show-positions/99999")
+            response.status shouldBe HttpStatusCode.OK
+            response.bodyAsText() shouldContain "Game not found"
+        }
+    }
+
+    //testing auto-ghost for single incorrect player
+    "POST /show-positions/{gameId} w/ 1 incorrect player triggers auto-ghost - auto ghost logic works" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "true")
+                }))
+            }
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+            val gameSession = activeSessions[gameId.toInt()]!!
+
+            client.post("/start-game/$gameId")
+            client.post("/show-correct-answer/$gameId")
+
+            //manually set one incorrect player
+            gameSession.lastIncorrectPlayers = listOf("linguin0")
+
+            val response = client.post("/show-positions/$gameId")
+            checkForHtml(response)
+            //host still sees leaderboard
+            response.bodyAsText() shouldContain "COMP2870 Quiz"
+            //verify player was auto ghosted and added to main list
+            gameSession.autoGhostedPlayer shouldBe "linguin0"
+            gameSession.ghostPlayers shouldContain "linguin0"
+        }
+    }
+
+    "POST /next-question/{gameId} on last question redirects to leaderboard - game ends correctly and displays leaderboard" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            // create and start game
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "false")
+                }))
+            }
+            //run through question flow
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+            client.post("/start-game/$gameId")
+            client.post("/show-correct-answer/$gameId")
+            client.post("/show-positions/$gameId")
+
+            //advance to next question should end game w/ 1 question
+            val response = client.post("/next-question/$gameId")
+            checkForRedirect(response, "/leaderboard/")
+        }
+    }
+
+    "POST /next-question/{gameId} mid-game returns 200 OK w/ HTML - next question served to host" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "JoanaKennah", "password456")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            //add second question to the quiz to model game flow
+            val question = addQuestion(quiz, "What is a Turing machine?", "furthereducation")
+            addAnswer(question,
+                "A theoretical model of computation",
+                "A physical computer built by Turing",
+                "A sorting algorithm",
+                null,
+                1)
+
+            //create & start game
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "false")
+                }))
+            }
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+            client.post("/start-game/$gameId")
+            client.post("/show-correct-answer/$gameId")
+            client.post("/show-positions/$gameId")
+
+            //advance to next question & check content
+            val response = client.post("/next-question/$gameId")
+            checkForHtml(response)
+            response.bodyAsText() shouldContain "COMP2870 Quiz"
+            response.bodyAsText() shouldContain "What is a Turing machine?"
+        }
+    }
+
+    "POST /next-question/99999 w/ valid session returns error - missing game ID handled" {
+        testApplication {
+            application { testModule() }
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "JoanaKennah", "password456")
+            val response = client.post("/next-question/99999")
+            response.status shouldBe HttpStatusCode.OK
+            response.bodyAsText() shouldContain "No active session found for this game"
+        }
+    }
+
 })
 
 // -- helper functions --
