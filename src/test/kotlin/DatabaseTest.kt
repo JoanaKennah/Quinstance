@@ -1004,7 +1004,7 @@ class DatabaseTest: StringSpec({
         }
     }
 
-    "Adding an Answer with an a negative correctIndex should throw an IllegalArgumentException" {
+    "Adding an Answer with a negative correctIndex should throw an IllegalArgumentException" {
         testApplication{
             application { testModule() }
 
@@ -1026,7 +1026,61 @@ class DatabaseTest: StringSpec({
                     "Option 2",
                     "Option 3",
                     "Option 4",
-                    0)
+                    -1)
+            }
+        }
+    }
+
+    "Adding an Answer with a correctIndex greater than 3 should throw an IllegalArgumentException" {
+        testApplication{
+            application { testModule() }
+
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val question = transaction(TestDatabase.db) {
+                val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                quiz shouldNotBe null
+
+                return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
+            }
+
+            shouldThrow<IllegalArgumentException> {
+                val answer = addAnswer(question,
+                    "Option 1",
+                    "Option 2",
+                    "Option 3",
+                    "Option 4",
+                    4)
+            }
+        }
+    }
+
+    "Adding an Answer with a correctIndex indicating a null option is correct should throw an IllegalArgumentException" {
+        testApplication{
+            application { testModule() }
+
+            val user = transaction(TestDatabase.db) {
+                User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+            }
+            user shouldNotBe null
+
+            val question = transaction(TestDatabase.db) {
+                val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                quiz shouldNotBe null
+
+                return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
+            }
+
+            shouldThrow<IllegalArgumentException> {
+                val answer = addAnswer(question,
+                    "Option 1",
+                    "Option 2",
+                    null,
+                    null,
+                    2)
             }
         }
     }
