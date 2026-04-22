@@ -269,6 +269,8 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
     }
     require(option1.isNotEmpty()) { "Option 1 must not be empty" }
     require(option2.isNotEmpty()) { "Option 2 must not be empty" }
+    require(correctIndex in 0..3) { "CorrectIndex must be between 0 and 3" }
+    require(listOf(option1, option2, option3, option4)[correctIndex] != null) { "Correct answer cannot be null" }
 
     // Check to see if an Answer already exists (Question and Answer have 1:1 relationship), return null if Answer
     // already exists
