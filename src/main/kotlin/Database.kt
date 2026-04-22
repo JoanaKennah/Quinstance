@@ -105,7 +105,6 @@ fun deleteUser(user : User) {
         // Throws an exception as it shouldn't be possible for a website user to have this error
         throw Exception("User doesn't exist")
     }
-
 }
 
 /**
@@ -280,7 +279,7 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
 
         val allOptions = listOfNotNull(option1, option2, option3, option4)
         val correctOption = allOptions[correctIndex]
-        var finalOption2: String = ""
+        var finalOption2 = ""
         var finalOption3: String? = null
         var finalOption4: String? = null
 
