@@ -1215,6 +1215,110 @@ class RoutingTest : StringSpec({
         }
     }
 
+    "GET /minigame-result/{gameId} newly ghosted player sees ghost screen - ghost result routing works" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "linguin0", "password123")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "true")
+                }))
+            }
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+            val gameSession = activeSessions[gameId.toInt()]!!
+            client.post("/start-game/$gameId")
+
+            //set up linguin0 as new ghost
+            gameSession.lastIncorrectPlayers = listOf("linguin0")
+            gameSession.mathsGameState = MathsGameState()
+            gameSession.mathsGameState!!.ghostPlayers = listOf("linguin0")
+            gameSession.ghostPlayers.add("linguin0")
+
+            val response = client.get("/minigame-result/$gameId")
+            checkForHtml(response)
+            response.bodyAsText() shouldContain "Total Score:"
+            response.bodyAsText() shouldContain "You are now a ghost!"
+        }
+    }
+
+    "GET /minigame-result/{gameId} safe player sees safe screen - safe result routing works" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "linguin0", "password123")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "true")
+                }))
+            }
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+            val gameSession = activeSessions[gameId.toInt()]!!
+            client.post("/start-game/$gameId")
+
+            //linguin0 in danger but survived
+            gameSession.lastIncorrectPlayers = listOf("linguin0")
+            gameSession.mathsGameState = MathsGameState()
+            //JoanaKennah ghosted
+            gameSession.mathsGameState!!.ghostPlayers = listOf("JoanaKennah")
+            gameSession.ghostPlayers.add("JoanaKennah")
+
+            val response = client.get("/minigame-result/$gameId")
+            checkForHtml(response)
+            response.bodyAsText() shouldContain "Total Score:"
+            response.bodyAsText() shouldContain "You are safe!"
+        }
+    }
+
+    "GET /minigame-result/{gameId} existing ghost sees safe screen w/ veil text - existing ghost routing works" {
+        testApplication {
+            application { testModule() }
+            val client = createClient {
+                install(HttpCookies)
+                followRedirects = false
+            }
+            preLogin(client, "linguin0", "password123")
+            val quiz = retrieveUserQuizzes("JoanaKennah")!!.first()
+
+            val createResponse = client.post("/create-lobby/${quiz.id.value}") {
+                setBody(FormDataContent(Parameters.build {
+                    append("timeLimit", "30")
+                    append("theme", "default")
+                    append("minigames", "true")
+                }))
+            }
+            val gameId = createResponse.headers["Location"]!!.substringAfterLast("/")
+            val gameSession = activeSessions[gameId.toInt()]!!
+            client.post("/start-game/$gameId")
+
+            //linguin0 is existing ghost from a previous minigame
+            gameSession.lastIncorrectPlayers = listOf("JoanaKennah")
+            gameSession.mathsGameState = MathsGameState()
+            gameSession.mathsGameState!!.ghostPlayers = listOf("JoanaKennah")
+            gameSession.ghostPlayers.add("linguin0")
+            gameSession.ghostPlayers.add("JoanaKennah")
+
+            val response = client.get("/minigame-result/$gameId")
+            checkForHtml(response)
+            response.bodyAsText() shouldContain "Total Score:"
+            response.bodyAsText() shouldContain "inside the veil"
+        }
+    }
+
 
 })
 
