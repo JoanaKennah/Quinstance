@@ -105,7 +105,6 @@ fun deleteUser(user : User) {
         // Throws an exception as it shouldn't be possible for a website user to have this error
         throw Exception("User doesn't exist")
     }
-
 }
 
 /**
@@ -269,6 +268,8 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
     }
     require(option1.isNotEmpty()) { "Option 1 must not be empty" }
     require(option2.isNotEmpty()) { "Option 2 must not be empty" }
+    require(correctIndex in 0..3) { "CorrectIndex must be between 0 and 3" }
+    require(listOf(option1, option2, option3, option4)[correctIndex] != null) { "Correct answer cannot be null" }
 
     // Check to see if an Answer already exists (Question and Answer have 1:1 relationship), return null if Answer
     // already exists
@@ -278,7 +279,7 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
 
         val allOptions = listOfNotNull(option1, option2, option3, option4)
         val correctOption = allOptions[correctIndex]
-        var finalOption2: String = ""
+        var finalOption2 = ""
         var finalOption3: String? = null
         var finalOption4: String? = null
 
