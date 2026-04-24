@@ -1,5 +1,6 @@
 package com.example.database
 
+import com.example.database.objects.InUseCode
 import com.example.database.objects.Quiz
 import com.example.database.tables.UserTable
 import com.example.database.tables.QuizTable
@@ -160,6 +161,30 @@ object TestDatabase {
             QuinstanceTable.insert {
                 it[quiz] = userTwoQuiz
                 it[question] = userTwoQuizQ1
+            }
+
+            // Game for linguin0 hosting Quiz 'COMP2860 Quiz'
+            val gameOne =
+                GameTable.insertAndGetId {
+                    it[quiz] = userOneQuiz
+                    it[timeStamp] = java.time.LocalDateTime.now().toString()
+                }
+
+            // Game for JoanaKennah hosting Quiz 'COMP2870 Quiz'
+            val gameTwo =
+                GameTable.insertAndGetId {
+                    it[quiz] = userTwoQuiz
+                    it[timeStamp] = java.time.LocalDateTime.now().toString()
+                }
+
+            InUseTable.insert {
+                it[room_code] = "ABCD1234"
+                it[game] = gameOne
+            }
+
+            InUseTable.insert {
+                it[room_code] = "EFGH5678"
+                it[game] = gameTwo
             }
         }
     }

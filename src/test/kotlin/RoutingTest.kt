@@ -2,9 +2,12 @@ package com.example
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.*
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.collections.shouldContainAny
 import io.kotest.matchers.collections.shouldBeIn
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainAnyOf
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
@@ -1691,7 +1694,7 @@ class RoutingTest : StringSpec({
             gameSession.lastIncorrectPlayers = listOf("linguin0")
             gameSession.roomsGameState = RoomsGameState()
 
-            //pick a room 
+            //pick a room
             val response = client.post("/rooms-pick/$gameId") {
                 setBody(FormDataContent(Parameters.build {
                     append("room", "B")
@@ -1955,7 +1958,7 @@ class RoutingTest : StringSpec({
         }
     }
 
-    /* Polling endpoint tests - 
+    /* Polling endpoint tests -
     checking current state of game of lobby since HTTP cannot push updates -
     replaces websocket tests for now, checks JSON values returned */
     "GET /game-started/{gameId} returns false before game starts - gamestart polling works" {

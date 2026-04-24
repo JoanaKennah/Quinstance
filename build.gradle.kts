@@ -42,6 +42,10 @@ dependencies {
     testImplementation(libs.kotest.runner.junit5)
 }
 
+ktlint {
+    version.set("1.4.1")
+}
+
 tasks.test {
     useJUnitPlatform()
     testLogging {
