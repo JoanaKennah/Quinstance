@@ -1,9 +1,12 @@
 package com.example
 import com.example.database.TestDatabase
+import com.example.database.objects.Game
+import com.example.database.objects.InUseCode
 import com.example.database.objects.Question
 import com.example.database.objects.Quinstance
 import com.example.database.objects.Quiz
 import com.example.database.objects.User
+import com.example.database.tables.InUseTable
 import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
 import com.example.database.tables.UserTable
@@ -16,6 +19,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldHaveLength
+import io.kotest.matchers.types.shouldBeTypeOf
 import io.ktor.server.testing.testApplication
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -1291,6 +1295,76 @@ class DatabaseTest :
                 shouldThrow<IllegalArgumentException> {
                     addGame(quiz)
                 }
+            }
+        }
+
+        "Retrieve room code for Game with Quiz 'COMP2860' (normal data)" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.findById(1)
+                    }
+                game shouldNotBe null
+
+                val roomCode = retrieveRoomCode(game!!)
+                roomCode shouldNotBe null
+                roomCode shouldBe "ABCD1234"
+            }
+        }
+
+        "Retrieve room code for Game with Quiz 'COMP2870' (normal data)" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.findById(2)
+                    }
+                game shouldNotBe null
+
+                val roomCode = retrieveRoomCode(game!!)
+                roomCode shouldNotBe null
+                roomCode shouldBe "EFGH5678"
+            }
+        }
+
+        "Retrieving the room code for a Game that doesn't exist throws IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        user shouldNotBe null
+
+                        val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                        quiz shouldNotBe null
+
+                        Game.new {
+                            this.quiz = quiz!!
+                            this.timeStamp = java.time.LocalDateTime.now().toString()
+                        }
+                    }
+                game shouldBe null
+
+                transaction(TestDatabase.db) { game.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveRoomCode(game)
+                }
+            }
+        }
+
+        "Retrieve InUseCode object from InUseTable using normal data" {
+            testApplication {
+                application { testModule() }
+
+                val roomCode = "ABCD1234"
+
+                val inUseCode = retrieveInUseCode(roomCode)
+                inUseCode shouldNotBe null
             }
         }
     })
