@@ -27,7 +27,7 @@ import io.ktor.utils.io.copyTo
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import java.io.File
 import java.io.InputStream
-
+import com.example.sendConfirmationEmail
 
 fun Application.configureRouting() {
     routing {
@@ -117,6 +117,15 @@ fun Application.configureRouting() {
             val createdUser = addUser(username, password, name, email, keystage, role)
             val newUserRole = createdUser?.role?.lowercase() ?: "USERNAME_EXISTS"
             
+            if (createdUser != null && newUserRole != "USERNAME_EXISTS") {
+                sendConfirmationEmail(
+                    toEmail = email,
+                    firstName = firstname,
+                    lastName = lastname,
+                    username = username,
+                    password = password
+                )
+            }
 
             when (newUserRole) {
                 "USERNAME_EXISTS" -> {
