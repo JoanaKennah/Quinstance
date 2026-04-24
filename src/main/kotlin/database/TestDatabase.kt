@@ -161,6 +161,18 @@ object TestDatabase {
                 it[quiz] = userTwoQuiz
                 it[question] = userTwoQuizQ1
             }
+
+            // Game for linguin0 hosting Quiz 'COMP2860 Quiz'
+            GameTable.insert {
+                it[quiz] = userOneQuiz
+                it[timeStamp] = java.time.LocalDateTime.now().toString()
+            }
+
+            // Game for JoanaKennah hosting Quiz 'COMP2870 Quiz'
+            GameTable.insert {
+                it[quiz] = userTwoQuiz
+                it[timeStamp] = java.time.LocalDateTime.now().toString()
+            }
         }
     }
 }

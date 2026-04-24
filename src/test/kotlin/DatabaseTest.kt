@@ -11,6 +11,7 @@ import com.password4j.Password
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.longs.shouldBeInRange
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
@@ -18,6 +19,7 @@ import io.kotest.matchers.string.shouldHaveLength
 import io.ktor.server.testing.testApplication
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import java.time.Duration
 
 class DatabaseTest :
     StringSpec({
@@ -1164,6 +1166,130 @@ class DatabaseTest :
                         "Option 4",
                         -1,
                     )
+                }
+            }
+        }
+
+        "Retrieve Game using given gameID for Quiz 'COMP2860 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val gameId = 1
+                val game = retrieveGame(gameId)
+
+                game shouldNotBe null
+                transaction(TestDatabase.db) {
+                    game!!.quiz.quiz_name shouldBe "COMP2860 Quiz"
+                }
+            }
+        }
+
+        "Retrieve Game using given gameID for Quiz 'COMP2870 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val gameId = 2
+                val game = retrieveGame(gameId)
+
+                game shouldNotBe null
+                transaction(TestDatabase.db) {
+                    game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                }
+            }
+        }
+
+        "Retrieving a Game with an invalid gameID should return null" {
+            testApplication {
+                application { testModule() }
+
+                val gameId = 5
+                val game = retrieveGame(gameId)
+
+                game shouldBe null
+            }
+        }
+
+        "Retrieving a Game with a negative gameID should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val gameId = -1
+                shouldThrow<IllegalArgumentException> {
+                    retrieveGame(gameId)
+                }
+            }
+        }
+
+        "Add a Game with Quiz 'COMP2860' (normal data) to GameTable" {
+            testApplication {
+                application { testModule() }
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "linguin0" }.firstOrNull()
+                        user shouldNotBe null
+
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                    }
+                quiz shouldNotBe null
+
+                val timeBefore = java.time.LocalDateTime.now()
+                val game = addGame(quiz!!)
+                game shouldNotBe null
+
+                val convertedTimeStamp = java.time.LocalDateTime.parse(game.timeStamp)
+
+                val timeBetween = Duration.between(timeBefore, convertedTimeStamp).toMillis()
+                timeBetween shouldBeInRange 0L..10L
+            }
+        }
+
+        "Add a Game with Quiz 'COMP2870' (normal data) to GameTable" {
+            testApplication {
+                application { testModule() }
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        user shouldNotBe null
+
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                    }
+                quiz shouldNotBe null
+
+                val timeBefore = java.time.LocalDateTime.now()
+                val game = addGame(quiz!!)
+                game shouldNotBe null
+
+                val convertedTimeStamp = java.time.LocalDateTime.parse(game.timeStamp)
+
+                val timeBetween = Duration.between(timeBefore, convertedTimeStamp).toMillis()
+                timeBetween shouldBeInRange 0L..10L
+            }
+        }
+
+        "Adding a Game with a Quiz that doesn't exist throws an IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        user shouldNotBe null
+
+                        Quiz.new {
+                            this.user = user!!
+                            this.quiz_name = "Test Quiz"
+                            this.description = "This is a test quiz"
+                            this.category = "other"
+                            this.key_stage = "furthereducation"
+                        }
+                    }
+                quiz shouldNotBe null
+                transaction(TestDatabase.db) { quiz.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    addGame(quiz)
                 }
             }
         }
