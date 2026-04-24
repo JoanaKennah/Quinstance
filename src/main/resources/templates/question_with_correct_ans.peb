@@ -3,7 +3,7 @@
 <head>
     <title>Correct Answer</title>
 
-    {% if theme ==  "spooky" %}
+    {% if theme == "spooky" %}
     <style>
         body {
             font-family: Arial, sans-serif;
