@@ -1,5 +1,4 @@
 package com.example
-
 import com.example.database.TestDatabase
 import com.example.database.objects.Question
 import com.example.database.objects.Quinstance
@@ -9,16 +8,16 @@ import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
 import com.example.database.tables.UserTable
 import com.password4j.Password
-import io.kotest.core.spec.style.StringSpec
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
-import io.ktor.server.testing.testApplication
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.string.shouldHaveLength
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import io.ktor.server.testing.testApplication
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 class DatabaseTest :
     StringSpec({
@@ -673,13 +672,14 @@ class DatabaseTest :
 
                 val questionAnswerData =
                     listOf(
-                        listOf("A program in execution",
+                        listOf(
+                            "A program in execution",
                             "Come to understand or accept something over a period of time",
                             "A summons or writ requiring a person to appear in court",
                             "A program waiting to be executed",
-                            ),
-                        listOf("A small sequence of programmed instructions", "A piece of yarn or twine", null, null))
-
+                        ),
+                        listOf("A small sequence of programmed instructions", "A piece of yarn or twine", null, null),
+                    )
 
                 val questions =
                     transaction(TestDatabase.db) {
@@ -691,7 +691,7 @@ class DatabaseTest :
 
                         quiz!!.quiz_name shouldBe "COMP2860 Quiz"
                         val quinstances = Quinstance.find { QuinstanceTable.quiz eq quiz.id }.toList()
-                        return@transaction buildList { for(q in quinstances) add(q.question) }
+                        return@transaction buildList { for (q in quinstances) add(q.question) }
                     }
                 questions shouldNotBe null
                 questions shouldHaveSize 2
@@ -705,7 +705,6 @@ class DatabaseTest :
                     answer.option3 shouldBe questionAnswerData[i][2]
                     answer.option4 shouldBe questionAnswerData[i][3]
                 }
-
             }
         }
 
@@ -928,13 +927,14 @@ class DatabaseTest :
                         val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
                         user shouldNotBe null
 
-                        val quiz = Quiz.new {
-                            this.user = user!!
-                            this.quiz_name = "Test Quiz"
-                            this.description = "This is a test quiz"
-                            this.category = "other"
-                            this.key_stage = "furthereducation"
-                        }
+                        val quiz =
+                            Quiz.new {
+                                this.user = user!!
+                                this.quiz_name = "Test Quiz"
+                                this.description = "This is a test quiz"
+                                this.category = "other"
+                                this.key_stage = "furthereducation"
+                            }
                         quiz shouldNotBe null
 
                         return@transaction Question.new {
@@ -971,13 +971,14 @@ class DatabaseTest :
                         val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
                         user shouldNotBe null
 
-                        val quiz = Quiz.new {
-                            this.user = user!!
-                            this.quiz_name = "Test Quiz"
-                            this.description = "This is a test quiz"
-                            this.category = "other"
-                            this.key_stage = "furthereducation"
-                        }
+                        val quiz =
+                            Quiz.new {
+                                this.user = user!!
+                                this.quiz_name = "Test Quiz"
+                                this.description = "This is a test quiz"
+                                this.category = "other"
+                                this.key_stage = "furthereducation"
+                            }
                         quiz shouldNotBe null
 
                         return@transaction Question.new {
@@ -1008,31 +1009,36 @@ class DatabaseTest :
             testApplication {
                 application { testModule() }
 
-                val questions = transaction(TestDatabase.db) {
-                    val user = User.find { UserTable.username eq "linguin0" }.firstOrNull()
-                    user shouldNotBe null
+                val questions =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "linguin0" }.firstOrNull()
+                        user shouldNotBe null
 
-                    val quizzes = Quiz.find { QuizTable.user eq user!!.id }.toList()
-                    quizzes shouldHaveSize 2
+                        val quizzes = Quiz.find { QuizTable.user eq user!!.id }.toList()
+                        quizzes shouldHaveSize 2
 
-                    val quiz = quizzes.firstOrNull()
-                    quiz shouldNotBe null
+                        val quiz = quizzes.firstOrNull()
+                        quiz shouldNotBe null
 
-                    val quinstances = Quinstance.find { QuinstanceTable.quiz eq quiz!!.id}.toList()
-                    return@transaction buildList { for(q in quinstances) { add( Question.findById(q.question.id)) }}
-                }
+                        val quinstances = Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.toList()
+                        return@transaction buildList {
+                            for (q in quinstances) {
+                                add(Question.findById(q.question.id))
+                            }
+                        }
+                    }
                 questions shouldNotBe null
                 questions shouldHaveSize 2
 
-                val answer = addAnswer(
-                    questions.first()!!,
-                    "Option 1",
-                    "Option 2",
-                    "Option 3",
-                    "Option 4",
-                    0,
-                )
-
+                val answer =
+                    addAnswer(
+                        questions.first()!!,
+                        "Option 1",
+                        "Option 2",
+                        "Option 3",
+                        "Option 4",
+                        0,
+                    )
                 answer shouldBe null
             }
         }
@@ -1041,24 +1047,26 @@ class DatabaseTest :
             testApplication {
                 application { testModule() }
 
-                val question = transaction(TestDatabase.db) {
-                    val user = User.find { UserTable.username eq "MinghaoLe123"}.firstOrNull()
-                    user shouldNotBe null
+                val question =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        user shouldNotBe null
 
-                    val quiz = Quiz.new {
-                        this.user = user!!
-                        this.quiz_name = "Test Quiz"
-                        this.description = "This is a test quiz"
-                        this.category = "other"
-                        this.key_stage = "furthereducation"
-                    }
-                    quiz shouldNotBe null
+                        val quiz =
+                            Quiz.new {
+                                this.user = user!!
+                                this.quiz_name = "Test Quiz"
+                                this.description = "This is a test quiz"
+                                this.category = "other"
+                                this.key_stage = "furthereducation"
+                            }
+                        quiz shouldNotBe null
 
-                    Question.new {
-                        this.question = "Test question"
-                        this.key_stage = "keystage1"
+                        Question.new {
+                            this.question = "Test question"
+                            this.key_stage = "keystage1"
+                        }
                     }
-                }
                 question shouldNotBe null
 
                 transaction(TestDatabase.db) { question.delete() }
@@ -1077,18 +1085,19 @@ class DatabaseTest :
         }
 
         "Adding an Answer with an empty option 1 should throw an IllegalArgumentException" {
-            testApplication{
+            testApplication {
                 application { testModule() }
 
-                val question = transaction(TestDatabase.db) {
-                    val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
-                    user shouldNotBe null
+                val question =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        user shouldNotBe null
 
-                    val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
-                    quiz shouldNotBe null
+                        val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                        quiz shouldNotBe null
 
-                    return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
-                }
+                        return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
+                    }
 
                 shouldThrow<IllegalArgumentException> {
                     addAnswer(
@@ -1104,18 +1113,19 @@ class DatabaseTest :
         }
 
         "Adding an Answer with an empty option 2 should throw an IllegalArgumentException" {
-            testApplication{
+            testApplication {
                 application { testModule() }
 
-                val question = transaction(TestDatabase.db) {
-                    val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
-                    user shouldNotBe null
+                val question =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        user shouldNotBe null
 
-                    val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
-                    quiz shouldNotBe null
+                        val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                        quiz shouldNotBe null
 
-                    return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
-                }
+                        return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
+                    }
 
                 shouldThrow<IllegalArgumentException> {
                     addAnswer(
@@ -1131,21 +1141,23 @@ class DatabaseTest :
         }
 
         "Adding an Answer with an a negative correctIndex should throw an IllegalArgumentException" {
-            testApplication{
+            testApplication {
                 application { testModule() }
 
-                val question = transaction(TestDatabase.db) {
-                    val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
-                    user shouldNotBe null
+                val question =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        user shouldNotBe null
 
-                    val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
-                    quiz shouldNotBe null
+                        val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                        quiz shouldNotBe null
 
-                    return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
-                }
+                        return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
+                    }
 
                 shouldThrow<IllegalArgumentException> {
-                    addAnswer(question,
+                    addAnswer(
+                        question,
                         "Option 1",
                         "Option 2",
                         "Option 3",
