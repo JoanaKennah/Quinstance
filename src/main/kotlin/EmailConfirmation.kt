@@ -38,12 +38,12 @@ fun sendConfirmationEmail(
             setText("""
                 Hi $firstName $lastName,
 
+                Welcome to Game Night Quizzes!
                 Your account has been created successfully!
 
                 Username: $username
-                Password: $password
 
-                Thanks for signing up!
+                Have fun and thanks for signing up!
             """.trimIndent())
         }
 
