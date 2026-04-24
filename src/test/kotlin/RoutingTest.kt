@@ -2,8 +2,10 @@ package com.example
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.*
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.string.shouldContain
-import io.kotest.matchers.collections.shouldContainAny
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainAnyOf
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
@@ -1023,9 +1025,8 @@ class RoutingTest : StringSpec({
             val response = client.get("/minigame-question/$gameId")
             checkForHtml(response)
             //verify valid maths question is displayed, check for operator
-            response.bodyAsText().let { body ->
-                body shouldContainAny listOf("+", "-", "×", "÷")
-            }
+            val operators = Regex("[+-×÷]")
+            response.bodyAsText() shouldContain operators
         }
     }
 
@@ -1125,8 +1126,7 @@ class RoutingTest : StringSpec({
             client.post("/minigame-end/$gameId")
 
             //verify ghost determination
-            gameSession.mathsGameState!!.ghostPlayers shouldContain "JoanaKennah"
-            gameSession.mathsGameState!!.ghostPlayers shouldNotContain "linguin0"
+            gameSession.mathsGameState!!.ghostPlayers.shouldContainExactly("JoanaKennah")
             gameSession.ghostPlayers shouldContain "JoanaKennah"
             gameSession.mathsGameState!!.isFinished shouldBe true
         }
