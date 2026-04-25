@@ -109,7 +109,7 @@ fun Application.configureRouting() {
             val keystage = parameters["keystage"]?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing input(s)")))
 
             if (password != confirmpassword) {
-                call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Passwords don't match")))
+                call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Passwords do not match")))
                 return@post
             }
 
@@ -181,7 +181,7 @@ fun Application.configureRouting() {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             
             if (session.role != "student") {
-                return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "You do not have permission to acess the student dashboard")))
+                return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "You do not have permission to access the student dashboard")))
             }
 
             call.respond(
@@ -195,7 +195,7 @@ fun Application.configureRouting() {
         //serves question page client-side, websocket connects here during game
         get("/game/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
-            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameId")))
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
             val game = retrieveGame(gameId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Game not found")))
             val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
 
@@ -242,7 +242,7 @@ fun Application.configureRouting() {
         //serves list of Qs in quiz
         get("/view-quiz-questions/{quizId}") {
             val quizId = call.parameters["quizId"]?.toIntOrNull()
-                ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "QuizID invalid")))
+                ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid quizID")))
 
             val quiz = retrieveQuiz(quizId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
             val questions = retrieveQuizQuestions(quiz)
@@ -367,7 +367,7 @@ fun Application.configureRouting() {
             val quizId = call.parameters["quizId"]?.toIntOrNull()
                 ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid quizID")))
             
-            val quiz = retrieveQuiz(quizId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No quiz found")))
+            val quiz = retrieveQuiz(quizId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
 
             call.respond(PebbleContent("add_question.peb", mapOf("quizName" to quiz.quiz_name, "quizId" to quizId)))
         }
@@ -377,7 +377,7 @@ fun Application.configureRouting() {
             val quizId = call.parameters["quizId"]?.toIntOrNull()
                 ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid quizID")))
 
-            val quiz = retrieveQuiz(quizId) ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No quiz found")))
+            val quiz = retrieveQuiz(quizId) ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
 
             val parameters = call.receiveParameters()
             val questionText = parameters["question"] 
@@ -711,7 +711,7 @@ fun Application.configureRouting() {
 
             val questions = retrieveQuizQuestions(quiz)                                        //load questions into quiz
             if (questions.isEmpty()) {
-                return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No Questions Found in Quiz")))
+                return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No questions found in this quiz")))
             } 
 
             val gameSession = activeSessions[gameId]
@@ -854,7 +854,7 @@ fun Application.configureRouting() {
 
             // Get current Q and correct ans
             val currentQuestion = gameSession.questions[gameSession.currentQuestionIndex]
-            val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No answer found for this question")))
+            val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No correct answer found for this question")))
 
             val answers = UserAnswers.allUserAnswers()
 
@@ -927,7 +927,7 @@ fun Application.configureRouting() {
             val gameSession = activeSessions[gameId] ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
 
             val currentQuestion = gameSession.questions[gameSession.currentQuestionIndex]
-            val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No answer found for question")))
+            val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No correct answer found for this question")))
 
             //check if player was revived
             if (session.username in gameSession.revivedPlayers) {
@@ -964,7 +964,7 @@ fun Application.configureRouting() {
 
             //get current Q plus correct ans
             val currentQuestion = gameSession.questions[gameSession.currentQuestionIndex]
-            val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No answer found for question")))
+            val correctAnswer = retrieveQuestionAnswer(currentQuestion)?.correct_answer ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No correct answer found for this question")))
 
 
             call.respond(PebbleContent("question_with_correct_ans.peb", mapOf(
