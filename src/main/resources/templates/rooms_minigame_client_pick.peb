@@ -88,6 +88,7 @@
         }
 
         .logout-btn {
+            color: white;
             background: none;
             border: none;
             cursor: pointer;
