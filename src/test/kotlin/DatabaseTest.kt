@@ -6,7 +6,6 @@ import com.example.database.objects.Question
 import com.example.database.objects.Quinstance
 import com.example.database.objects.Quiz
 import com.example.database.objects.User
-import com.example.database.tables.InUseTable
 import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
 import com.example.database.tables.UserTable
@@ -19,7 +18,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldHaveLength
-import io.kotest.matchers.types.shouldBeTypeOf
 import io.ktor.server.testing.testApplication
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -663,7 +661,6 @@ class DatabaseTest :
                     }
                 newQuiz shouldNotBe null
 
-                newQuiz shouldNotBe null
                 transaction(TestDatabase.db) { newQuiz.delete() } // To remove quiz from database so it can be invalid.
 
                 shouldThrow<IllegalArgumentException> {
@@ -924,7 +921,7 @@ class DatabaseTest :
             }
         }
 
-        "Add an Answer (normal data, fourth option is correct) to a Question without an existing Answer" {
+        "Add an Answer with null as the third option" {
             testApplication {
                 application { testModule() }
 
@@ -968,7 +965,7 @@ class DatabaseTest :
             }
         }
 
-        "Add an Answer (normal data, fourth option is correct) to a Question without an existing Answer" {
+        "Add an Answer with null as the fourth option" {
             testApplication {
                 application { testModule() }
 
@@ -1347,7 +1344,7 @@ class DatabaseTest :
                             this.timeStamp = java.time.LocalDateTime.now().toString()
                         }
                     }
-                game shouldBe null
+                game shouldNotBe null
 
                 transaction(TestDatabase.db) { game.delete() }
 
@@ -1357,7 +1354,7 @@ class DatabaseTest :
             }
         }
 
-        "Retrieve InUseCode object from InUseTable using normal data" {
+        "Retrieve InUseCode object from InUseTable using room code 'ABCD1234' (normal data)" {
             testApplication {
                 application { testModule() }
 
@@ -1365,6 +1362,269 @@ class DatabaseTest :
 
                 val inUseCode = retrieveInUseCode(roomCode)
                 inUseCode shouldNotBe null
+
+                transaction(TestDatabase.db) {
+                    inUseCode!!.game.id.toString() shouldBe "1"
+                    inUseCode.game.quiz.quiz_name shouldBe "COMP2860 Quiz"
+                }
+            }
+        }
+
+        "Retrieve InUseCode object from InUseTable using room code 'EFGH5678' (normal data)" {
+            testApplication {
+                application { testModule() }
+
+                val roomCode = "EFGH5678"
+
+                val inUseCode = retrieveInUseCode(roomCode)
+                inUseCode shouldNotBe null
+
+                transaction(TestDatabase.db) {
+                    inUseCode!!.game.id.toString() shouldBe "2"
+                    inUseCode.game.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                }
+            }
+        }
+
+        "Retrieving InUseCode object with empty Room Code throws IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val roomCode = ""
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveInUseCode(roomCode)
+                }
+            }
+        }
+
+        "Retrieving InUseCode object with a Room Code with invalid characters throws IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val roomCode = "#!#!#!#!"
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveInUseCode(roomCode)
+                }
+            }
+        }
+
+        "Retrieving InUseCode object with a Room Code with length < 8 throws IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val roomCode = "1234"
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveInUseCode(roomCode)
+                }
+            }
+        }
+
+        "Retrieving InUseCode object with a Room Code with length > 8 throws IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val roomCode = "ERROR!ERROR!"
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveInUseCode(roomCode)
+                }
+            }
+        }
+
+        "Room code 'ABCD1234' already exists in InUseTable (roomCodeAlreadyExists returns true)" {
+            testApplication {
+                application { testModule() }
+
+                val check = roomCodeAlreadyExists("ABCD1234")
+                check shouldBe true
+            }
+        }
+
+        "Room code 'EFGH5678' already exists in InUseTable (roomCodeAlreadyExists returns true)" {
+            testApplication {
+                application { testModule() }
+
+                val check = roomCodeAlreadyExists("EFGH5678")
+                check shouldBe true
+            }
+        }
+
+        "Room code 'DCBA9876' doesn't exist in InUseTable (roomCodeAlreadyExists returns false)" {
+            testApplication {
+                application { testModule() }
+
+                val check = roomCodeAlreadyExists("DCBA9876")
+                check shouldBe false
+            }
+        }
+
+        "Trying to check if an empty room code exists throws an IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                shouldThrow<IllegalArgumentException> {
+                    roomCodeAlreadyExists("")
+                }
+            }
+        }
+
+        "Trying to check if a room code with invalid characters exists throws an IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                shouldThrow<IllegalArgumentException> {
+                    roomCodeAlreadyExists("#!#!#!#!")
+                }
+            }
+        }
+
+        "Trying to check if a room code of length < 8 exists throws an IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                shouldThrow<IllegalArgumentException> {
+                    roomCodeAlreadyExists("SMALL")
+                }
+            }
+        }
+
+        "Trying to check if a room code of length > 8 exists throws an IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                shouldThrow<IllegalArgumentException> {
+                    roomCodeAlreadyExists("HUMoNGoUS")
+                }
+            }
+        }
+
+        "Add InUseCode object for Game with Quiz 'COMP2860 Quiz' (normal data)" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val game = Game.findById(1)
+                        game shouldNotBe null
+                        game!!.quiz.quiz_name shouldBe "COMP2860 Quiz"
+                        return@transaction game
+                    }
+
+                // Room code is generated using GenerateRoomCode, for tests I will be using placeholders.
+                val inUseCode = addInUseCode("HIJK1010", game)
+                inUseCode shouldNotBe null
+            }
+        }
+
+        "Add InUseCode object for Game with Quiz 'COMP2870 Quiz' (normal data)" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val game = Game.findById(2)
+                        game shouldNotBe null
+                        game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                        return@transaction game
+                    }
+
+                // Room code is generated using GenerateRoomCode, for tests I will be using placeholders.
+                val inUseCode = addInUseCode("LMNO1234", game)
+                inUseCode shouldNotBe null
+            }
+        }
+
+        "Adding InUseCode object with an empty room code throws an IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val game = Game.findById(2)
+                        game shouldNotBe null
+                        game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                        return@transaction game
+                    }
+
+                shouldThrow<IllegalArgumentException> {
+                    addInUseCode("", game)
+                }
+            }
+        }
+
+        "Adding InUseCode object with invalid characters throws an IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val game = Game.findById(2)
+                        game shouldNotBe null
+                        game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                        return@transaction game
+                    }
+
+                shouldThrow<IllegalArgumentException> {
+                    addInUseCode("!#!#!#!#", game)
+                }
+            }
+        }
+
+        "Adding InUseCode object with a non-unique room code throws an IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                transaction(TestDatabase.db) {
+                    val game = Game.findById(1)
+                    game shouldNotBe null
+                    game!!.quiz.quiz_name shouldBe "COMP2860 Quiz"
+
+                    InUseCode.new {
+                        this.room_code = "DCBA9876"
+                        this.game = game
+                    }
+                }
+                val game =
+                    transaction(TestDatabase.db) {
+                        val game = Game.findById(2)
+                        game shouldNotBe null
+                        game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                        return@transaction game
+                    }
+
+                shouldThrow<IllegalArgumentException> {
+                    addInUseCode("DCBA9876", game)
+                }
+            }
+        }
+
+        "Adding InUseCode object for a Game that doesn't exist throws IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        user shouldNotBe null
+
+                        val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                        quiz shouldNotBe null
+
+                        Game.new {
+                            this.quiz = quiz!!
+                            this.timeStamp = java.time.LocalDateTime.now().toString()
+                        }
+                    }
+                game shouldNotBe null
+
+                transaction(TestDatabase.db) { game.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    addInUseCode("LOLHI123", game)
+                }
             }
         }
     })

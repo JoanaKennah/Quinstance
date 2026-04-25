@@ -8,6 +8,7 @@ import kotlin.text.isNotEmpty
 import com.example.database.ProjectDatabase
 import com.example.database.tables.*
 import com.example.database.objects.*
+import com.example.generateRoomCode
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 
@@ -389,6 +390,25 @@ fun retrieveDescendingPlayerScores(game: Game): List<Map<String, Any>> {
 }
 
 /**
+ * Checks InUseTable to see if there is an InUseCode object that already exists with the given room code.
+ * @return true if the room code already exists, false otherwise
+ */
+fun roomCodeAlreadyExists(roomCode: String): Boolean {
+    require(roomCode.isNotEmpty()) { "Room code must not be empty" }
+    val acceptableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    for (character in roomCode) {
+        require(character in acceptableChars) { "Room code should only contain letters or numbers" }
+    }
+    require(roomCode.length == 8) { "Room code must have length 8" }
+
+    val check =
+        transaction(TransactionManager.defaultDatabase) {
+            InUseCode.find { InUseTable.room_code eq roomCode }.firstOrNull()
+        }
+    return check != null
+}
+
+/**
  * Creates and adds a new InUseCode record to InUseCodeTable.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */
@@ -396,7 +416,12 @@ fun addInUseCode(roomCode: String, game: Game): InUseCode {
     // Check to see if given game actually exists and that the room code is valid (length 8, not empty)
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     require(roomCode.isNotEmpty()) { "Room code must not be empty" }
-    require(roomCode.length == 8)
+    val acceptableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    for (character in roomCode) {
+        require(character in acceptableChars) { "Room code should only contain letters or numbers" }
+    }
+    require(roomCode.length == 8) { "Room code must have length 8" }
+    require(!roomCodeAlreadyExists(roomCode)) { "Room code already exists" }
 
     return transaction(TransactionManager.defaultDatabase) {
         InUseCode.new {
@@ -427,6 +452,10 @@ fun retrieveInUseCode(roomCode: String): InUseCode? {
     // Checks to see if room code given is not empty and has length 8
     require(roomCode.isNotEmpty()) { "Room code must not be empty" }
     require(roomCode.length == 8) { "Room code must have length 8" }
+    val acceptableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    for (character in roomCode) {
+        require(character in acceptableChars) { "Room code should only contain letters or numbers" }
+    }
 
     return transaction(TransactionManager.defaultDatabase) {
         InUseCode.find { InUseTable.room_code eq roomCode }.firstOrNull()

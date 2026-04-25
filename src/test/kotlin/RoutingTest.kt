@@ -4,10 +4,9 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.*
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.string.shouldContain
-import io.kotest.matchers.collections.shouldContainAny
-import io.kotest.matchers.collections.shouldBeIn
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainAnyOf
+import io.kotest.matchers.collections.shouldBeIn
+import io.kotest.matchers.collections.shouldNotContain
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
@@ -1028,7 +1027,7 @@ class RoutingTest : StringSpec({
             checkForHtml(response)
             //verify valid maths question is displayed, check for operator
             response.bodyAsText().let { body ->
-                body shouldContainAny listOf("+", "-", "×", "÷")
+                body shouldContain Regex("//+|-|×|÷")
             }
         }
     }

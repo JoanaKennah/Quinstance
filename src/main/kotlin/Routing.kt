@@ -563,7 +563,10 @@ fun Application.configureRouting() {
             )
             activeSessions[game.id.value] = gameSession
 
-            val roomCode = generateRoomCode()
+            var roomCode: String? = null
+            do {
+                roomCode = generateRoomCode()
+            } while (roomCodeAlreadyExists(roomCode))
             addInUseCode(roomCode, game)
 
             call.respondRedirect("/lobby-server/${game.id.value}")
