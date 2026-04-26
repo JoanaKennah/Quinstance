@@ -246,8 +246,19 @@
     <div class="questions-container">
         {% if error == "none" %}
             {% for question in questions %}
-                <div class="question-box" onclick="window.location.href='/add-question/{{ quiz.id }}'">
-                    {{ loop.index + 1 }}. {{ question.question }}
+                <div class="question-box" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex-grow: 1;">
+                        {{ loop.index + 1 }}. {{ question.question }}
+                    </div>
+
+                    <form action="/delete-question/{{ question.id }}" method="post" style="margin: 0;">
+                        <button
+                            type="submit"
+                            class="btn"
+                            onclick="return confirm('Are you sure you want to delete this question?');">
+                            Delete
+                        </button>
+                    </form>
                 </div>
             {% endfor %}
         {% endif %}

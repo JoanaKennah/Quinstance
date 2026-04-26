@@ -138,14 +138,21 @@ fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
  * Deletes given question from QuestionTable. Returns true if the question is successfully deleted
  */
 fun deleteQuestion(question: Question): Boolean {
-    // Finds if the given question exists, then deletes it
     return transaction(TransactionManager.defaultDatabase) {
-        val foundQuestion = Question.find { QuestionTable.id eq question.id }
-        if (foundQuestion.firstOrNull() != null) {
-            question.delete()
-            return@transaction true
+        val foundQuestion = Question.findById(question.id.value) ?: return@transaction false
+
+        val quinstance = Quinstance.find { QuinstanceTable.question eq foundQuestion.id }.firstOrNull()
+        val quiz = quinstance?.quiz
+
+        Answer.find { AnswerTable.question eq foundQuestion.id }.firstOrNull()?.delete()
+        quinstance?.delete()
+        foundQuestion.delete()
+
+        if (quiz != null && quiz.num_of_questions > 0) {
+            quiz.num_of_questions -= 1
         }
-        return@transaction false
+
+        true
     }
 }
 
