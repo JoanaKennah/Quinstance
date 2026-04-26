@@ -688,11 +688,32 @@ fun Application.configureRouting() {
                 return@post
             }
             val game = retrieveInUseCodeGame(inUseCode) ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Game not found")))
+
+            //stop players joining after game started
+            if (activeSessions[game.id.value]?.isStarted == true) {
+                call.respond(PebbleContent("join_lobby.peb", mapOf(
+                    "returnURL" to returnURL,
+                    "roomCode" to roomCode,
+                    "errorMessage" to "This Game has Already Started!"
+                )))
+                return@post
+            }
+
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
 
             val gameSession = activeSessions[game.id.value]
             val theme = gameSession?.theme ?: "default"
             call.sessions.set(session.copy(theme = theme))
+
+            //block prev removed players from joining 
+            if (gameSession != null && session.username in gameSession.barredUsernames) {
+                call.respond(PebbleContent("join_lobby.peb", mapOf(
+                    "returnURL" to returnURL,
+                    "roomCode" to roomCode,
+                    "errorMessage" to "You have already been removed from this game!"
+                )))
+                return@post
+            }
 
             addUserScore(game, user)
             call.respondRedirect("/lobby-client/${game.id.value}")
@@ -1320,6 +1341,7 @@ fun Application.configureRouting() {
             call.respond(PebbleContent("settings.peb", mapOf(
                 "gameId" to gameId,
                 "returnUrl" to returnUrl,
+                "theme" to session.theme,
                 "timeLimit" to gameSession.timeLimit,
                 "minigamesEnabled" to gameSession.miniGamesEnabled,
                 "mathsEnabled" to gameSession.activeMinigames.contains("maths"),
@@ -2018,6 +2040,7 @@ fun Application.configureRouting() {
             gameSession.lastCorrectPlayers = gameSession.lastCorrectPlayers.filter { it !in kickedPlayers }
 
             gameSession.kickedUsernames.addAll(kickedPlayers)
+            gameSession.barredUsernames.addAll(kickedPlayers)
 
             call.respondRedirect("/settings/$gameId")
         }
