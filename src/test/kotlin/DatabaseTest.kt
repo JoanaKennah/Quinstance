@@ -6,6 +6,7 @@ import com.example.database.objects.Question
 import com.example.database.objects.Quinstance
 import com.example.database.objects.Quiz
 import com.example.database.objects.User
+import com.example.database.tables.InUseTable
 import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
 import com.example.database.tables.UserTable
@@ -1624,6 +1625,72 @@ class DatabaseTest :
 
                 shouldThrow<IllegalArgumentException> {
                     addInUseCode("LOLHI123", game)
+                }
+            }
+        }
+
+        "Retrieve Game object using InUseCode for Quiz 'COMP2860 Quiz' (normal data)" {
+            testApplication {
+                application { testModule() }
+                val roomCode = "ABCD1234"
+
+                val inUseCode =
+                    transaction(TestDatabase.db) {
+                        InUseCode.find { InUseTable.room_code eq roomCode }.firstOrNull()
+                    }
+                inUseCode shouldNotBe null
+                inUseCode!!.room_code shouldBe roomCode
+
+                val game = retrieveInUseCodeGame(inUseCode)
+                game shouldNotBe null
+
+                transaction(TestDatabase.db) {
+                    game!!.quiz.quiz_name shouldBe "COMP2860 Quiz"
+                }
+            }
+        }
+
+        "Retrieve Game object using InUseCode for Quiz 'COMP2870 Quiz' (normal data)" {
+            testApplication {
+                application { testModule() }
+                val roomCode = "EFGH5678"
+
+                val inUseCode =
+                    transaction(TestDatabase.db) {
+                        InUseCode.find { InUseTable.room_code eq roomCode }.firstOrNull()
+                    }
+                inUseCode shouldNotBe null
+                inUseCode!!.room_code shouldBe roomCode
+
+                val game = retrieveInUseCodeGame(inUseCode)
+                game shouldNotBe null
+
+                transaction(TestDatabase.db) {
+                    game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                }
+            }
+        }
+
+        "Retrieving Game object using an InUseCode object that doesn't exist should throw an IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val inUseCode =
+                    transaction(TestDatabase.db) {
+                        val game = Game.findById(2)
+                        game shouldNotBe null
+                        game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+
+                        InUseCode.new {
+                            this.room_code = "TEST1234"
+                            this.game = game
+                        }
+                    }
+
+                transaction(TestDatabase.db) { inUseCode.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveInUseCodeGame(inUseCode)
                 }
             }
         }

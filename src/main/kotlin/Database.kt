@@ -467,6 +467,12 @@ fun retrieveInUseCode(roomCode: String): InUseCode? {
  * Exposed DAO is shite.
  */
 fun retrieveInUseCodeGame(inUseCode: InUseCode): Game? {
+    val foundInUseCode =
+        transaction(TransactionManager.defaultDatabase) {
+            InUseCode.find { InUseTable.id eq inUseCode.id }.firstOrNull()
+        }
+    require(foundInUseCode != null) { "InUseCode must exist" }
+
     return transaction(TransactionManager.defaultDatabase) {
         Game.find { GameTable.id eq inUseCode.game.id }.firstOrNull()
     }
