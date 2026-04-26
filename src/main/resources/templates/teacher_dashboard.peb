@@ -28,7 +28,7 @@
         }
 
         h1 {
-            color: black,
+            color: black;
             margin-top: 40px;
         }
 
@@ -63,7 +63,7 @@
 
 <div class="navbar">
     <form method="post" action="/logout">
-        <button type="submit" style="background: none; border: none; cursor: pointer; font-weight: bold; font-size: 14px; padding: 0;">Logout</button>
+        <button type="submit" style="background: none; border: none; cursor: pointer; font-weight: bold; font-size: 14px; padding: 0; width: auto;">Logout</button>
     </form>
 </div>
 
