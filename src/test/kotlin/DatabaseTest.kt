@@ -28,7 +28,6 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldHaveLength
 import io.ktor.server.testing.testApplication
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.time.Duration
 
@@ -1350,7 +1349,10 @@ class DatabaseTest :
 
                         Game.new {
                             this.quiz = quiz!!
-                            this.timeStamp = java.time.LocalDateTime.now().toString()
+                            this.timeStamp =
+                                java.time.LocalDateTime
+                                    .now()
+                                    .toString()
                         }
                     }
                 game shouldNotBe null
@@ -1624,7 +1626,10 @@ class DatabaseTest :
 
                         Game.new {
                             this.quiz = quiz!!
-                            this.timeStamp = java.time.LocalDateTime.now().toString()
+                            this.timeStamp =
+                                java.time.LocalDateTime
+                                    .now()
+                                    .toString()
                         }
                     }
                 game shouldNotBe null
@@ -1718,7 +1723,7 @@ class DatabaseTest :
                 deleteInUseCode(game)
 
                 transaction(TestDatabase.db) {
-                    val deleteCheck = InUseCode.find { InUseTable.game eq game.id}.firstOrNull()
+                    val deleteCheck = InUseCode.find { InUseTable.game eq game.id }.firstOrNull()
                     deleteCheck shouldBe null
                 }
             }
@@ -1739,7 +1744,7 @@ class DatabaseTest :
                 deleteInUseCode(game)
 
                 transaction(TestDatabase.db) {
-                    val deleteCheck = InUseCode.find { InUseTable.game eq game.id}.firstOrNull()
+                    val deleteCheck = InUseCode.find { InUseTable.game eq game.id }.firstOrNull()
                     deleteCheck shouldBe null
                 }
             }
@@ -1760,7 +1765,10 @@ class DatabaseTest :
                         val game =
                             Game.new {
                                 this.quiz = quiz!!
-                                this.timeStamp = java.time.LocalDateTime.now().toString()
+                                this.timeStamp =
+                                    java.time.LocalDateTime
+                                        .now()
+                                        .toString()
                             }
                         game shouldNotBe null
 
@@ -1842,7 +1850,10 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         Game.new {
                             this.quiz = quiz!!
-                            this.timeStamp = java.time.LocalDateTime.now().toString()
+                            this.timeStamp =
+                                java.time.LocalDateTime
+                                    .now()
+                                    .toString()
                         }
                     }
 
@@ -1986,7 +1997,10 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         Game.new {
                             this.quiz = quiz!!
-                            this.timeStamp = java.time.LocalDateTime.now().toString()
+                            this.timeStamp =
+                                java.time.LocalDateTime
+                                    .now()
+                                    .toString()
                         }
                     }
 
@@ -2015,7 +2029,10 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         Game.new {
                             this.quiz = quiz!!
-                            this.timeStamp = java.time.LocalDateTime.now().toString()
+                            this.timeStamp =
+                                java.time.LocalDateTime
+                                    .now()
+                                    .toString()
                         }
                     }
 
