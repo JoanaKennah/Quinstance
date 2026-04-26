@@ -499,6 +499,56 @@ class DatabaseTest :
             }
         }
 
+
+        "Retrieve Quiz 'COMP2860 Quiz' using it's quiz ID (1)" {
+            testApplication {
+                application { testModule() }
+
+                val quizId = 1
+
+                val quiz = retrieveQuiz(quizId)
+                quiz shouldNotBe null
+
+                quiz!!.quiz_name shouldBe "COMP2860 Quiz"
+            }
+        }
+
+        "Retrieve Quiz 'COMP2870 Quiz' using it's quiz ID (3)" {
+            testApplication {
+                application { testModule() }
+
+                val quizId = 3
+
+                val quiz = retrieveQuiz(quizId)
+                quiz shouldNotBe null
+
+                quiz!!.quiz_name shouldBe "COMP2870 Quiz"
+            }
+        }
+
+        "Retrieving Quiz using a quiz ID that doesn't exist should return null" {
+            testApplication {
+                application { testModule() }
+
+                val quizId = 10
+
+                val quiz = retrieveQuiz(quizId)
+                quiz shouldBe null
+            }
+        }
+
+        "Retrieving Quiz using a negative quiz ID should throw an IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val quizId = -1
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveQuiz(quizId)
+                }
+            }
+        }
+
         "Add a Question (normal data) to Quiz 'COMP2860 Quiz'" {
             testApplication {
                 application { testModule() }

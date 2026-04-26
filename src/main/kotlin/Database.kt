@@ -8,7 +8,6 @@ import kotlin.text.isNotEmpty
 import com.example.database.ProjectDatabase
 import com.example.database.tables.*
 import com.example.database.objects.*
-import com.example.generateRoomCode
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 
@@ -51,17 +50,6 @@ fun retrieveUser(username: String) : User? {
     require(username.isNotEmpty()) { "User can't be empty" }
     return transaction(TransactionManager.defaultDatabase) {
         User.find { UserTable.username eq username }.firstOrNull()
-    }
-}
-
-/**
- * Retrieves user from UserTable using their ID, returns null if no user found
- */
-fun retrieveUserById(userId: Int): User? {
-    require(userId > 0) { "User ID must be positive" }
-
-    return transaction(TransactionManager.defaultDatabase) {
-        User.findById(userId)
     }
 }
 
