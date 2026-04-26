@@ -200,10 +200,11 @@
                 </thead>
                 <tbody>
                     {% for player in players %}
+                        {% set ghostColor = theme == "spooky" ? "white" : "#e63973" %}
                         <tr>
-                            <td>{{ loop.index + 1 }}</td>
-                            <td>{{ player.username }}</td>
-                            <td>{{ player.score }}</td>
+                            <td {% if player.isGhost %}style="color: {{ ghostColor }};"{% endif %}>{{ loop.index + 1 }}</td>
+                            <td {% if player.isGhost %}style="color: {{ ghostColor }};"{% endif %}>{{ player.username }}</td>
+                            <td {% if player.isGhost %}style="color: {{ ghostColor }};"{% endif %}>{{ player.score }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

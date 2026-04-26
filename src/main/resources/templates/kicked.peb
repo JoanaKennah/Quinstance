@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Kicked</title>
+
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+            color: #2dc84d;
+        }
+
+        .navbar {
+            background-color: #2dc84d;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            color: black;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .box {
+            border: 2px solid #2dc84d;
+            border-radius: 10px;
+            padding: 30px;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: black;
+            color: #2dc84d;
+            border: 2px solid #2dc84d;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #2dc84d;
+            color: black;
+        }
+    </style>
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            color: black;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 30px;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+    <div class="navbar">
+        <form method="post" action="/logout">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <div class="box">
+            <h1>You have been kicked!</h1>
+            <form method="post" action="/leaderboard-quit/{{ gameId }}">
+                <button type="submit" class="btn">Return to Dashboard</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
