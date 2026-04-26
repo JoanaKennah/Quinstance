@@ -6,6 +6,7 @@ import org.jetbrains.exposed.v1.core.eq
 import com.password4j.Password
 import kotlin.text.isNotEmpty
 import com.example.database.ProjectDatabase
+import com.example.database.TestDatabase
 import com.example.database.tables.*
 import com.example.database.objects.*
 import org.jetbrains.exposed.v1.core.and
@@ -24,6 +25,16 @@ import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 data class UserAttemptView(
     val quizName: String,
     val score: Int
+)
+
+/**
+ * Information about a Player's score.
+ */
+data class PlayerScoreInfo(
+    val userID: Int,
+    val username: String,
+    val score: Int,
+    val isGhost: Boolean
 )
 
 /**
@@ -83,22 +94,6 @@ fun addUser(username: String, password: String, name: String, email: String, key
             }
         }
     }; return null
-}
-
-/**
- * Deletes given user from UserTable (possibly used for Admin purposes)
- **/
-fun deleteUser(user : User) {
-    // Checks if the user exists in the table before deleting it
-    val userExists = retrieveUser(user.username)
-    if (userExists != null) {
-        transaction(TransactionManager.defaultDatabase) {
-            user.delete()
-        }
-    } else {
-        // Throws an exception as it shouldn't be possible for a website user to have this error
-        throw Exception("User doesn't exist")
-    }
 }
 
 /**
@@ -387,21 +382,6 @@ fun roomCodeAlreadyExists(roomCode: String): Boolean {
 }
 
 /**
- * Retrieve list of Players with their associated scores in DESCENDING order.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
- */
-
-fun retrieveDescendingPlayerScores(game: Game): List<Map<String, Any>> {
-    // Check to see if given game actually exists
-    require(retrieveGame(game.id.value) != null) { "Game must exist" }
-    return transaction(TransactionManager.defaultDatabase) {
-        UserScore.find { UserScoreTable.game eq game.id }
-            .sortedByDescending { it.score }
-            .map { userScore -> mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score, "isGhost" to userScore.ghost) }
-    }
-}
-
-/**
  * Creates and adds a new InUseCode record to InUseCodeTable.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */
@@ -513,16 +493,52 @@ fun retrieveUserScore(game: Game, user: User): UserScore? {
 /**
  * Retrieves all UserScores from a given Game
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @return list of PlayerScoreInfo objects.
  */
-fun retrieveAllUserScoresDescending(game: Game): List<Triple<Int, String, Int>> {
+fun retrieveAllUserScoresDescending(game: Game): List<PlayerScoreInfo> {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     return transaction(TransactionManager.defaultDatabase) {
         UserScore.find { UserScoreTable.game eq game.id }
             .sortedByDescending { it.score }
             .map { userScore ->
-                Triple(userScore.user.id.value, userScore.user.username, userScore.score)
+                PlayerScoreInfo(userScore.user.id.value, userScore.user.username, userScore.score, userScore.isGhost)
         }
     }
+}
+
+/**
+ * Deletes UserScore object for a given User.
+ * Created by Emily in Routing.kt, refactored and edited in Database.kt for testing purposes.
+ * @return True if delete is successful, false if UserScore doesn't exist.
+ * @throws IllegalArgumentException if the Game or User doesn't exist.
+ */
+fun deleteUserScoreForGivenUser(game: Game, user: User): Boolean {
+    require(retrieveGame(game.id.value) != null) { "Game must exist" }
+    require(retrieveUser(user.username) != null) { "User must exist" }
+    val userScore =
+        transaction(TestDatabase.db) {
+            UserScore.find {
+                UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
+            }.firstOrNull()
+        } ?: return false
+    transaction(TestDatabase.db) { userScore.delete() }
+    return true
+}
+
+/**
+ * Deletes all UserScores for a given Game.
+ * Created by Emily in Routing.kt, refactored and edited in Database.kt for testing purposes.
+ * @return True if delete is successful, false if there are no UserScores to delete.
+ * @throws java.lang.IllegalArgumentException if the Game doesn't exist.
+ */
+fun deleteGameUserScores(game: Game): Boolean {
+    require(retrieveGame(game.id.value) != null) { "Game must exist" }
+    val userScores = transaction(TransactionManager.defaultDatabase) {                                                                   //delete all user scores from this game
+        UserScore.find { UserScoreTable.game eq game.id }.toList()
+    }
+    if (userScores.isEmpty()) return false
+    userScores.forEach { it.delete() }
+    return true
 }
 
 /**
