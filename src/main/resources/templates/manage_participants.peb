@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Manage Participants</title>
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+        }
+
+        .navbar {
+            background-color: #2dc84d;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .title-box {
+            border: 2px solid #2dc84d;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+            color: #2dc84d;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .players-section {
+            flex-grow: 1;
+        }
+
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .player-name {
+            color: #2dc84d;
+            font-weight: bold;
+            font-size: 36px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .player-name.selected {
+            color: #cc0000;
+            text-decoration: line-through;
+        }
+
+        .player-name:hover {
+            opacity: 0.8;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 180px;
+        }
+
+        .btn {
+            padding: 14px 22px;
+            font-size: 16px;
+            background-color: black;
+            color: #2dc84d;
+            border: 2px solid #2dc84d;
+            cursor: pointer;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #2dc84d;
+            color: black;
+        }
+
+        .btn-kick {
+            background-color: #cc0000;
+            color: white;
+            border: 2px solid #cc0000;
+        }
+
+        .btn-kick:hover {
+            background-color: #aa0000;
+            border-color: #aa0000;
+        }
+
+        .btn-save {
+            background-color: #2dc84d;
+            color: black;
+            border: 2px solid #2dc84d;
+        }
+
+        .btn-save:hover {
+            background-color: #23A03D;
+        }
+
+        .selected-count {
+            color: #cc0000;
+            font-size: 14px;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .content {
+            margin: 40px;
+        }
+    </style>
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .title-box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+            color: black;
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+        }
+
+        .players-section {
+            flex-grow: 1;
+        }
+
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .player-name {
+            color: black;
+            font-weight: bold;
+            font-size: 32px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .player-name.selected {
+            color: #cc0000;
+            text-decoration: line-through;
+        }
+
+        .player-name:hover {
+            opacity: 0.8;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 180px;
+        }
+
+        .btn {
+            padding: 14px 22px;
+            font-size: 16px;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            cursor: pointer;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #e63973;
+            color: white;
+        }
+
+        .btn-kick {
+            background-color: #cc0000;
+            color: white;
+            border: 2px solid #cc0000;
+        }
+
+        .btn-kick:hover {
+            background-color: #aa0000;
+            border-color: #aa0000;
+        }
+
+        .btn-save {
+            background-color: #e63973;
+            color: white;
+            border: 2px solid #e63973;
+        }
+
+        .btn-save:hover {
+            background-color: #d6285f;
+        }
+
+        .selected-count {
+            color: #cc0000;
+            font-size: 14px;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        .content {
+            margin: 40px;
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+
+<div class="navbar">
+    <a>{{ quizName }}</a>
+</div>
+
+<div class="content">
+
+    <div class="title-box">
+        <h1>Manage Participants</h1>
+    </div>
+
+    <div class="main-container">
+
+        <div class="players-section">
+            <div class="player-grid" id="player-grid">
+                {% for player in players %}
+                    <div class="player-name" onclick="toggleSelect(this)" data-username="{{ player }}">
+                        {{ player }}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="controls">
+            <button type="button" class="btn" onclick="window.location.href='/settings/{{ gameId }}'">Cancel</button>
+            <div class="selected-count" id="selected-count"></div>
+            <button type="button" class="btn btn-kick" onclick="kickSelected()">Kick Selected</button>
+            <form method="post" action="/manage-participants/{{ gameId }}" id="kick-form">
+                <div id="kicked-inputs"></div>
+                <button type="submit" class="btn btn-save">Save</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    //usernames currently selected (red)
+    const selectedPlayers = new Set();
+
+    //usernames confirmed for kicking (removed)
+    const kickedPlayers = new Set();
+
+    //selects username in red
+    function toggleSelect(el) {
+        const username = el.dataset.username;
+        if (selectedPlayers.has(username)) {
+            selectedPlayers.delete(username);
+            el.classList.remove("selected");
+        } else {
+            selectedPlayers.add(username);
+            el.classList.add("selected");
+        }
+        updateCount();
+    }
+
+    //on kick selected - 
+    //removed players from grid
+    function kickSelected() {
+        if (selectedPlayers.size === 0) return;
+
+        selectedPlayers.forEach(username => {
+           
+            kickedPlayers.add(username);
+
+            //remove from grid
+            const el = document.querySelector(`[data-username="${username}"]`);
+            if (el) el.remove();
+
+            //hidden input for save form
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = "kickedPlayers";
+            input.value = username;
+            document.getElementById("kicked-inputs").appendChild(input);
+        });
+
+        //re-init list for next selection
+        selectedPlayers.clear();
+        updateCount();
+    }
+
+    //updates selected counter
+    function updateCount() {
+        const count = document.getElementById("selected-count");
+        count.textContent = selectedPlayers.size > 0
+            ? `${selectedPlayers.size} selected`
+            : "";
+    }
+</script>
+
+</body>
+</html>
