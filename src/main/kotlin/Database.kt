@@ -386,7 +386,7 @@ fun retrieveDescendingPlayerScores(game: Game): List<Map<String, Any>> {
     return transaction(TransactionManager.defaultDatabase) {
         UserScore.find { UserScoreTable.game eq game.id }
             .sortedByDescending { it.score }
-            .map { userScore -> mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score) }
+            .map { userScore -> mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score, "isGhost" to userScore.ghost) }
     }
 }
 

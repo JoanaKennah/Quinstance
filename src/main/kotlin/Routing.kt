@@ -755,6 +755,15 @@ fun Application.configureRouting() {
 
             if (gameSession.currentQuestionIndex >= gameSession.questions.size) {
                 gameSession.isFinished = true
+                transaction(TransactionManager.defaultDatabase) {
+                    gameSession.ghostPlayers.forEach { username ->
+                        val ghostUser = retrieveUser(username)
+                        if (ghostUser != null) {
+                            val userScore = retrieveUserScore(game, ghostUser)
+                            userScore?.ghost = true
+                        }
+                    }
+                }
                 activeSessions.remove(gameId)           //cut game and go to leaderboard 
                 deleteInUseCode(game)
                 call.respondRedirect("/leaderboard/$gameId") 
@@ -790,7 +799,17 @@ fun Application.configureRouting() {
             val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
 
             // Retrieve player scores, sort by highest
-            val players = retrieveDescendingPlayerScores(game)
+            val players = transaction(TransactionManager.defaultDatabase) {
+                UserScore.find { UserScoreTable.game eq game.id }
+                    .sortedByDescending { it.score }
+                    .map { userScore ->
+                        mapOf<String, Any>(
+                            "username" to userScore.user.username,
+                            "score" to userScore.score,
+                            "isGhost" to userScore.ghost
+                        )
+                    }
+            }
 
             call.respond(PebbleContent("end_leaderboard.peb", mapOf(
                 "quizName" to quiz.quiz_name,
@@ -998,11 +1017,24 @@ fun Application.configureRouting() {
                     gameSession.ghostPlayers.add(autoGhostedPlayer)
                     gameSession.autoGhostedPlayer = autoGhostedPlayer
 
+                    // recalculate scores after adding ghost so isGhost reflects correctly
+                    val updatedScores = transaction(TransactionManager.defaultDatabase) {
+                        UserScore.find { UserScoreTable.game eq game.id }
+                            .sortedByDescending { it.score }
+                            .map { userScore ->
+                                mapOf<String, Any>(
+                                    "username" to userScore.user.username,
+                                    "score" to userScore.score,
+                                    "isGhost" to (userScore.user.username in gameSession.ghostPlayers)
+                                )
+                            }
+                    }
+
                     gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/auto-ghost-result/$gameId\"}")) }
 
                     call.respond(PebbleContent("leaderboard.peb", mapOf(
                         "quizName" to quiz.quiz_name,
-                        "players" to scores,
+                        "players" to updatedScores,
                         "gameId" to gameId,
                         "quizId" to quiz.id,
                         "theme" to session.theme

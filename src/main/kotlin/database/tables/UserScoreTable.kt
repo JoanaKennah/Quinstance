@@ -8,4 +8,6 @@ object UserScoreTable : IntIdTable() {
     val game = reference("game", GameTable, ReferenceOption.CASCADE)
     val user = reference("user", UserTable, ReferenceOption.CASCADE)
     val score = integer("score")
+    //for end leaderboard purposes
+    val ghost = bool("ghost").default(false)
 }
