@@ -187,13 +187,7 @@ object TestDatabase {
                 it[game] = gameTwo
             }
 
-            // User Scores for three users playing a Game with Quiz 'COMP2860'.
-            UserScoreTable.insert {
-                it[game] = gameOne
-                it[user] = userOne
-                it[score] = 250
-            }
-
+            // User Scores for two users playing a Game with Quiz 'COMP2860'.
             UserScoreTable.insert {
                 it[game] = gameOne
                 it[user] = userTwo

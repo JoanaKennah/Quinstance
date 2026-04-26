@@ -793,7 +793,10 @@ fun Application.configureRouting() {
             val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
 
             // Retrieve player scores, sort by highest
-            val players = retrieveDescendingPlayerScores(game)
+            val allUserScores = retrieveAllUserScoresDescending(game)
+            val players = allUserScores.map {
+                mapOf<String, Any>("username" to it.second, "score" to it.third)
+            }
 
             call.respond(PebbleContent("end_leaderboard.peb", mapOf(
                 "quizName" to quiz.quiz_name,

@@ -1779,13 +1779,13 @@ class DatabaseTest :
             }
         }
 
-        "Retrieve UserScore for User 'linguin0' with Game playing Quiz 'COMP2860'" {
+        "Retrieve UserScore for User 'MinghaoLe123' with Game playing Quiz 'COMP2860'" {
             testApplication {
                 application { testModule() }
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { username eq "linguin0" }.firstOrNull()
+                        User.find { username eq "MinghaoLe123" }.firstOrNull()
                     }
                 user shouldNotBe null
 
@@ -1797,7 +1797,7 @@ class DatabaseTest :
 
                 val userScore = retrieveUserScore(game!!, user!!)
                 userScore shouldNotBe null
-                userScore!!.score shouldBe 250
+                userScore!!.score shouldBe 500
             }
         }
 
@@ -1828,7 +1828,7 @@ class DatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { username eq "linguin0" }.firstOrNull()
+                        User.find { username eq "JoanaKennah" }.firstOrNull()
                     }
                 user shouldNotBe null
 
@@ -1884,13 +1884,64 @@ class DatabaseTest :
             }
         }
 
+        "Add User Score for User 'linguin0' playing a Game with Quiz 'COMP2870'" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { username eq "linguin0" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 2 }.firstOrNull()
+                    }
+                game shouldNotBe null
+
+                val userScore = addUserScore(game!!, user!!)
+                userScore shouldNotBe null
+                userScore.let {
+                    it.game shouldBe 1
+                    it.user shouldBe user
+                    it.score shouldBe 0
+                }
+            }
+        }
+
+        "Add User Score for User 'MinghaoLe123' playing a Game with Quiz 'COMP2870'" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { username eq "linguin0" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 2 }.firstOrNull()
+                    }
+                game shouldNotBe null
+
+                val userScore = addUserScore(game!!, user!!)
+                userScore shouldNotBe null
+                userScore.let {
+                    it.game shouldBe 1
+                    it.user shouldBe user
+                    it.score shouldBe 0
+                }
+            }
+        }
+
         "Retrieve all UserScore objects for a Game playing Quiz 'COMP2860'" {
             testApplication {
                 application { testModule() }
 
                 val userScoreData =
                     listOf(
-                        Triple(1, "linguin0", 250),
                         Triple(2, "JoanaKennah", 1000),
                         Triple(3, "MinghaoLe123", 500),
                     ).sortedByDescending { it.third }
@@ -1904,11 +1955,58 @@ class DatabaseTest :
                 val allUserScores = retrieveAllUserScoresDescending(game!!)
                 allUserScores shouldHaveSize 3
 
-                for (i in 0..2) {
+                for (i in 0..1) {
                     val (id, username, score) = allUserScores[i]
                     id shouldBe userScoreData[i].first
                     username shouldBe userScoreData[i].second
                     score shouldBe userScoreData[i].third
+                }
+            }
+        }
+
+        "Retrieve empty list if there are no user scores for a Game" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.findById(2)
+                    }
+                game shouldNotBe null
+
+                val userScores = retrieveAllUserScoresDescending(game!!)
+                userScores shouldHaveSize 0
+            }
+        }
+
+        "Retrieving UserScores for a Game that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { username eq "linguin0" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                    }
+                quiz shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.new {
+                            this.quiz = quiz!!
+                            this.timeStamp = java.time.LocalDateTime.now().toString()
+                        }
+                    }
+
+                transaction(TestDatabase.db) { game.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveAllUserScoresDescending(game)
                 }
             }
         }

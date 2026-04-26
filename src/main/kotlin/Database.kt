@@ -375,20 +375,6 @@ fun retrieveGamePlayers(game: Game): List<String> {
 }
 
 /**
- * Retrieve list of Players with their associated scores in DESCENDING order.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
- */
-fun retrieveDescendingPlayerScores(game: Game): List<Map<String, Any>> {
-    // Check to see if given game actually exists
-    require(retrieveGame(game.id.value) != null) { "Game must exist" }
-    return transaction(TransactionManager.defaultDatabase) {
-        UserScore.find { UserScoreTable.game eq game.id }
-            .sortedByDescending { it.score }
-            .map { userScore -> mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score) }
-    }
-}
-
-/**
  * Checks InUseTable to see if there is an InUseCode object that already exists with the given room code.
  * @return true if the room code already exists, false otherwise
  */
