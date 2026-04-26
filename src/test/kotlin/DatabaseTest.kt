@@ -639,6 +639,62 @@ class DatabaseTest :
             }
         }
 
+        "Delete Question 'What is a process?' from Quiz 'COMP2860 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        val quiz = Quiz.find { QuizTable.quiz_name eq "COMP2860 Quiz" }.firstOrNull()
+                        quiz shouldNotBe null
+
+                        Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
+                    }
+                question shouldNotBe null
+                question.question shouldBe "What is a process?"
+
+                val delete = deleteQuestion(question)
+                delete shouldBe true
+            }
+        }
+
+        "Delete Question 'What is a finite state automation?' from Quiz 'COMP2870 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        val quiz = Quiz.find { QuizTable.quiz_name eq "COMP2870 Quiz" }.firstOrNull()
+                        quiz shouldNotBe null
+
+                        Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }.firstOrNull()!!.question
+                    }
+                question shouldNotBe null
+                question.question shouldBe "What is a finite state automation?"
+
+                val delete = deleteQuestion(question)
+                delete shouldBe true
+            }
+        }
+
+        "Deleting a question that doesn't exist should return false" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.new {
+                            this.question = "This is a test question"
+                            this.key_stage = "keystagefour"
+                        }
+                    }
+                question shouldNotBe null
+
+                transaction(TestDatabase.db) { question.delete() }
+                deleteQuestion(question) shouldBe false
+            }
+        }
+
         "Retrieve Quiz 'COMP2860 Quiz' using an associated Game ID (1)" {
             testApplication {
                 application { testModule() }
