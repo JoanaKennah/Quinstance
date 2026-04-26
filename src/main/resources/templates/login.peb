@@ -11,7 +11,7 @@
         }
 
         .navbar {
-            background-color: #cfe9c6;
+            background-color: #20882E;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -52,7 +52,7 @@
         }
 
         .forgot a {
-            color: #a2d192;
+            color: #176321;
             text-decoration: underline;
         }
 
@@ -82,14 +82,14 @@
         button {
             margin-top: 25px;
             padding: 10px 25px;
-            background-color: #a2d192;
-            color: black;
+            background-color: #176321;
+            color: white;
             border: none;
             cursor: pointer;
         }
 
         button:hover {
-            background-color: green;
+            background-color: #20882E;
             color: white;
         }
     

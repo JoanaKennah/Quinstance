@@ -38,6 +38,7 @@ data class SentAnswerData(
 
 data class GameSession(
     val gameId: Int,
+    val hostUsername: String,
     val questions: List<Question>,
     var currentQuestionIndex: Int = 0,
     var isAdvanced: Boolean = false,                //flag for advancing question
@@ -56,6 +57,8 @@ data class GameSession(
     var ghostPlayers: MutableList<String> = mutableListOf(),
     var revivedPlayers: MutableList<String> = mutableListOf(),
     var autoGhostedPlayer: String? = null,
+    var kickedUsernames: MutableList<String> = mutableListOf(),
+    var barredUsernames: MutableList<String> = mutableListOf(),
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet())
 )
 

@@ -387,6 +387,21 @@ fun roomCodeAlreadyExists(roomCode: String): Boolean {
 }
 
 /**
+ * Retrieve list of Players with their associated scores in DESCENDING order.
+ * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ */
+
+fun retrieveDescendingPlayerScores(game: Game): List<Map<String, Any>> {
+    // Check to see if given game actually exists
+    require(retrieveGame(game.id.value) != null) { "Game must exist" }
+    return transaction(TransactionManager.defaultDatabase) {
+        UserScore.find { UserScoreTable.game eq game.id }
+            .sortedByDescending { it.score }
+            .map { userScore -> mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score, "isGhost" to userScore.ghost) }
+    }
+}
+
+/**
  * Creates and adds a new InUseCode record to InUseCodeTable.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */

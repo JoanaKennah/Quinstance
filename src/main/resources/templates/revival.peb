@@ -87,7 +87,7 @@
         }
 
         .navbar a {
-            color: black;
+            color: white;
             text-decoration: none;
             font-weight: bold;
         }
@@ -169,6 +169,20 @@
         socket.onerror = function(error) {
             console.log("WebSocket error: " + error);
         }
+    </script>
+    <script>
+        //just in case - polls to check if player kicked
+        const kickPoll = setInterval(() => {
+            fetch("/is-kicked/{{ gameId }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.kicked) {
+                        clearInterval(kickPoll);
+                        window.location.href = "/kicked/{{ gameId }}";
+                    }
+                })
+                .catch(err => console.log("Kick poll error: " + err));
+        }, 1000);
     </script>
 </body>
 </html>

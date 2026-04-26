@@ -36,6 +36,7 @@ dependencies {
     implementation("io.ktor:ktor-server-websockets")
     implementation(libs.ktor.server.sessions)
     implementation("org.apache.commons:commons-csv:1.5")
+    implementation("com.sun.mail:jakarta.mail:2.0.1")
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.kotest.assertions.core)

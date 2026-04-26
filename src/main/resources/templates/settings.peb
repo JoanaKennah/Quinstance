@@ -3,6 +3,113 @@
 <head>
     <title>Settings</title>
 
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+            color: #2DC84D;
+        }
+
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .content {
+            margin: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .settings-box {
+            border: 2px solid #2DC84D;
+            border-radius: 10px;
+            padding: 30px;
+            width: 60%;
+        }
+
+        .settings-box h2 {
+            text-align: center;
+            text-decoration: underline;
+            color: #2DC84D;
+            margin-top: 0;
+        }
+
+        .setting-label {
+            font-size: 16px;
+            color: #2DC84D;
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+
+        .time-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .time-btn {
+            padding: 8px 16px;
+            border: 2px solid #2DC84D;
+            border-radius: 6px;
+            background-color: black;
+            color: #2DC84D;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .time-btn:hover, .time-btn.selected {
+            background-color: #2DC84D;
+            color: black;
+        }
+
+        .minigame-btn {
+            padding: 8px 16px;
+            border: 2px solid #2DC84D;
+            border-radius: 6px;
+            background-color: black;
+            color: #2DC84D;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .minigame-btn.selected {
+            background-color: #2DC84D;
+            color: black;
+        }
+
+        .bottom-bar {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            font-size: 16px;
+            background-color: black;
+            color: #2DC84D;
+            border: 2px solid #2DC84D;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .btn:hover {
+            background-color: #2DC84D;
+            color: black;
+        }
+    </style>
+    {% else %}
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -106,6 +213,7 @@
             color: white;
         }
     </style>
+    {% endif %}
 
     <script>
         function selectTime(element, seconds) {
@@ -152,7 +260,7 @@
                 <button type="button" class="time-btn {% if timeLimit == 0 %}selected{% endif %}" onclick="selectTime(this, 0)">Unlimited</button>
             </div>
 
-            <div style="margin-top: 20px; font-size: 16px; color: black;">
+            <div style="margin-top: 20px; font-size: 16px;">
                 Mini Games:
                 <input type="checkbox"
                     id="minigamesToggle"
@@ -164,7 +272,7 @@
             </div>
 
             <div id="minigameOptions" style="margin-top: 10px; display: {% if minigamesEnabled %}block{% else %}none{% endif %};">
-                <div style="font-size: 14px; color: black; margin-bottom: 8px;">Select minigames:</div>
+                <div style="font-size: 14px; margin-bottom: 8px;">Select minigames:</div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button type="button"
                         class="minigame-btn {% if mathsEnabled %}selected{% endif %}"
@@ -190,12 +298,14 @@
                 <button type="button" class="btn" onclick="window.location.href='{{ returnUrl }}'">
                     Cancel
                 </button>
+                <button type="button" class="btn" onclick="window.location.href='/manage-participants/{{ gameId }}'">
+                    Manage Participants
+                </button>
                 <button type="submit" class="btn">Save</button>
             </div>
 
         </form>
     </div>
 </div>
-
 </body>
 </html>

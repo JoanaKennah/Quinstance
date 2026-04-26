@@ -67,7 +67,7 @@
         }
       
         .navbar a {
-            color: black;
+            color: white;
             text-decoration: none;
             font-weight: bold;
         }
@@ -111,14 +111,13 @@
         .timer {
             margin-top: 30px;
             font-size: 18px;
-            color: #e63973
+            color: #e63973;
         }
-
     </style>
     {% endif %}
 
     <script>
-        //replace timer with polling approach
+        //polls for next Q
         const currentIndex = {{ questionIndex }};
 
         const pollSend = setInterval(() => {
@@ -127,15 +126,30 @@
             .then(data => {
                 if (data.finished) {
                     clearInterval(pollSend);
+                    clearInterval(kickPoll);
                     window.location.href = "/end-game/{{ gameId }}";
                 } else if (data.index > currentIndex) {
                     clearInterval(pollSend);
+                    clearInterval(kickPoll);
                     window.location.href = "/game/{{ gameId }}";
                 }
             })
             .catch(err => console.log("Polling error: " + err));
         }, 500);
 
+        //polls to check if player kicked
+        const kickPoll = setInterval(() => {
+            fetch("/is-kicked/{{ gameId }}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.kicked) {
+                        clearInterval(kickPoll);
+                        clearInterval(pollSend);
+                        window.location.href = "/kicked/{{ gameId }}";
+                    }
+                })
+                .catch(err => console.log("Kick poll error: " + err));
+        }, 1000);
     </script>
 
 </head>
