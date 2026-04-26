@@ -13,8 +13,8 @@ import com.example.database.tables.InUseTable
 import com.example.database.tables.QuestionTable
 import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
-import com.example.database.tables.UserTable
 import com.example.database.tables.UserScoreTable
+import com.example.database.tables.UserTable
 import com.example.database.tables.UserTable.username
 import com.password4j.Password
 import io.kotest.assertions.throwables.shouldThrow
@@ -509,7 +509,6 @@ class DatabaseTest :
                 }
             }
         }
-
 
         "Retrieve Quiz 'COMP2860 Quiz' using it's quiz ID (1)" {
             testApplication {
