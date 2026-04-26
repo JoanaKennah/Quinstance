@@ -57,7 +57,7 @@ data class GameSession(
     var ghostPlayers: MutableList<String> = mutableListOf(),
     var revivedPlayers: MutableList<String> = mutableListOf(),
     var autoGhostedPlayer: String? = null,
-    var kickedUsernames: MutableList<String> = mutableListOf()
+    var kickedUsernames: MutableList<String> = mutableListOf(),
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet())
 )
 
