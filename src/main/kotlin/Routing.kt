@@ -344,6 +344,35 @@ fun Application.configureRouting() {
                         "returnURL" to "/view-quizzes")))
             } else return@post call.respondText("Invalid quizId")
         }
+        post("/delete-question/{questionId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+
+            val questionId = call.parameters["questionId"]?.toIntOrNull()
+                ?: return@post call.respondText("Invalid question ID")
+
+            val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
+
+            val quizId = transaction(TransactionManager.defaultDatabase) {
+                val question = Question.findById(questionId) ?: return@transaction null
+                val quinstance = Quinstance.find { QuinstanceTable.question eq question.id }.firstOrNull()
+                    ?: return@transaction null
+                val quiz = quinstance.quiz
+
+                if (quiz.user.id != user.id) {
+                    return@transaction null
+            }
+
+            val deleted = deleteQuestion(question)
+            if (deleted) quiz.id.value else null
+        }
+ 
+        if (quizId != null) {
+            call.respondRedirect("/view-quiz-questions/$quizId")
+        } else {
+            call.respondText("Failed to delete question or permission denied")
+        }
+    } 
+
 
         get("/questionTemplate") {
             // Reference: https://ryanharrison.co.uk/2018/09/20/ktor-file-upload-download.html
@@ -411,6 +440,34 @@ fun Application.configureRouting() {
 
             call.respond(PebbleContent("view_quizzes.peb", mapOf("username" to session.username, "returnURL" to returnURL, "quizzes" to quizzes)))
         }
+
+
+        post("/delete-quiz/{quizId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+
+            val quizId = call.parameters["quizId"]?.toIntOrNull()
+                ?: return@post call.respondText("Invalid quiz ID")
+
+            val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
+
+            val deleted = transaction(TransactionManager.defaultDatabase) {
+                val quiz = Quiz.findById(quizId) ?: return@transaction false
+
+                if (quiz.user.id != user.id) {
+                    return@transaction false
+                }
+
+                quiz.delete()
+                true
+            }
+
+            if (deleted) {
+                call.respondRedirect("/view-quizzes")
+            } else {
+                call.respondText("Failed to delete quiz or permission denied")
+            }
+        }
+
 
         //serves conformation page for created quiz
         post ("/quiz-created/{quizId}") {
