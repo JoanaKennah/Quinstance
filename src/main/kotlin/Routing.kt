@@ -1112,7 +1112,7 @@ fun Application.configureRouting() {
 
             val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
 
-            val allScores = retrieveAllUserScores(game)
+            val allScores = retrieveAllUserScoresDescending(game)
 
             // Find score and position per player
             val playerScore = allScores.indexOfFirst { it.first == user.id.value }
@@ -1172,7 +1172,7 @@ fun Application.configureRouting() {
 
             val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login") 
 
-            val allScores = retrieveAllUserScores(game)
+            val allScores = retrieveAllUserScoresDescending(game)
 
             val playerScore = allScores.indexOfFirst { it.first == user.id.value }
             val position = playerScore + 1
@@ -1497,7 +1497,7 @@ fun Application.configureRouting() {
                     "theme" to session.theme
                 )))
             } else {
-                val allScores = retrieveAllUserScores(game)
+                val allScores = retrieveAllUserScoresDescending(game)
                 val playerScore = allScores.indexOfFirst { it.first == user.id.value }
                 val position = playerScore + 1
                 val score = allScores.getOrNull(playerScore)?.third ?: 0

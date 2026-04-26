@@ -11,6 +11,12 @@ import com.example.database.tables.InUseTable
 import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
 import com.example.database.tables.UserTable
+import com.example.database.tables.UserTable.email
+import com.example.database.tables.UserTable.key_stage
+import com.example.database.tables.UserTable.name
+import com.example.database.tables.UserTable.password
+import com.example.database.tables.UserTable.role
+import com.example.database.tables.UserTable.username
 import com.password4j.Password
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -22,6 +28,7 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldHaveLength
 import io.ktor.server.testing.testApplication
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.time.Duration
 
@@ -1768,6 +1775,140 @@ class DatabaseTest :
 
                 shouldThrow<IllegalArgumentException> {
                     deleteInUseCode(newGame)
+                }
+            }
+        }
+
+        "Retrieve UserScore for User 'linguin0' with Game playing Quiz 'COMP2860'" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { username eq "linguin0" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.findById(1)
+                    }
+                game shouldNotBe null
+
+                val userScore = retrieveUserScore(game!!, user!!)
+                userScore shouldNotBe null
+                userScore!!.score shouldBe 250
+            }
+        }
+
+        "Retrieve null if there is no UserScore associated with a Game playing Quiz 'COMP2860'" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { username eq "JoanaKennah" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.findById(2)
+                    }
+                game shouldNotBe null
+
+                val userScore = retrieveUserScore(game!!, user!!)
+                userScore shouldBe null
+            }
+        }
+
+        "Retrieving UserScore for a Game that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { username eq "linguin0" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                    }
+                quiz shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.new {
+                            this.quiz = quiz!!
+                            this.timeStamp = java.time.LocalDateTime.now().toString()
+                        }
+                    }
+
+                transaction(TestDatabase.db) { game.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveUserScore(game, user!!)
+                }
+            }
+        }
+
+        "Retrieving UserScore for User who doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val fakeUser =
+                    transaction(TestDatabase.db) {
+                        val hashedPass = Password.hash("test123").addRandomSalt(8).withScrypt()
+                        User.new {
+                            this.username = "Test User"
+                            this.password = hashedPass.result
+                            this.name = "Test Test"
+                            this.email = "test@gmail.com"
+                            this.key_stage = "furthereducation"
+                            this.role = "student"
+                        }
+                    }
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.findById(1)
+                    }
+                game shouldNotBe null
+
+                transaction(TestDatabase.db) { fakeUser.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveUserScore(game!!, fakeUser)
+                }
+            }
+        }
+
+        "Retrieve all UserScore objects for a Game playing Quiz 'COMP2860'" {
+            testApplication {
+                application { testModule() }
+
+                val userScoreData =
+                    listOf(
+                        Triple(1, "linguin0", 250),
+                        Triple(2, "JoanaKennah", 1000),
+                        Triple(3, "MinghaoLe123", 500),
+                    ).sortedByDescending { it.third }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.findById(1)
+                    }
+                game shouldNotBe null
+
+                val allUserScores = retrieveAllUserScoresDescending(game!!)
+                allUserScores shouldHaveSize 3
+
+                for (i in 0..2) {
+                    val (id, username, score) = allUserScores[i]
+                    id shouldBe userScoreData[i].first
+                    username shouldBe userScoreData[i].second
+                    score shouldBe userScoreData[i].third
                 }
             }
         }

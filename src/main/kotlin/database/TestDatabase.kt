@@ -186,8 +186,25 @@ object TestDatabase {
                 it[room_code] = "EFGH5678"
                 it[game] = gameTwo
             }
+
+            // User Scores for three users playing a Game with Quiz 'COMP2860'.
+            UserScoreTable.insert {
+                it[game] = gameOne
+                it[user] = userOne
+                it[score] = 250
+            }
+
+            UserScoreTable.insert {
+                it[game] = gameOne
+                it[user] = userTwo
+                it[score] = 1000
+            }
+
+            UserScoreTable.insert {
+                it[game] = gameOne
+                it[user] = userThree
+                it[score] = 500
+            }
         }
     }
 }
-
-// to use test database over the real one, type in the command box "./gradlew run -PapplicationModule=testModule

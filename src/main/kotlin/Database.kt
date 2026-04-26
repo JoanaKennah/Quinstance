@@ -378,7 +378,6 @@ fun retrieveGamePlayers(game: Game): List<String> {
  * Retrieve list of Players with their associated scores in DESCENDING order.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */
-
 fun retrieveDescendingPlayerScores(game: Game): List<Map<String, Any>> {
     // Check to see if given game actually exists
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
@@ -521,13 +520,13 @@ fun retrieveUserScore(game: Game, user: User): UserScore? {
  * Retrieves all UserScores from a given Game
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */
-fun retrieveAllUserScores(game: Game): List<Triple<Int, String, Int>> {
+fun retrieveAllUserScoresDescending(game: Game): List<Triple<Int, String, Int>> {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     return transaction(TransactionManager.defaultDatabase) {
         UserScore.find { UserScoreTable.game eq game.id }
             .sortedByDescending { it.score }
             .map { userScore ->
-                Triple<Int, String, Int>(userScore.user.id.value, userScore.user.username, userScore.score)
+                Triple(userScore.user.id.value, userScore.user.username, userScore.score)
         }
     }
 }
