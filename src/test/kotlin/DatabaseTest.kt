@@ -1,4 +1,5 @@
 package com.example
+import com.example.database.ProjectDatabase
 import com.example.database.TestDatabase
 import com.example.database.objects.Game
 import com.example.database.objects.InUseCode
@@ -6,16 +7,14 @@ import com.example.database.objects.Question
 import com.example.database.objects.Quinstance
 import com.example.database.objects.Quiz
 import com.example.database.objects.User
+import com.example.database.tables.AnswerTable
 import com.example.database.tables.GameTable
 import com.example.database.tables.InUseTable
+import com.example.database.tables.QuestionTable
 import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
 import com.example.database.tables.UserTable
-import com.example.database.tables.UserTable.email
-import com.example.database.tables.UserTable.key_stage
-import com.example.database.tables.UserTable.name
-import com.example.database.tables.UserTable.password
-import com.example.database.tables.UserTable.role
+import com.example.database.tables.UserScoreTable
 import com.example.database.tables.UserTable.username
 import com.password4j.Password
 import io.kotest.assertions.throwables.shouldThrow
@@ -28,12 +27,30 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldHaveLength
 import io.ktor.server.testing.testApplication
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.exists
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.time.Duration
 
 class DatabaseTest :
     StringSpec({
         // Testing the functions used for Login / Signup
+
+        "Configure Project Database for actual Application (this does not use TestDatabase.db)" {
+            testApplication {
+                configureDatabase()
+
+                transaction(ProjectDatabase.database) {
+                    AnswerTable.exists() shouldBe true
+                    InUseTable.exists() shouldBe true
+                    QuestionTable.exists() shouldBe true
+                    QuinstanceTable.exists() shouldBe true
+                    QuizTable.exists() shouldBe true
+                    GameTable.exists() shouldBe true
+                    UserScoreTable.exists() shouldBe true
+                    UserTable.exists() shouldBe true
+                }
+            }
+        }
 
         "Retrieving user with empty username throws an IllegalArgumentException" {
             testApplication {
@@ -292,7 +309,7 @@ class DatabaseTest :
 
                 val retrievedUser =
                     transaction(TestDatabase.db) {
-                        User.find { UserTable.username eq user!!.username }.firstOrNull()
+                        User.find { username eq user!!.username }.firstOrNull()
                     }
                 retrievedUser shouldNotBe null
                 retrievedUser!!.let {
@@ -302,7 +319,6 @@ class DatabaseTest :
             }
         }
 
-        // Testing functions used for Quizzes (Questions, Quinstances, Answers)
         "Retrieve all (2) quizzes for user 'linguin0'" {
             testApplication {
                 application { testModule() }
@@ -315,15 +331,13 @@ class DatabaseTest :
 
                 val foundQuizzes = retrieveUserQuizzes("linguin0")
                 foundQuizzes shouldNotBe null
-                if (foundQuizzes != null) {
-                    foundQuizzes shouldHaveSize 2
+                foundQuizzes!! shouldHaveSize 2
 
-                    for (i in 0..1) {
-                        foundQuizzes[i].quiz_name shouldBe quizzesData[i][0]
-                        foundQuizzes[i].num_of_questions shouldBe quizzesData[i][1]
-                        foundQuizzes[i].description shouldBe quizzesData[i][2]
-                        foundQuizzes[i].category shouldBe quizzesData[i][3]
-                    }
+                for (i in 0..1) {
+                    foundQuizzes[i].quiz_name shouldBe quizzesData[i][0]
+                    foundQuizzes[i].num_of_questions shouldBe quizzesData[i][1]
+                    foundQuizzes[i].description shouldBe quizzesData[i][2]
+                    foundQuizzes[i].category shouldBe quizzesData[i][3]
                 }
             }
         }
@@ -334,15 +348,12 @@ class DatabaseTest :
 
                 val foundQuizzes = retrieveUserQuizzes("JoanaKennah")
                 foundQuizzes shouldNotBe null
+                foundQuizzes!! shouldHaveSize 1
 
-                if (foundQuizzes != null) {
-                    foundQuizzes shouldHaveSize 1
-
-                    foundQuizzes[0].quiz_name shouldBe "COMP2870 Quiz"
-                    foundQuizzes[0].num_of_questions shouldBe 1
-                    foundQuizzes[0].description shouldBe "University of Leeds COMP2870 Quiz for Revision :)"
-                    foundQuizzes[0].category shouldBe "computerscience"
-                }
+                foundQuizzes[0].quiz_name shouldBe "COMP2870 Quiz"
+                foundQuizzes[0].num_of_questions shouldBe 1
+                foundQuizzes[0].description shouldBe "University of Leeds COMP2870 Quiz for Revision :)"
+                foundQuizzes[0].category shouldBe "computerscience"
             }
         }
 
@@ -371,7 +382,7 @@ class DatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        User.find { username eq "MinghaoLe123" }.firstOrNull()
                     }
                 user shouldNotBe null
 
@@ -393,7 +404,7 @@ class DatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        User.find { username eq "MinghaoLe123" }.firstOrNull()
                     }
                 user shouldNotBe null
 
@@ -415,7 +426,7 @@ class DatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        User.find { username eq "MinghaoLe123" }.firstOrNull()
                     }
                 user shouldNotBe null
 
@@ -437,7 +448,7 @@ class DatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        User.find { username eq "MinghaoLe123" }.firstOrNull()
                     }
                 user shouldNotBe null
 
@@ -460,7 +471,7 @@ class DatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        User.find { username eq "MinghaoLe123" }.firstOrNull()
                     }
                 user shouldNotBe null
 
@@ -482,7 +493,7 @@ class DatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        User.find { username eq "MinghaoLe123" }.firstOrNull()
                     }
                 user shouldNotBe null
 
@@ -505,7 +516,6 @@ class DatabaseTest :
                 application { testModule() }
 
                 val quizId = 1
-
                 val quiz = retrieveQuiz(quizId)
                 quiz shouldNotBe null
 
@@ -518,7 +528,6 @@ class DatabaseTest :
                 application { testModule() }
 
                 val quizId = 3
-
                 val quiz = retrieveQuiz(quizId)
                 quiz shouldNotBe null
 
@@ -531,9 +540,19 @@ class DatabaseTest :
                 application { testModule() }
 
                 val quizId = 10
-
                 val quiz = retrieveQuiz(quizId)
                 quiz shouldBe null
+            }
+        }
+
+        "Retrieving Quiz using a quiz ID of 0 should throw an IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val quizId = 0
+                shouldThrow<IllegalArgumentException> {
+                    retrieveQuiz(quizId)
+                }
             }
         }
 
@@ -542,7 +561,6 @@ class DatabaseTest :
                 application { testModule() }
 
                 val quizId = -1
-
                 shouldThrow<IllegalArgumentException> {
                     retrieveQuiz(quizId)
                 }
@@ -555,7 +573,7 @@ class DatabaseTest :
 
                 val quiz =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.find { username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
                         Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                     }
@@ -580,7 +598,7 @@ class DatabaseTest :
 
                 val quiz =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.find { username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
                         Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                     }
@@ -605,7 +623,7 @@ class DatabaseTest :
 
                 val quiz =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.find { username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
                         Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                     }
@@ -617,6 +635,64 @@ class DatabaseTest :
                         "This is a test question. I don't know how to make this long to be honest. Hello examiner, how has your day been? Writing tests are very important but do you enjoy writing tests? I think I enjoy it but it can be quite tedious, but is important. What is 2+2????!",
                         "furthereducation",
                     )
+                }
+            }
+        }
+
+        "Retrieve Quiz 'COMP2860 Quiz' using an associated Game ID (1)" {
+            testApplication {
+                application { testModule() }
+
+                val gameId = 1
+                val quiz = retrieveQuizFromGameID(gameId)
+
+                quiz shouldNotBe null
+                quiz!!.quiz_name shouldBe "COMP2860 Quiz"
+                transaction(TestDatabase.db) { quiz.user.username shouldBe "linguin0" }
+            }
+        }
+
+        "Retrieve Quiz 'COMP2870 Quiz' using an associated Game ID (2)" {
+            testApplication {
+                application { testModule() }
+
+                val gameId = 2
+                val quiz = retrieveQuizFromGameID(gameId)
+
+                quiz shouldNotBe null
+                quiz!!.quiz_name shouldBe "COMP2870 Quiz"
+                transaction(TestDatabase.db) { quiz.user.username shouldBe "JoanaKennah" }
+            }
+        }
+
+        "Retrieving a Quiz using a Game ID that doesn't exist should return null" {
+            testApplication {
+                application { testModule() }
+
+                val gameId = 10
+                val quiz = retrieveQuizFromGameID(gameId)
+                quiz shouldBe null
+            }
+        }
+
+        "Retrieving a Quiz using a Game ID of 0 show throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val gameId = 0
+                shouldThrow<IllegalArgumentException> {
+                    retrieveQuizFromGameID(gameId)
+                }
+            }
+        }
+
+        "Retrieving a Quiz using a negative Game ID show throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val gameId = -1
+                shouldThrow<IllegalArgumentException> {
+                    retrieveQuizFromGameID(gameId)
                 }
             }
         }
@@ -633,7 +709,7 @@ class DatabaseTest :
 
                 val quiz =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "linguin0" }.firstOrNull()
+                        val user = User.find { username eq "linguin0" }.firstOrNull()
                         user shouldNotBe null
                         Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                     }
@@ -658,7 +734,7 @@ class DatabaseTest :
 
                 val quiz =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.find { username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
                         Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                     }
@@ -680,7 +756,7 @@ class DatabaseTest :
 
                 val retrievedQuizzes =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        val user = User.find { username eq "MinghaoLe123" }.firstOrNull()
                         user shouldNotBe null
 
                         Quiz.new {
@@ -706,7 +782,7 @@ class DatabaseTest :
 
                 val newQuiz =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        val user = User.find { username eq "MinghaoLe123" }.firstOrNull()
                         user shouldNotBe null
 
                         Quiz.new {
@@ -744,7 +820,7 @@ class DatabaseTest :
 
                 val questions =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "linguin0" }.firstOrNull()
+                        val user = User.find { username eq "linguin0" }.firstOrNull()
                         user shouldNotBe null
 
                         val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
@@ -775,7 +851,7 @@ class DatabaseTest :
 
                 val question =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.find { username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
 
                         val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
@@ -803,7 +879,7 @@ class DatabaseTest :
 
                 val question =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        val user = User.find { username eq "MinghaoLe123" }.firstOrNull()
                         user shouldNotBe null
 
                         Quiz.new {
@@ -832,7 +908,7 @@ class DatabaseTest :
 
                 val question =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        val user = User.find { username eq "MinghaoLe123" }.firstOrNull()
                         user shouldNotBe null
 
                         Quiz.new {
@@ -873,7 +949,7 @@ class DatabaseTest :
 
                 val question =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        val user = User.find { username eq "MinghaoLe123" }.firstOrNull()
                         user shouldNotBe null
 
                         Quiz.new {
@@ -914,7 +990,7 @@ class DatabaseTest :
 
                 val question =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        val user = User.find { username eq "MinghaoLe123" }.firstOrNull()
                         user shouldNotBe null
 
                         Quiz.new {
@@ -985,7 +1061,7 @@ class DatabaseTest :
 
                 val question =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        val user = User.find { username eq "MinghaoLe123" }.firstOrNull()
                         user shouldNotBe null
 
                         val quiz =
@@ -1029,7 +1105,7 @@ class DatabaseTest :
 
                 val question =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        val user = User.find { username eq "MinghaoLe123" }.firstOrNull()
                         user shouldNotBe null
 
                         val quiz =
@@ -1072,7 +1148,7 @@ class DatabaseTest :
 
                 val questions =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "linguin0" }.firstOrNull()
+                        val user = User.find { username eq "linguin0" }.firstOrNull()
                         user shouldNotBe null
 
                         val quizzes = Quiz.find { QuizTable.user eq user!!.id }.toList()
@@ -1110,7 +1186,7 @@ class DatabaseTest :
 
                 val question =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                        val user = User.find { username eq "MinghaoLe123" }.firstOrNull()
                         user shouldNotBe null
 
                         val quiz =
@@ -1151,7 +1227,7 @@ class DatabaseTest :
 
                 val question =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.find { username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
 
                         val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
@@ -1179,7 +1255,7 @@ class DatabaseTest :
 
                 val question =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.find { username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
 
                         val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
@@ -1207,7 +1283,7 @@ class DatabaseTest :
 
                 val question =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.find { username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
 
                         val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
@@ -1268,6 +1344,17 @@ class DatabaseTest :
             }
         }
 
+        "Retrieving a Game with a gameID of 0 should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val gameId = 0
+                shouldThrow<IllegalArgumentException> {
+                    retrieveGame(gameId)
+                }
+            }
+        }
+
         "Retrieving a Game with a negative gameID should throw IllegalArgumentException" {
             testApplication {
                 application { testModule() }
@@ -1285,7 +1372,7 @@ class DatabaseTest :
 
                 val quiz =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "linguin0" }.firstOrNull()
+                        val user = User.find { username eq "linguin0" }.firstOrNull()
                         user shouldNotBe null
 
                         Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
@@ -1309,7 +1396,7 @@ class DatabaseTest :
 
                 val quiz =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.find { username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
 
                         Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
@@ -1333,7 +1420,7 @@ class DatabaseTest :
 
                 val quiz =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.find { username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
 
                         Quiz.new {
@@ -1391,7 +1478,7 @@ class DatabaseTest :
 
                 val game =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.find { username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
 
                         val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
@@ -1420,7 +1507,6 @@ class DatabaseTest :
                 application { testModule() }
 
                 val roomCode = "ABCD1234"
-
                 val inUseCode = retrieveInUseCode(roomCode)
                 inUseCode shouldNotBe null
 
@@ -1436,7 +1522,6 @@ class DatabaseTest :
                 application { testModule() }
 
                 val roomCode = "EFGH5678"
-
                 val inUseCode = retrieveInUseCode(roomCode)
                 inUseCode shouldNotBe null
 
@@ -1452,7 +1537,6 @@ class DatabaseTest :
                 application { testModule() }
 
                 val roomCode = ""
-
                 shouldThrow<IllegalArgumentException> {
                     retrieveInUseCode(roomCode)
                 }
@@ -1464,7 +1548,6 @@ class DatabaseTest :
                 application { testModule() }
 
                 val roomCode = "#!#!#!#!"
-
                 shouldThrow<IllegalArgumentException> {
                     retrieveInUseCode(roomCode)
                 }
@@ -1476,7 +1559,6 @@ class DatabaseTest :
                 application { testModule() }
 
                 val roomCode = "1234"
-
                 shouldThrow<IllegalArgumentException> {
                     retrieveInUseCode(roomCode)
                 }
@@ -1488,7 +1570,6 @@ class DatabaseTest :
                 application { testModule() }
 
                 val roomCode = "ERROR!ERROR!"
-
                 shouldThrow<IllegalArgumentException> {
                     retrieveInUseCode(roomCode)
                 }
@@ -1592,7 +1673,6 @@ class DatabaseTest :
                         return@transaction game
                     }
 
-                // Room code is generated using GenerateRoomCode, for tests I will be using placeholders.
                 val inUseCode = addInUseCode("LMNO1234", game)
                 inUseCode shouldNotBe null
             }
@@ -1906,7 +1986,6 @@ class DatabaseTest :
                                     .toString()
                         }
                     }
-
                 transaction(TestDatabase.db) { game.delete() }
 
                 shouldThrow<IllegalArgumentException> {

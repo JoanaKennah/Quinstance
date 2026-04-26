@@ -18,6 +18,9 @@ import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
     - https://stackoverflow.com
  */
 
+/**
+ * Data class for a User's attempt at playing a Quiz.
+ */
 data class UserAttemptView(
     val quizName: String,
     val score: Int
@@ -31,14 +34,16 @@ fun configureDatabase() {
     val dbConnection = ProjectDatabase.database
 
     transaction(dbConnection) {
-        SchemaUtils.create(AnswerTable,
+        SchemaUtils.create(
+            AnswerTable,
             InUseTable,
             QuestionTable,
             QuinstanceTable,
             QuizTable,
             GameTable,
             UserScoreTable,
-            UserTable)
+            UserTable,
+        )
     }
 
 }
@@ -141,7 +146,7 @@ fun deleteQuiz(quiz: Quiz) : Boolean {
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */
 fun retrieveQuiz(quizID: Int): Quiz? {
-    require(quizID >= 0) { "QuizID must be greater than or equal to 0" }
+    require(quizID > 0) { "QuizID must be greater than or equal to 0" }
     return transaction(TransactionManager.defaultDatabase) {
         Quiz.findById(quizID)
     }
@@ -153,7 +158,7 @@ fun retrieveQuiz(quizID: Int): Quiz? {
  */
 fun retrieveQuizFromGameID(gameID: Int): Quiz? {
     // Check to see if given game actually exists
-    require(gameID >= 0) { "GameID must be non-negative" }
+    require(gameID > 0) { "GameID must be non-negative" }
     return transaction(TransactionManager.defaultDatabase) {
         val game = retrieveGame(gameID)
         return@transaction game?.quiz
@@ -329,7 +334,7 @@ fun retrieveQuestionAnswer(question: Question) : Answer? {
  */
 fun retrieveGame(gameID: Int): Game? {
     // Check given gameID is valid
-    require(gameID >= 0) { "GameID must be non-negative" }
+    require(gameID > 0) { "GameID must be non-negative" }
     return transaction(TransactionManager.defaultDatabase) {
        Game.findById(gameID)
     }
