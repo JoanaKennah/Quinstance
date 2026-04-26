@@ -41,10 +41,10 @@ class SocketsTest : StringSpec({
     "activeSessions session accessible at correct index after being added, and can hold multiple sessions" {
         activeSessions.clear()
         val session = GameSession(gameId = 1, questions = emptyList())
-        //activeSessions[1] = session1
-        //activeSessions[2] = session2
-        //activeSessions[1] shouldBe session1
-        //activeSessions[2] shouldBe session2
+        activeSessions[1] = session1
+        activeSessions[2] = session2
+        activeSessions[1] shouldBe session1
+        activeSessions[2] shouldBe session2
         activeSessions.size shouldBe 2
     }
 
