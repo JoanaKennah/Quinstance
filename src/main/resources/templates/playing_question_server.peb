@@ -45,6 +45,24 @@
                 font-size: 26px;
                 color: #2DC84D;
             }
+            .btn {
+                padding: 10px 20px;
+                background-color: black;
+                color: #2DC84D;
+                border: 2px solid #2DC84D;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+
+            .btn:hover {
+                background-color: #2DC84D;
+                color: black;
+            }
+            .button-container {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 20px;
+            }
         </style>
         {% else %}
         <style>
@@ -61,7 +79,7 @@
             }
         
             .navbar a {
-                color: black;
+                color: white;
                 text-decoration: none;
                 font-weight: bold;
             }
@@ -93,32 +111,67 @@
                 font-size: 26px;
                 color: black;
             }
+
+            .btn {
+                padding: 10px 20px;
+                background-color: white;
+                color: black;
+                border: 2px solid #e63973;
+                cursor: pointer;
+                border-radius: 5px;
+            }
+
+            .btn:hover {
+                background-color: #e63973;
+                color: white;
+            }
+
+            .button-container {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 20px;
+            }
         </style>
         {% endif %}
 
         <script>
 
             function startTimer() {
-                const endTime = Date.now() + {{ timeLimit }}000;
-                localStorage.setItem("quizEndTime", endTime);
                  
                 const timerDisplay = document.getElementById("timer");
+                if ({{ timeLimit }} == 0) {
+                    timerDisplay.textContent = "Unlimited Time";
+                    return;
+                } else {
+                    const endTime = Date.now() + {{ timeLimit }}000;
+                    localStorage.setItem("quizEndTime", endTime);
+                    const countdown = setInterval(() => {
+                        const endTime = localStorage.getItem("quizEndTime");
+                        const timeLeft = Math.floor((endTime - Date.now()) / 1000);
+                        timerDisplay.textContent = timeLeft;
 
-                const countdown = setInterval(() => {
-                    const endTime = localStorage.getItem("quizEndTime");
-                    const timeLeft = Math.floor((endTime - Date.now()) / 1000);
-                    timerDisplay.textContent = timeLeft;
+                        if (timeLeft <= 0) {
+                            clearInterval(countdown);
+                            localStorage.removeItem("quizEndTime");
+                            fetch("/show-correct-answer/{{ gameId }}", { method: "POST" })
+                                .then(() => window.location.href = "/show-correct-answer/{{ gameId }}");
+                        }
+                    }, 1000);
+                }
+            }
 
-                    if (timeLeft <= 0) {
-                        clearInterval(countdown);
-                        localStorage.removeItem("quizEndTime");
-                        fetch("/show-correct-answer/{{ gameId }}", { method: "POST" })
-                            .then(() => window.location.href = "/show-correct-answer/{{ gameId }}");
-                    }
-                }, 1000);
+            function goToNext() {
+                fetch("/next-question/{{ gameId }}", { method: "POST" })
+                    .then(response => response.text())
+                    .then(html => {
+                        document.open();
+                        document.write(html);
+                        document.close();
+                    });
             }
 
             window.onload = startTimer;
+
         </script>
 
     </head>
@@ -140,7 +193,19 @@
         </div>
 
         <div class="timer">
-            <span id="timer">{{ timeLimit }}</span>
+            <span id="timer">
+                {% if timeLimit == 0 %}
+                    Unlimited Time
+                {% else %}
+                    {{ timeLimit }}
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="button-container">
+            <button class="btn" onclick="goToNext()">
+                Next
+            </button>
         </div>
 
     </div>

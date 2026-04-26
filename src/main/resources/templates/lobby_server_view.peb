@@ -97,6 +97,19 @@
         .content {
             margin: 40px;
         }
+
+        .warning-bar {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: black;
+        border-top: 2px solid #2dc84d;
+        color: #2dc84d;
+        display: none;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        }
     </style>
 
     {% else %}
@@ -114,7 +127,7 @@
         }
 
         .navbar a {
-            color: black;
+            color: white;
             text-decoration: none;
             font-weight: bold;
         }
@@ -194,6 +207,19 @@
         .content {
             margin: 40px;
         }
+
+        .warning-bar {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: white;
+        border-top: 2px solid #e63973;
+        color: black;
+        display: none;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        }
     </style>
     {% endif %}
 </head>
@@ -221,7 +247,7 @@
         </div>
 
         <div class="controls">
-            <form method="post" action="/start-game/{{ gameId }}">
+            <form id="start-form" method="post" action="/start-game/{{ gameId }}">
                 <button type="submit" class="btn btn-start">Start Quiz</button>
             </form>
 
@@ -239,13 +265,22 @@
 
 </div>
 
+<div class="warning-bar" id="warning-bar">
+    <span>Minigames won't activate without a minimum of 2 players</span>
+    <div>
+        <button class="btn" onclick="hideWarning()">Wait</button>
+        <button class="btn btn-start" onclick="forceStart()">Ignore</button>
+    </div>
+</div>
 
 <script>
     //polls for joined players once per sec
+    let currentPlayerCount = 0;
     const pollPlayers = setInterval(() => {
         fetch("/lobby-players/{{ gameId }}")
             .then(response => response.json())
             .then(players => {
+                currentPlayerCount = players.length;
                 const grid = document.getElementById("player-grid");
                 grid.innerHTML = players
                     .map(p => `<div class="player-name">${p}</div>`)
@@ -253,6 +288,23 @@
             })
             .catch(err => console.log("Player poll error: " + err));
     }, 1000);
+
+    window.onload = function () {
+        document.getElementById("start-form").addEventListener("submit", function(e) {
+            if (currentPlayerCount <= 1) {
+                e.preventDefault();
+                document.getElementById("warning-bar").style.display = "flex";
+            }
+        });
+    };
+
+    function hideWarning() {
+        document.getElementById("warning-bar").style.display = "none";
+    }
+
+    function forceStart() {
+        document.getElementById("start-form").submit();
+    }
 </script>
 
 </body>
