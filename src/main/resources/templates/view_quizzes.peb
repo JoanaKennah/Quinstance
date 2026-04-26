@@ -95,8 +95,19 @@
     {% else %}
         <div class="quiz-container">
             {% for quiz in quizzes %}
-                <div class="quiz-box" onclick="window.location.href='/view-quiz/{{ quiz.id }}'" style="cursor: pointer;">
-                    {{ loop.index + 1 }}. {{ quiz.quiz_name }}
+                <div class="quiz-box" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div onclick="window.location.href='/view-quiz/{{ quiz.id }}'" style="cursor: pointer; flex-grow: 1;">
+                        {{ loop.index + 1 }}. {{ quiz.quiz_name }}
+                    </div>
+
+                    <form action="/delete-quiz/{{ quiz.id }}" method="post" style="margin: 0;">
+                        <button
+                            type="submit"
+                            class="btn"
+                            onclick="return confirm('Are you sure you want to delete this quiz?');">
+                            Delete
+                        </button>
+                    </form>
                 </div>
             {% endfor %}
         </div>
