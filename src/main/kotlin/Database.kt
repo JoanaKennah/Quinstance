@@ -467,12 +467,7 @@ fun retrieveInUseCode(roomCode: String): InUseCode? {
  * Exposed DAO is shite.
  */
 fun retrieveInUseCodeGame(inUseCode: InUseCode): Game? {
-    val foundInUseCode =
-        transaction(TransactionManager.defaultDatabase) {
-            InUseCode.find { InUseTable.id eq inUseCode.id }.firstOrNull()
-        }
-    require(foundInUseCode != null) { "InUseCode must exist" }
-
+    require(retrieveInUseCode(inUseCode.room_code) != null ) { "InUseCode must exist" }
     return transaction(TransactionManager.defaultDatabase) {
         Game.find { GameTable.id eq inUseCode.game.id }.firstOrNull()
     }
@@ -483,6 +478,7 @@ fun retrieveInUseCodeGame(inUseCode: InUseCode): Game? {
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */
 fun deleteInUseCode(game: Game) {
+    require(retrieveGame(game.id.value) != null) { "Game must exist" }
     transaction(TransactionManager.defaultDatabase) {                                                                   //delete room code
         InUseCode.find { InUseTable.game eq game.id }.firstOrNull()?.delete()
     }

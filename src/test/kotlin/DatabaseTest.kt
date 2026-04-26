@@ -6,6 +6,7 @@ import com.example.database.objects.Question
 import com.example.database.objects.Quinstance
 import com.example.database.objects.Quiz
 import com.example.database.objects.User
+import com.example.database.tables.GameTable
 import com.example.database.tables.InUseTable
 import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
@@ -1691,6 +1692,82 @@ class DatabaseTest :
 
                 shouldThrow<IllegalArgumentException> {
                     retrieveInUseCodeGame(inUseCode)
+                }
+            }
+        }
+
+        "Delete InUseCode object for Game with Quiz 'COMP2860 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val foundGame = Game.findById(1)
+                        foundGame shouldNotBe null
+                        foundGame!!.quiz.quiz_name shouldBe "COMP2860 Quiz"
+                        return@transaction foundGame
+                    }
+
+                deleteInUseCode(game)
+
+                transaction(TestDatabase.db) {
+                    val deleteCheck = InUseCode.find { InUseTable.game eq game.id}.firstOrNull()
+                    deleteCheck shouldBe null
+                }
+            }
+        }
+
+        "Delete InUseCode object for Game with Quiz 'COMP2870 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val foundGame = Game.findById(2)
+                        foundGame shouldNotBe null
+                        foundGame!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                        return@transaction foundGame
+                    }
+
+                deleteInUseCode(game)
+
+                transaction(TestDatabase.db) {
+                    val deleteCheck = InUseCode.find { InUseTable.game eq game.id}.firstOrNull()
+                    deleteCheck shouldBe null
+                }
+            }
+        }
+
+        "Deleting InUseCode object for a Game that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val newGame =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        user shouldNotBe null
+
+                        val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                        quiz shouldNotBe null
+
+                        val game =
+                            Game.new {
+                                this.quiz = quiz!!
+                                this.timeStamp = java.time.LocalDateTime.now().toString()
+                            }
+                        game shouldNotBe null
+
+                        InUseCode.new {
+                            this.game = game
+                            this.room_code = "TEST1234"
+                        }
+                        return@transaction game
+                    }
+
+                transaction(TestDatabase.db) { newGame.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    deleteInUseCode(newGame)
                 }
             }
         }
