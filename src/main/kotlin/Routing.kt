@@ -609,7 +609,7 @@ fun Application.configureRouting() {
 
             val parameters = call.receiveParameters()
             val timeLimit = parameters["timeLimit"]?.toIntOrNull() ?: 30
-            println("Time limit received: ${parameters["timeLimit"]}, parsed as: $timeLimit")
+            
             //read and update theme from checkbox
             val theme = if (parameters["theme"] == "spooky") "spooky" else "default"
             val miniGamesEnabled = parameters["minigames"] == "true"
@@ -1098,7 +1098,6 @@ fun Application.configureRouting() {
             }
 
             val testRandomValue = (0..1).random()
-            println(testRandomValue)
             when {
                 gameSession.miniGamesEnabled && gameSession.lastIncorrectPlayers.size == 1 -> {
                     val autoGhostedPlayer = gameSession.lastIncorrectPlayers[0]
@@ -1138,8 +1137,6 @@ fun Application.configureRouting() {
 
                     gameSession.minigameJustPlayed = true
                     val selectedMinigame = gameSession.activeMinigames.random()
-
-                    println(selectedMinigame)
 
                     when (selectedMinigame) {
                         "maths" -> {
@@ -1274,7 +1271,7 @@ fun Application.configureRouting() {
             val session = activeSessions[gameId]
             val index = activeSessions[gameId]?.currentQuestionIndex ?: 0
             val finished = session?.isFinished ?: true
-            println("Question index polled: gameId=$gameId index=$index finished=$finished")
+            
             call.respondText("{\"index\":$index,\"finished\":$finished}", ContentType.Application.Json)
         }
 
@@ -2013,13 +2010,8 @@ fun Application.configureRouting() {
             val game = retrieveGame(gameId) ?: return@post call.respondText("Game not found")
             val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found")
 
-            println("GameSession found: ${activeSessions[gameId] != null}")
-            println("Connections at kick time: ${gameSession.connections.size}")
-
             val parameters = call.receiveParameters()
             val kickedPlayers = parameters.getAll("kickedPlayers") ?: emptyList()
-
-            println("Kicked players: $kickedPlayers")
 
             transaction(TransactionManager.defaultDatabase) {
                 kickedPlayers.forEach { username ->
