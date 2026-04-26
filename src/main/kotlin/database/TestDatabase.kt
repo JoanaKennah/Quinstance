@@ -199,6 +199,13 @@ object TestDatabase {
                 it[user] = userThree
                 it[score] = 500
             }
+
+            // User Score for Minghao playing a Game with Quiz 'COMP2870'
+            UserScoreTable.insert {
+                it[game] = gameTwo
+                it[user] = userThree
+                it[score] = 750
+            }
         }
     }
 }

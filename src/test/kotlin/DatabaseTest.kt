@@ -1902,10 +1902,11 @@ class DatabaseTest :
 
                 val userScore = addUserScore(game!!, user!!)
                 userScore shouldNotBe null
-                userScore.let {
-                    it.game shouldBe 1
-                    it.user shouldBe user
-                    it.score shouldBe 0
+
+                transaction(TestDatabase.db) {
+                    userScore.game.id.value shouldBe game.id.value
+                    userScore.user.id.value shouldBe user.id.value
+                    userScore.score shouldBe 0
                 }
             }
         }
@@ -1928,10 +1929,11 @@ class DatabaseTest :
 
                 val userScore = addUserScore(game!!, user!!)
                 userScore shouldNotBe null
-                userScore.let {
-                    it.game shouldBe 1
-                    it.user shouldBe user
-                    it.score shouldBe 0
+
+                transaction(TestDatabase.db) {
+                    userScore.game.id.value shouldBe game.id.value
+                    userScore.user.id.value shouldBe user.id.value
+                    userScore.score shouldBe 0
                 }
             }
         }
@@ -1953,7 +1955,7 @@ class DatabaseTest :
                 game shouldNotBe null
 
                 val allUserScores = retrieveAllUserScoresDescending(game!!)
-                allUserScores shouldHaveSize 3
+                allUserScores shouldHaveSize 2
 
                 for (i in 0..1) {
                     val (id, username, score) = allUserScores[i]
@@ -1968,13 +1970,27 @@ class DatabaseTest :
             testApplication {
                 application { testModule() }
 
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { username eq "JoanaKennah" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                    }
+                quiz shouldNotBe null
+
                 val game =
                     transaction(TestDatabase.db) {
-                        Game.findById(2)
+                        Game.new {
+                            this.quiz = quiz!!
+                            this.timeStamp = java.time.LocalDateTime.now().toString()
+                        }
                     }
-                game shouldNotBe null
 
-                val userScores = retrieveAllUserScoresDescending(game!!)
+                val userScores = retrieveAllUserScoresDescending(game)
                 userScores shouldHaveSize 0
             }
         }
@@ -2007,6 +2023,96 @@ class DatabaseTest :
 
                 shouldThrow<IllegalArgumentException> {
                     retrieveAllUserScoresDescending(game)
+                }
+            }
+        }
+
+        "Retrieve Quiz user attempts (1) for User 'JoanaKennah'" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { username eq "JoanaKennah" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val userAttempt = retrieveUserAttempts(user!!)
+                userAttempt shouldNotBe null
+                userAttempt shouldHaveSize 1
+
+                val specificAttempt = userAttempt.firstOrNull()
+                specificAttempt shouldNotBe null
+
+                specificAttempt!!.quizName shouldBe "COMP2860 Quiz"
+                specificAttempt.score shouldBe 1000
+            }
+        }
+
+        "Retrieve Quiz user attempts (2) for User 'MinghaoLe123'" {
+            testApplication {
+                application { testModule() }
+
+                val attemptData =
+                    listOf(
+                        listOf("COMP2860 Quiz", 500),
+                        listOf("COMP2870 Quiz", 750),
+                    )
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { username eq "MinghaoLe123" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val userAttempts = retrieveUserAttempts(user!!)
+                userAttempts shouldNotBe null
+                userAttempts shouldHaveSize 2
+
+                for (i in 0..1) {
+                    userAttempts[i].quizName shouldBe attemptData[i][0]
+                    userAttempts[i].score shouldBe attemptData[i][1]
+                }
+            }
+        }
+
+        "Retrieve empty list of Quiz user attempts for User 'linguin0'" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { username eq "linguin0" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val userAttempt = retrieveUserAttempts(user!!)
+                userAttempt shouldHaveSize 0
+            }
+        }
+
+        "Retrieving Quiz user attempts from a User who doesn't exist throws IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        val hashedPass = Password.hash("test123").addRandomSalt(8).withScrypt()
+                        User.new {
+                            this.username = "Test User"
+                            this.password = hashedPass.result
+                            this.name = "Test Test"
+                            this.email = "test@gmail.com"
+                            this.key_stage = "furthereducation"
+                            this.role = "student"
+                        }
+                    }
+                user shouldNotBe null
+
+                transaction(TestDatabase.db) { user.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveUserAttempts(user)
                 }
             }
         }
