@@ -555,6 +555,7 @@ fun Application.configureRouting() {
             val questions = retrieveQuizQuestions(quiz)
             val gameSession = GameSession(
                 gameId = game.id.value, 
+                hostUsername = session.username,
                 questions = questions, 
                 timeLimit = timeLimit,
                 miniGamesEnabled = miniGamesEnabled,
@@ -1897,6 +1898,99 @@ fun Application.configureRouting() {
                     "isExistingGhost" to isExistingGhost
                 )))
             }
+        }
+        //tested up to here
+
+        //serves manage page with current player list
+        get("/manage-participants/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val quiz = retrieveQuizFromGameID(gameId) ?: return@get call.respondText("Quiz not found")
+
+            val players = retrieveGamePlayers(game)
+
+            call.respond(PebbleContent("manage_participants.peb", mapOf(
+                "gameId" to gameId,
+                "quizName" to quiz.quiz_name,
+                "players" to players,
+                "theme" to session.theme
+            )))
+        }
+
+        //processes kicklist, removes scores, redirects clients to kicked route, redirects host back to settings
+        post("/manage-participants/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
+            val game = retrieveGame(gameId) ?: return@post call.respondText("Game not found")
+            val gameSession = activeSessions[gameId] ?: return@post call.respondText("No active session found")
+
+            println("GameSession found: ${activeSessions[gameId] != null}")
+            println("Connections at kick time: ${gameSession.connections.size}")
+
+            val parameters = call.receiveParameters()
+            val kickedPlayers = parameters.getAll("kickedPlayers") ?: emptyList()
+
+            println("Kicked players: $kickedPlayers")
+
+            transaction(TransactionManager.defaultDatabase) {
+                kickedPlayers.forEach { username ->
+                    val user = retrieveUser(username)
+                    if (user != null) {
+                        //remove UserScore entry
+                        UserScore.find {
+                            UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
+                        }.firstOrNull()?.delete()
+
+                        //remove ghost entry if ghost
+                        gameSession.ghostPlayers.remove(username)
+                    }
+                }
+            }
+
+            gameSession.lastIncorrectPlayers = gameSession.lastIncorrectPlayers.filter { it !in kickedPlayers }
+            gameSession.lastCorrectPlayers = gameSession.lastCorrectPlayers.filter { it !in kickedPlayers }
+
+            gameSession.kickedUsernames.addAll(kickedPlayers)
+
+            call.respondRedirect("/settings/$gameId")
+        }
+
+        //serves client page depending on if kicked
+        get("/kicked/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
+            val game = retrieveGame(gameId) ?: return@get call.respondText("Game not found")
+            val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
+            val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
+
+            //send host back to settings
+            if (session.username == gameSession.hostUsername) {
+                call.respondRedirect("/settings/$gameId")
+                return@get
+            }
+
+            val userScore = retrieveUserScore(game, user)
+
+            if (userScore == null) {
+                //score == null - kicked
+                call.respond(PebbleContent("kicked.peb", mapOf(
+                    "gameId" to gameId,
+                    "theme" to session.theme
+                )))
+            } else {
+                //score exists - not kicked
+                call.respondRedirect("/client-position/$gameId")
+            }
+        }
+
+        //polling endpoint - returns if current user kicked
+        get("/is-kicked/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondText("{\"kicked\":false}", ContentType.Application.Json)
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("{\"kicked\":false}", ContentType.Application.Json)
+            val gameSession = activeSessions[gameId]
+            val kicked = gameSession?.kickedUsernames?.contains(session.username) ?: false
+            call.respondText("{\"kicked\":$kicked}", ContentType.Application.Json)
         }
     }
 }
