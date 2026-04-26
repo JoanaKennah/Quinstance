@@ -516,12 +516,12 @@ fun deleteUserScoreForGivenUser(game: Game, user: User): Boolean {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     require(retrieveUser(user.username) != null) { "User must exist" }
     val userScore =
-        transaction(TestDatabase.db) {
+        transaction(TransactionManager.defaultDatabase) {
             UserScore.find {
                 UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
             }.firstOrNull()
         } ?: return false
-    transaction(TestDatabase.db) { userScore.delete() }
+    transaction(TransactionManager.defaultDatabase) { userScore.delete() }
     return true
 }
 
@@ -537,7 +537,7 @@ fun deleteGameUserScores(game: Game): Boolean {
         UserScore.find { UserScoreTable.game eq game.id }.toList()
     }
     if (userScores.isEmpty()) return false
-    userScores.forEach { it.delete() }
+    transaction(TransactionManager.defaultDatabase) { userScores.forEach { it.delete() } }
     return true
 }
 
