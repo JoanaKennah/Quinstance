@@ -398,7 +398,60 @@ fun Application.configureRouting() {
             
             val quiz = retrieveQuiz(quizId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
 
-            call.respond(PebbleContent("add_question.peb", mapOf("quizName" to quiz.quiz_name, "quizId" to quizId)))
+            call.respond(PebbleContent("add_question.peb",
+                mapOf<String, Any>(
+                    "quizName" to quiz.quiz_name,
+                    "quizId" to quizId,
+                    "questionId" to "",
+                    "isEdit" to false,
+                    "previousQuestionText" to "",
+                    "previousCorrectAnswer" to "",
+                    "previousOption2" to "",
+                    "previousAnswer3" to "",
+                    "previousAnswer4" to "",
+                )
+            ))
+        }
+
+        get("/edit-question/{questionId}") {
+            val questionId = call.parameters["questionId"]?.toIntOrNull()
+                ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid questionID")))
+
+            val quiz =
+                transaction {
+                    val quinstance = Quinstance.find { QuinstanceTable.question eq questionId }.firstOrNull()
+                    if (quinstance != null) return@transaction quinstance.quiz
+                    else return@transaction null
+                } ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
+
+            val question =
+                transaction(TransactionManager.defaultDatabase) {
+                    Question.find { QuestionTable.id eq questionId }.firstOrNull()
+                } ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Question not found")))
+
+            val answer = retrieveQuestionAnswer(question) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Answer not found")))
+            val option3 = when(answer.option3) {
+                null -> ""
+                else -> answer.option3.toString()
+            }
+
+            val option4 = when(answer.option4) {
+                null -> ""
+                else -> answer.option4.toString()
+            }
+            call.respond(PebbleContent("add_question.peb",
+                mapOf(
+                    "quizName" to quiz.quiz_name,
+                    "quizId" to quiz.id,
+                    "questionId" to question.id,
+                    "isEdit" to true,
+                    "previousQuestionText" to question.question,
+                    "previousCorrectAnswer" to answer.correct_answer,
+                    "previousOption2" to answer.option2,
+                    "previousOption3" to option3,
+                    "previousOption4" to option4,
+                ))
+            )
         }
 
         //Reading question, all the answers, checking correct answer, saving to DB, redirects back to Q list
@@ -426,10 +479,36 @@ fun Application.configureRouting() {
             val option3 = answers.getOrNull(2) 
             val option4 = answers.getOrNull(3)
 
-            // Correct index here indicates correct answer for DB
-            val question = addQuestion(quiz, questionText, quiz.category)
-            addAnswer(question, option1, option2, option3, option4, correctIndex)
+            val isEdit = parameters["isEdit"].toBoolean()
 
+            // Correct index here indicates correct answer for DB
+            if (!isEdit) {
+                val question = addQuestion(quiz, questionText, quiz.key_stage)
+                addAnswer(question, option1, option2, option3, option4, correctIndex)
+            } else {
+                val questionId = parameters["questionId"]?.toIntOrNull()
+                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid question ID")))
+
+                val questionData = mapOf("question" to questionText,
+                    "keyStage" to quiz.key_stage,
+                )
+
+                val answerData = mapOf("option1" to option1,
+                    "option2" to option2,
+                    "option3" to option3,
+                    "option4" to option4,
+                    "correctIndex" to correctIndex.toString(),
+                )
+
+                val question = transaction(TransactionManager.defaultDatabase) { Question.findById(questionId) }
+                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Question doesn't exist")))
+
+                val answer = retrieveQuestionAnswer(question)
+                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Answer doesn't exist")))
+                println(answer.correct_answer)
+
+                editQuestion(question, questionData, answer, answerData)
+            }
             call.respondRedirect("/view-quiz-questions/$quizId")
         }
 

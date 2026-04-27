@@ -134,8 +134,93 @@ fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
     return newQuestion
 }
 
+fun setAnswerOptions(option1: String, option2: String, option3: String? = null, option4: String? = null, correctIndex: Int): List<String?> {
+    val allOptions = listOfNotNull(option1, option2, option3, option4)
+    val correctOption = allOptions[correctIndex]
+    var finalOption2 = ""
+    var finalOption3: String? = null
+    var finalOption4: String? = null
+
+    // Not happy about this implementation but avoids issues found in developing csv reading. Ensures there are
+    // no duplicate answers.
+    when (correctOption) {
+        option1 -> {
+            finalOption2 = option2
+            if (option3 != null) finalOption3 = option3
+            if (option4 != null) finalOption4 = option4
+        }
+        option2 -> {
+            finalOption2 = option1
+            if (option3 != null) finalOption3 = option3
+            if (option4 != null) finalOption4 = option4
+        }
+        option3 -> {
+            finalOption2 = option1
+            finalOption3 = option2
+            finalOption4 = option4
+        }
+        option4 -> {
+            finalOption2 = option1
+            finalOption3 = option2
+            finalOption4 = option3
+        }
+    }
+    return listOf(correctOption, finalOption2, finalOption3, finalOption4)
+}
+
+
+fun editQuestion(question: Question, questionData: Map<String, String>, answer: Answer, answerData: Map<String, String?>) {
+    require(questionData.isNotEmpty() && answerData.isNotEmpty()) { "Nothing to edit" }
+    transaction(TransactionManager.defaultDatabase) {
+        require(Question.findById(question.id) != null) { "Question must exist "}
+    }
+
+    for (item in questionData) {
+        require(item.key in listOf("question", "keyStage")) { "questionData key must be an existing attribute" }
+    }
+    for (item in answerData) {
+        require(item.key in listOf("option1", "option2", "option3", "option4", "correctIndex")) { "answerData key must be an existing attribute" }
+        if (item.key == "correctIndex") {
+            require(item.value?.toIntOrNull() != null) { "correctIndex must be an integer" }
+            require(item.value?.toInt() in 0..3){ "correctIndex must in range 0..3" }
+        }
+    }
+
+    transaction(TransactionManager.defaultDatabase) {
+        if (questionData.isNotEmpty()) {
+            questionData.forEach {
+                when(it.key) {
+                    "question" -> question.question = it.value
+                    "keyStage" -> question.key_stage = it.value
+                }
+            }
+        }
+
+        if (answerData.isNotEmpty()) {
+            val answerOptions = setAnswerOptions(
+                answerData["option1"]!!,
+                answerData["option2"]!!,
+                answerData["option3"],
+                answerData["option4"],
+                answerData["correctIndex"]!!.toInt())
+            println("correct answer ${answerOptions[0]}")
+            answerData.forEach {
+                when(it.key) {
+                    "correctIndex" -> answer.correct_answer = answerOptions[0]!!
+                    "option2" -> answer.option2 = answerOptions[1]!!
+                    "option3" -> answer.option3 = answerOptions[2]
+                    "option4" -> answer.option4 = answerOptions[3]
+                }
+            }
+            println("saved ${answer.correct_answer}")
+        }
+    }
+    println("HI!")
+}
+
 /**
  * Deletes given question from QuestionTable. Returns true if the question is successfully deleted
+ * Created by Minghao in Routing.kt, refactored and edited in Database.kt for testing purposes.
  */
 fun deleteQuestion(question: Question): Boolean {
     return transaction(TransactionManager.defaultDatabase) {
@@ -266,7 +351,6 @@ fun retrieveUserQuizzes(username: String) : MutableList<Quiz>? {
         return@transaction quizList
     }
 }
-
 /**
  * Creates and adds an Answer (to a Question) to AnswerTable
  */
@@ -286,43 +370,14 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
             return@transaction null
         }
 
-        val allOptions = listOfNotNull(option1, option2, option3, option4)
-        val correctOption = allOptions[correctIndex]
-        var finalOption2: String = ""
-        var finalOption3: String? = null
-        var finalOption4: String? = null
-
-        // Not happy about this implementation but avoids issues found in developing csv reading. Ensures there are
-        // no duplicate answers.
-        when (correctOption) {
-            option1 -> {
-                finalOption2 = option2
-                if (option3 != null) finalOption3 = option3
-                if (option4 != null) finalOption4 = option4
-            }
-            option2 -> {
-                finalOption2 = option1
-                if (option3 != null) finalOption3 = option3
-                if (option4 != null) finalOption4 = option4
-            }
-            option3 -> {
-                finalOption2 = option1
-                finalOption3 = option2
-                finalOption4 = option4
-            }
-            option4 -> {
-                finalOption2 = option1
-                finalOption3 = option2
-                finalOption4 = option3
-            }
-        }
+        val answers = setAnswerOptions(option1, option2, option3, option4, correctIndex)
 
         val newAnswer = Answer.new {
             this.question = question
-            this.correct_answer = allOptions[correctIndex]
-            this.option2 = finalOption2
-            this.option3 = finalOption3
-            this.option4 = finalOption4
+            this.correct_answer = answers[0]!!
+            this.option2 = answers[1]!!
+            this.option3 = answers[2]
+            this.option4 = answers[3]
         }
         return@transaction newAnswer
     }
