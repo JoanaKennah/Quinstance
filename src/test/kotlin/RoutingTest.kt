@@ -3,7 +3,7 @@ package com.example
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.*
 import io.kotest.matchers.string.shouldContain
-import io.kotest.matchers.collections.shouldContainAny
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.collections.shouldBeIn
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
@@ -1025,7 +1025,7 @@ class RoutingTest : StringSpec({
             checkForHtml(response)
             //verify valid maths question is displayed, check for operator
             response.bodyAsText().let { body ->
-                body shouldContainAny listOf("+", "-", "×", "÷")
+                listOf("+", "-", "×", "÷").any { it in body } shouldBe true
             }
         }
     }
@@ -2320,7 +2320,7 @@ class RoutingTest : StringSpec({
 //checks for a 200 OK and correct landing
 fun checkForHtml(response: HttpResponse) {
     response.status shouldBe HttpStatusCode.OK
-    response.headers["Content-Type"]?.shouldContain("text/html")
+    response.headers["Content-Type"] shouldContain "text/html"
 }
 
 //Checks for a 302 found and correct landing
