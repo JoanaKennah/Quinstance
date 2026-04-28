@@ -54,6 +54,7 @@ data class GameSession(
     var mathsGameState: MathsGameState? = null,
     var potionsGameState: PotionsGameState? = null,
     var roomsGameState: RoomsGameState? = null,
+    var wordsGameState: WordsGameState? = null,
     var ghostPlayers: MutableList<String> = mutableListOf(),
     var revivedPlayers: MutableList<String> = mutableListOf(),
     var autoGhostedPlayer: String? = null,
