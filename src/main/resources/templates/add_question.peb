@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Create Question</title>
+    {% if isEdit %}
+        <title>Edit Question</title>
+    {% else %}
+        <title>Create Question</title>
+    {% endif %}
 
     <style>
         body {

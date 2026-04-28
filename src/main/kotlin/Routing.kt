@@ -454,7 +454,8 @@ fun Application.configureRouting() {
             )
         }
 
-        //Reading question, all the answers, checking correct answer, saving to DB, redirects back to Q list
+        // Reading question, all the answers, checking correct answer, saving to DB, redirects back to Q list
+        // If isEditQuestion is true, instead of saving everything to the DB as new records, it edits previous records.
         post("/add-question/{quizId}") {
             val quizId = call.parameters["quizId"]?.toIntOrNull()
                 ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid quizID")))
@@ -479,17 +480,19 @@ fun Application.configureRouting() {
             val option3 = answers.getOrNull(2) 
             val option4 = answers.getOrNull(3)
 
-            val isEdit = parameters["isEdit"].toBoolean()
+            val isEditQuestion = parameters["isEdit"].toBoolean()
 
-            // Correct index here indicates correct answer for DB
-            if (!isEdit) {
+            if (!isEditQuestion) {
+                // Correct index here indicates correct answer for Database
                 val question = addQuestion(quiz, questionText, quiz.key_stage)
                 addAnswer(question, option1, option2, option3, option4, correctIndex)
             } else {
+                // Different to addAnswer so a new record isn't made.
                 val questionId = parameters["questionId"]?.toIntOrNull()
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid question ID")))
 
-                val questionData = mapOf("question" to questionText,
+                val questionData = mapOf(
+                    "question" to questionText,
                     "keyStage" to quiz.key_stage,
                 )
 
@@ -505,14 +508,11 @@ fun Application.configureRouting() {
 
                 val answer = retrieveQuestionAnswer(question)
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Answer doesn't exist")))
-                println(answer.correct_answer)
 
                 editQuestion(question, questionData, answer, answerData)
             }
             call.respondRedirect("/view-quiz-questions/$quizId")
         }
-
-
 
         //serves list of quizzes created by user
         get ("/view-quizzes") {

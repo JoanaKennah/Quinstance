@@ -45,6 +45,7 @@ fun configureDatabase() {
 
 /**
  * Retrieves user from UserTable using their username, returns null if no user found
+ * @throws IllegalArgumentException if the username is empty.
  */
 fun retrieveUser(username: String) : User? {
     require(username.isNotEmpty()) { "User can't be empty" }
@@ -55,9 +56,10 @@ fun retrieveUser(username: String) : User? {
 
 /**
  * Retrieves user from UserTable using their ID, returns null if no user found
+ * @throws IllegalArgumentException if userID is less than or equal to 0.
  */
 fun retrieveUserById(userId: Int): User? {
-    require(userId > 0) { "User ID must be positive" }
+    require(userId >= 0) { "User ID must be positive" }
 
     return transaction(TransactionManager.defaultDatabase) {
         User.findById(userId)
@@ -65,11 +67,14 @@ fun retrieveUserById(userId: Int): User? {
 }
 
 /**
- * Adds a new User to UserTable. Returns null if user already exists
+ * Adds a new User to UserTable.
+ * @return User object if user was added to Database, null if user already exists.
+ * @throws IllegalArgumentException if any params are empty.
+ * @throws IllegalArgumentException if username or email is greater than 50 characters.
  */
-fun addUser(username: String, password: String, name: String, email: String, key_stage: String, role: String) : User? {
+fun addUser(username: String, password: String, name: String, email: String, keyStage: String, role: String) : User? {
     // Check to ensure all parameters are not empty
-    for (parameter in listOf(username, password, name, email, key_stage, role)) {
+    for (parameter in listOf(username, password, name, email, keyStage, role)) {
         require(parameter.isNotEmpty())
     }
     require(username.length <= 50)
@@ -84,7 +89,7 @@ fun addUser(username: String, password: String, name: String, email: String, key
                 this.password = hash.result
                 this.name = name
                 this.email = email
-                this.key_stage = key_stage
+                this.key_stage = keyStage
                 this.role = role
             }
         }
@@ -92,7 +97,7 @@ fun addUser(username: String, password: String, name: String, email: String, key
 }
 
 /**
- * Deletes given user from UserTable (possibly used for Admin purposes)
+ * Deletes given user from UserTable (possibly used for Admin purposes).
  **/
 fun deleteUser(user : User) {
     // Checks if the user exists in the table before deleting it
@@ -110,23 +115,23 @@ fun deleteUser(user : User) {
 
 /**
  * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1.
+ * @throws IllegalArgumentException if any param is empty
  */
-fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
-    for (parameter in listOf(question, key_stage)) {
+fun addQuestion(quiz: Quiz, question: String, keyStage: String) : Question {
+    for (parameter in listOf(question, keyStage)) {
         require(parameter.isNotEmpty())
     }
     val newQuestion = transaction(TransactionManager.defaultDatabase) {
         // Don't need to check if Question already exists
         val question = Question.new {
             this.question = question
-            this.key_stage = key_stage
+            this.key_stage = keyStage
         }
         // Creates Quinstance so we know which Quiz is associated with what Question
         Quinstance.new {
             this.quiz = quiz
             this.question = question
         }
-
         quiz.num_of_questions += 1
 
         return@transaction question
@@ -134,7 +139,17 @@ fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
     return newQuestion
 }
 
+/**
+ * Takes each answer option the user inputted for their question and sets the correctAnswer to the answer indicated by
+ * correctIndex and returns the remaining three options. Need for this found during testing of reading Csv files.
+ * @return listOf(correctOption, option2, option3?, option4?)
+ * @throws IllegalArgumentException if option1 or option2 is empty, or if correctIndex isn't within 0 to 3.
+ */
 fun setAnswerOptions(option1: String, option2: String, option3: String? = null, option4: String? = null, correctIndex: Int): List<String?> {
+    require(option1 != "") { "option1 cannot be empty" }
+    require(option2 != "") { "option2 cannot be empty" }
+    require(correctIndex in 0..3) { "correctIndex must be between 0 and 3" }
+
     val allOptions = listOfNotNull(option1, option2, option3, option4)
     val correctOption = allOptions[correctIndex]
     var finalOption2 = ""
@@ -168,11 +183,15 @@ fun setAnswerOptions(option1: String, option2: String, option3: String? = null, 
     return listOf(correctOption, finalOption2, finalOption3, finalOption4)
 }
 
-
+/**
+ * Edits given Question and Answer in the Database
+ */
 fun editQuestion(question: Question, questionData: Map<String, String>, answer: Answer, answerData: Map<String, String?>) {
     require(questionData.isNotEmpty() && answerData.isNotEmpty()) { "Nothing to edit" }
     transaction(TransactionManager.defaultDatabase) {
         require(Question.findById(question.id) != null) { "Question must exist "}
+        require(Answer.findById(answer.id) != null) { "Answer must exist" }
+        require(answer.question.id == question.id) { "Answer must be for the given Question "}
     }
 
     for (item in questionData) {
@@ -203,7 +222,7 @@ fun editQuestion(question: Question, questionData: Map<String, String>, answer: 
                 answerData["option3"],
                 answerData["option4"],
                 answerData["correctIndex"]!!.toInt())
-            println("correct answer ${answerOptions[0]}")
+
             answerData.forEach {
                 when(it.key) {
                     "correctIndex" -> answer.correct_answer = answerOptions[0]!!
@@ -212,10 +231,8 @@ fun editQuestion(question: Question, questionData: Map<String, String>, answer: 
                     "option4" -> answer.option4 = answerOptions[3]
                 }
             }
-            println("saved ${answer.correct_answer}")
         }
     }
-    println("HI!")
 }
 
 /**
