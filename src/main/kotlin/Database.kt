@@ -184,7 +184,10 @@ fun setAnswerOptions(option1: String, option2: String, option3: String? = null, 
 }
 
 /**
- * Edits given Question and Answer in the Database
+ * Edits given Question and Answer in the Database.
+ * @throws IllegalArgumentException if questionData or answerData is empty.
+ * @throws IllegalArgumentException if question given doesn't exist
+ * @throws IllegalArgumentException if answer given doesn't exist or the answer is not associated with the question.
  */
 fun editQuestion(question: Question, questionData: Map<String, String>, answer: Answer, answerData: Map<String, String?>) {
     require(questionData.isNotEmpty() && answerData.isNotEmpty()) { "Nothing to edit" }
