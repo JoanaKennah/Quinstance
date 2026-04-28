@@ -3,7 +3,8 @@ package com.example
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.*
 import io.kotest.matchers.string.shouldContain
-import io.kotest.matchers.collections.shouldContainAny
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.collections.shouldBeIn
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
@@ -178,7 +179,7 @@ class RoutingTest : StringSpec({
                 }))
             }
             response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Passwords don't match"
+            response.bodyAsText() shouldContain "Passwords do not match"
         }
     }
 
@@ -276,7 +277,7 @@ class RoutingTest : StringSpec({
             application { testModule() }
             val response = client.get("/view-quiz-questions/NonInteger")
             response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Quiz ID Invalid"
+            response.bodyAsText() shouldContain "Invalid quizID"
         }
     }
 
@@ -285,7 +286,7 @@ class RoutingTest : StringSpec({
             application { testModule() }
             val response = client.get("/add-question/NonInteger")
             response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Invalid Quiz ID"
+            response.bodyAsText() shouldContain "Invalid quizID"
         }
     }
 
@@ -296,7 +297,7 @@ class RoutingTest : StringSpec({
             preLogin(client, "linguin0", "password123")
             val response = client.get("/view-quiz/NonInteger")
             response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Invalid quiz ID"
+            response.bodyAsText() shouldContain "Invalid quizID"
         }
     }
 
@@ -307,7 +308,7 @@ class RoutingTest : StringSpec({
             preLogin(client, "linguin0", "password123")
             val response = client.get("/leaderboard/NonInteger")
             response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Invalid game ID"
+            response.bodyAsText() shouldContain "Invalid gameID"
         }
     }
     
@@ -326,7 +327,7 @@ class RoutingTest : StringSpec({
             application { testModule() }
             val response = client.get("/add-question/99999")
             response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "No Quiz Found"
+            response.bodyAsText() shouldContain "Quiz not found"
         }
     }
 
@@ -366,7 +367,7 @@ class RoutingTest : StringSpec({
                 }))
             }
             response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Please enter a quiz name"
+            response.bodyAsText() shouldContain "Missing input(s)"
         }
     }
 
@@ -396,7 +397,7 @@ class RoutingTest : StringSpec({
                 }))
             }
             response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Please enter a room code"
+            response.bodyAsText() shouldContain "Missing input(s)"
         }
     }
 
@@ -419,7 +420,7 @@ class RoutingTest : StringSpec({
             preLogin(client, "linguin0", "password123")
             val response = client.get("/game/99999")
             response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Game Not Found"
+            response.bodyAsText() shouldContain "Game not found"
         }
     }
 
@@ -921,7 +922,7 @@ class RoutingTest : StringSpec({
             preLogin(client, "JoanaKennah", "password456")
             val response = client.post("/next-question/99999")
             response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "No active session found for this game"
+            response.bodyAsText() shouldContain "Game not found"
         }
     }
 
@@ -1025,7 +1026,7 @@ class RoutingTest : StringSpec({
             checkForHtml(response)
             //verify valid maths question is displayed, check for operator
             response.bodyAsText().let { body ->
-                body shouldContainAny listOf("+", "-", "×", "÷")
+                listOf("+", "-", "×", "÷").any { it in body } shouldBe true
             }
         }
     }
@@ -2320,7 +2321,7 @@ class RoutingTest : StringSpec({
 //checks for a 200 OK and correct landing
 fun checkForHtml(response: HttpResponse) {
     response.status shouldBe HttpStatusCode.OK
-    response.headers["Content-Type"]?.shouldContain("text/html")
+    response.headers["Content-Type"] shouldContain "text/html"
 }
 
 //Checks for a 302 found and correct landing
