@@ -323,9 +323,9 @@ fun Application.configureRouting() {
                             "" -> null
                             else -> question.option3
                         }
-                        val option4 = when (question.option3) {
+                        val option4 = when (question.option4) {
                             "" -> null
-                            else -> question.option3
+                            else -> question.option4
                         }
                         // Add Answer to database.
                         addAnswer(
