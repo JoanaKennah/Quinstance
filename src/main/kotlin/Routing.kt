@@ -382,7 +382,6 @@ fun Application.configureRouting() {
         }
     } 
 
-
         get("/questionTemplate") {
             // Reference: https://ryanharrison.co.uk/2018/09/20/ktor-file-upload-download.html
             val file = File("src/main/resources/questionTemplate.csv")
@@ -496,9 +495,10 @@ fun Application.configureRouting() {
                     "keyStage" to quiz.key_stage,
                 )
 
-                val answerData = mapOf("option1" to option1,
-                    "option2" to option2,
-                    "option3" to option3,
+                val answerData = mapOf(
+                    "option1" to option1,
+                    "option2" to option3,
+                    "option3" to option2,
                     "option4" to option4,
                     "correctIndex" to correctIndex.toString(),
                 )
