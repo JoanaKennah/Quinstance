@@ -7,12 +7,12 @@ import com.example.database.tables.UserTable
 
 /**
  * User class connected to UserTable through IntEntityClass
- * @property username unique identifier for User (not to be confused with id)
- * @property password account password, will be hashed before storing
- * @property name should contain firstname and lastname
- * @property email account email address, format checked in .peb file
- * @property key_stage age group of the user
- * @property role account role (e.g. Student, Teacher, Admin)
+ * @property username Unique identifier for User (not to be confused with id)
+ * @property password Account password, will be hashed before storing
+ * @property name Should contain firstname and lastname
+ * @property email Account email address, format checked in .peb file
+ * @property key_stage Age group of the user
+ * @property role Account role (e.g. Student, Teacher, Admin)
  */
 class User(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<User>(UserTable)

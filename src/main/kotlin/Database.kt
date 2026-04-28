@@ -6,6 +6,7 @@ import org.jetbrains.exposed.v1.core.eq
 import com.password4j.Password
 import kotlin.text.isNotEmpty
 import com.example.database.ProjectDatabase
+import com.example.database.TestDatabase
 import com.example.database.tables.*
 import com.example.database.objects.*
 import org.jetbrains.exposed.v1.core.and
@@ -18,9 +19,22 @@ import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
     - https://stackoverflow.com
  */
 
+/**
+ * Data class for a User's attempt at playing a Quiz.
+ */
 data class UserAttemptView(
     val quizName: String,
     val score: Int
+)
+
+/**
+ * Information about a Player's score.
+ */
+data class PlayerScoreInfo(
+    val userID: Int,
+    val username: String,
+    val score: Int,
+    val isGhost: Boolean
 )
 
 /**
@@ -31,14 +45,16 @@ fun configureDatabase() {
     val dbConnection = ProjectDatabase.database
 
     transaction(dbConnection) {
-        SchemaUtils.create(AnswerTable,
+        SchemaUtils.create(
+            AnswerTable,
             InUseTable,
             QuestionTable,
             QuinstanceTable,
             QuizTable,
             GameTable,
             UserScoreTable,
-            UserTable)
+            UserTable,
+        )
     }
 
 }
@@ -55,6 +71,7 @@ fun retrieveUser(username: String) : User? {
 }
 
 /**
+ * Adds a new User to UserTable. Returns null if user already exists
  * Retrieves user from UserTable using their ID, returns null if no user found
  * @throws IllegalArgumentException if userID is less than or equal to 0.
  */
@@ -332,7 +349,7 @@ fun deleteQuiz(quiz: Quiz) : Boolean {
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */
 fun retrieveQuiz(quizID: Int): Quiz? {
-    require(quizID >= 0) { "QuizID must be greater than or equal to 0" }
+    require(quizID > 0) { "QuizID must be greater than or equal to 0" }
     return transaction(TransactionManager.defaultDatabase) {
         Quiz.findById(quizID)
     }
@@ -344,7 +361,7 @@ fun retrieveQuiz(quizID: Int): Quiz? {
  */
 fun retrieveQuizFromGameID(gameID: Int): Quiz? {
     // Check to see if given game actually exists
-    require(gameID >= 0) { "GameID must be non-negative" }
+    require(gameID > 0) { "GameID must be non-negative" }
     return transaction(TransactionManager.defaultDatabase) {
         val game = retrieveGame(gameID)
         return@transaction game?.quiz
@@ -372,6 +389,72 @@ fun retrieveUserQuizzes(username: String) : MutableList<Quiz>? {
     }
 }
 /**
+ * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1.
+ */
+fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
+    for (parameter in listOf(question, key_stage)) {
+        require(parameter.isNotEmpty())
+    }
+    val newQuestion = transaction(TransactionManager.defaultDatabase) {
+        // Don't need to check if Question already exists
+        val question = Question.new {
+            this.question = question
+            this.key_stage = key_stage
+        }
+        // Creates Quinstance so we know which Quiz is associated with what Question
+        Quinstance.new {
+            this.quiz = quiz
+            this.question = question
+        }
+
+        quiz.num_of_questions += 1
+
+        return@transaction question
+    }
+    return newQuestion
+}
+
+/**
+ * Deletes given question from QuestionTable. Returns true if the question is successfully deleted
+ */
+fun deleteQuestion(question: Question): Boolean {
+    // Finds if the given question exists, then deletes it
+    return transaction(TransactionManager.defaultDatabase) {
+        val foundQuestion = Question.find { QuestionTable.id eq question.id }
+        if (foundQuestion.firstOrNull() != null) {
+            question.delete()
+            return@transaction true
+        }
+        return@transaction false
+    }
+}
+
+/**
+ * Retrieves all Questions associated with the given Quiz. If there are no questions associated with the quiz,
+ * a null value is returned.
+ */
+fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
+    // Find all question ID's associated with the given Quiz
+    return transaction(TransactionManager.defaultDatabase) {
+        // Check to see if quiz actually exists
+        require( (Quiz.findById(quiz.id))?.id == quiz.id ) { "Quiz received does not exist" }
+
+        val foundQuestionQuinstances = Quinstance.find { QuinstanceTable.quiz eq quiz.id }
+        val questionList = mutableListOf<Question>()
+
+        // Retrieves Question objects from the ID's found and appends them to a list, which is returned.
+        // Can be empty but never null
+        for (questionQuinstance in foundQuestionQuinstances) {
+            val question = Question.findById(questionQuinstance.id)
+            if (question != null) {
+                questionList.add(question)
+            }
+        }
+        return@transaction questionList
+    }
+}
+
+/**
  * Creates and adds an Answer (to a Question) to AnswerTable
  */
 fun addAnswer(question: Question, option1: String, option2: String, option3: String? = null, option4: String? = null, correctIndex: Int) : Answer? {
@@ -381,14 +464,14 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
     }
     require(option1.isNotEmpty()) { "Option 1 must not be empty" }
     require(option2.isNotEmpty()) { "Option 2 must not be empty" }
+    require(correctIndex in 0..3) { "CorrectIndex must be between 0 and 3" }
+    require(listOf(option1, option2, option3, option4)[correctIndex] != null) { "Correct answer cannot be null" }
 
     // Check to see if an Answer already exists (Question and Answer have 1:1 relationship), return null if Answer
     // already exists
     return transaction(TransactionManager.defaultDatabase) {
         val check = Answer.find {AnswerTable.question eq question.id }
-        if (check.firstOrNull() != null) {
-            return@transaction null
-        }
+        if (check.firstOrNull() != null) return@transaction null
 
         val answers = setAnswerOptions(option1, option2, option3, option4, correctIndex)
 
@@ -424,7 +507,7 @@ fun retrieveQuestionAnswer(question: Question) : Answer? {
  */
 fun retrieveGame(gameID: Int): Game? {
     // Check given gameID is valid
-    require(gameID >= 0) { "GameID must be non-negative" }
+    require(gameID > 0) { "GameID must be non-negative" }
     return transaction(TransactionManager.defaultDatabase) {
        Game.findById(gameID)
     }
@@ -458,18 +541,22 @@ fun retrieveGamePlayers(game: Game): List<String> {
 }
 
 /**
- * Retrieve list of Players with their associated scores in DESCENDING order.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Checks InUseTable to see if there is an InUseCode object that already exists with the given room code.
+ * @return true if the room code already exists, false otherwise
  */
-
-fun retrieveDescendingPlayerScores(game: Game): List<Map<String, Any>> {
-    // Check to see if given game actually exists
-    require(retrieveGame(game.id.value) != null) { "Game must exist" }
-    return transaction(TransactionManager.defaultDatabase) {
-        UserScore.find { UserScoreTable.game eq game.id }
-            .sortedByDescending { it.score }
-            .map { userScore -> mapOf<String, Any>("username" to userScore.user.username, "score" to userScore.score, "isGhost" to userScore.ghost) }
+fun roomCodeAlreadyExists(roomCode: String): Boolean {
+    require(roomCode.isNotEmpty()) { "Room code must not be empty" }
+    val acceptableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    for (character in roomCode) {
+        require(character in acceptableChars) { "Room code should only contain letters or numbers" }
     }
+    require(roomCode.length == 8) { "Room code must have length 8" }
+
+    val check =
+        transaction(TransactionManager.defaultDatabase) {
+            InUseCode.find { InUseTable.room_code eq roomCode }.firstOrNull()
+        }
+    return check != null
 }
 
 /**
@@ -480,7 +567,12 @@ fun addInUseCode(roomCode: String, game: Game): InUseCode {
     // Check to see if given game actually exists and that the room code is valid (length 8, not empty)
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     require(roomCode.isNotEmpty()) { "Room code must not be empty" }
-    require(roomCode.length == 8)
+    val acceptableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    for (character in roomCode) {
+        require(character in acceptableChars) { "Room code should only contain letters or numbers" }
+    }
+    require(roomCode.length == 8) { "Room code must have length 8" }
+    require(!roomCodeAlreadyExists(roomCode)) { "Room code already exists" }
 
     return transaction(TransactionManager.defaultDatabase) {
         InUseCode.new {
@@ -511,6 +603,10 @@ fun retrieveInUseCode(roomCode: String): InUseCode? {
     // Checks to see if room code given is not empty and has length 8
     require(roomCode.isNotEmpty()) { "Room code must not be empty" }
     require(roomCode.length == 8) { "Room code must have length 8" }
+    val acceptableChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    for (character in roomCode) {
+        require(character in acceptableChars) { "Room code should only contain letters or numbers" }
+    }
 
     return transaction(TransactionManager.defaultDatabase) {
         InUseCode.find { InUseTable.room_code eq roomCode }.firstOrNull()
@@ -522,6 +618,7 @@ fun retrieveInUseCode(roomCode: String): InUseCode? {
  * Exposed DAO is shite.
  */
 fun retrieveInUseCodeGame(inUseCode: InUseCode): Game? {
+    require(retrieveInUseCode(inUseCode.room_code) != null ) { "InUseCode must exist" }
     return transaction(TransactionManager.defaultDatabase) {
         Game.find { GameTable.id eq inUseCode.game.id }.firstOrNull()
     }
@@ -532,6 +629,7 @@ fun retrieveInUseCodeGame(inUseCode: InUseCode): Game? {
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */
 fun deleteInUseCode(game: Game) {
+    require(retrieveGame(game.id.value) != null) { "Game must exist" }
     transaction(TransactionManager.defaultDatabase) {                                                                   //delete room code
         InUseCode.find { InUseTable.game eq game.id }.firstOrNull()?.delete()
     }
@@ -573,19 +671,60 @@ fun retrieveUserScore(game: Game, user: User): UserScore? {
 /**
  * Retrieves all UserScores from a given Game
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @return list of PlayerScoreInfo objects.
  */
-fun retrieveAllUserScores(game: Game): List<Triple<Int, String, Int>> {
+fun retrieveAllUserScoresDescending(game: Game): List<PlayerScoreInfo> {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     return transaction(TransactionManager.defaultDatabase) {
         UserScore.find { UserScoreTable.game eq game.id }
             .sortedByDescending { it.score }
             .map { userScore ->
-                Triple<Int, String, Int>(userScore.user.id.value, userScore.user.username, userScore.score)
+                PlayerScoreInfo(userScore.user.id.value, userScore.user.username, userScore.score, userScore.isGhost)
         }
     }
 }
 
+/**
+ * Deletes UserScore object for a given User.
+ * Created by Emily in Routing.kt, refactored and edited in Database.kt for testing purposes.
+ * @return True if delete is successful, false if UserScore doesn't exist.
+ * @throws IllegalArgumentException if the Game or User doesn't exist.
+ */
+fun deleteUserScoreForGivenUser(game: Game, user: User): Boolean {
+    require(retrieveGame(game.id.value) != null) { "Game must exist" }
+    require(retrieveUser(user.username) != null) { "User must exist" }
+    val userScore =
+        transaction(TransactionManager.defaultDatabase) {
+            UserScore.find {
+                UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
+            }.firstOrNull()
+        } ?: return false
+    transaction(TransactionManager.defaultDatabase) { userScore.delete() }
+    return true
+}
+
+/**
+ * Deletes all UserScores for a given Game.
+ * Created by Emily in Routing.kt, refactored and edited in Database.kt for testing purposes.
+ * @return True if delete is successful, false if there are no UserScores to delete.
+ * @throws java.lang.IllegalArgumentException if the Game doesn't exist.
+ */
+fun deleteGameUserScores(game: Game): Boolean {
+    require(retrieveGame(game.id.value) != null) { "Game must exist" }
+    val userScores = transaction(TransactionManager.defaultDatabase) {                                                                   //delete all user scores from this game
+        UserScore.find { UserScoreTable.game eq game.id }.toList()
+    }
+    if (userScores.isEmpty()) return false
+    transaction(TransactionManager.defaultDatabase) { userScores.forEach { it.delete() } }
+    return true
+}
+
+/**
+ * Retrieve all quizzes a user has played (or attempted to play) and return the quiz name and the user's score.
+ * Returns a list of UserAttemptView objects, can be empty.
+ */
 fun retrieveUserAttempts(user: User): List<UserAttemptView> {
+    require(retrieveUser(user.username) != null) { "User must exist" }
     return transaction(TransactionManager.defaultDatabase) {
         UserScore.find { UserScoreTable.user eq user.id }
             .map {

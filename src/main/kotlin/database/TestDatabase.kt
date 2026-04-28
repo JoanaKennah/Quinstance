@@ -1,5 +1,6 @@
 package com.example.database
 
+import com.example.database.objects.InUseCode
 import com.example.database.objects.Quiz
 import com.example.database.tables.UserTable
 import com.example.database.tables.QuizTable
@@ -161,8 +162,50 @@ object TestDatabase {
                 it[quiz] = userTwoQuiz
                 it[question] = userTwoQuizQ1
             }
+
+            // Game for linguin0 hosting Quiz 'COMP2860 Quiz'
+            val gameOne =
+                GameTable.insertAndGetId {
+                    it[quiz] = userOneQuiz
+                    it[timeStamp] = java.time.LocalDateTime.now().toString()
+                }
+
+            // Game for JoanaKennah hosting Quiz 'COMP2870 Quiz'
+            val gameTwo =
+                GameTable.insertAndGetId {
+                    it[quiz] = userTwoQuiz
+                    it[timeStamp] = java.time.LocalDateTime.now().toString()
+                }
+
+            InUseTable.insert {
+                it[room_code] = "ABCD1234"
+                it[game] = gameOne
+            }
+
+            InUseTable.insert {
+                it[room_code] = "EFGH5678"
+                it[game] = gameTwo
+            }
+
+            // User Scores for two users playing a Game with Quiz 'COMP2860'.
+            UserScoreTable.insert {
+                it[game] = gameOne
+                it[user] = userTwo
+                it[score] = 1000
+            }
+
+            UserScoreTable.insert {
+                it[game] = gameOne
+                it[user] = userThree
+                it[score] = 500
+            }
+
+            // User Score for Minghao playing a Game with Quiz 'COMP2870'
+            UserScoreTable.insert {
+                it[game] = gameTwo
+                it[user] = userThree
+                it[score] = 750
+            }
         }
     }
 }
-
-// to use test database over the real one, type in the command box "./gradlew run -PapplicationModule=testModule
