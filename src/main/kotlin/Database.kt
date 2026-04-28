@@ -390,7 +390,8 @@ fun retrieveUserQuizzes(username: String) : MutableList<Quiz>? {
 }
 /**
  * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1.
- */
+ ---- commented out as duplicate
+
 fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
     for (parameter in listOf(question, key_stage)) {
         require(parameter.isNotEmpty())
@@ -413,10 +414,11 @@ fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
     }
     return newQuestion
 }
-
+ */
 /**
  * Deletes given question from QuestionTable. Returns true if the question is successfully deleted
- */
+ --- commented out as duplicate
+
 fun deleteQuestion(question: Question): Boolean {
     // Finds if the given question exists, then deletes it
     return transaction(TransactionManager.defaultDatabase) {
@@ -428,11 +430,12 @@ fun deleteQuestion(question: Question): Boolean {
         return@transaction false
     }
 }
-
+ */
 /**
  * Retrieves all Questions associated with the given Quiz. If there are no questions associated with the quiz,
  * a null value is returned.
- */
+ ---- commented out as duplicate
+
 fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
     // Find all question ID's associated with the given Quiz
     return transaction(TransactionManager.defaultDatabase) {
@@ -453,7 +456,7 @@ fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
         return@transaction questionList
     }
 }
-
+ */
 /**
  * Creates and adds an Answer (to a Question) to AnswerTable
  */
