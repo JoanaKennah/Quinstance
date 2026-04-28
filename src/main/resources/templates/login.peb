@@ -33,7 +33,7 @@
         }
 
         label {
-            color: #a2d192;
+            color: #20882E;
             font-weight: bold;
             display: block;
             margin-top: 20px;
