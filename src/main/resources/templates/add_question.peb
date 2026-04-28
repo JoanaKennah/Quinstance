@@ -234,7 +234,11 @@
             <div class="column">
                 <div class="answer-box" id="a1">
                     <input type="text" value='{{ previousCorrectAnswer }}' name="answers[]" placeholder="Answer 1">
-                    <input type="checkbox" name="correct" value="0" onclick="onlyOneCheckbox(this)">
+                    {% if isEdit %}
+                        <input type="checkbox" name="correct" value="0" onclick="onlyOneCheckbox(this)" checked>
+                    {% else %}
+                        <input type="checkbox" name="correct" value="0" onclick="onlyOneCheckbox(this)">
+                    {% endif %}
                 </div>
                 <div class="answer-box" id="a3">
                     <span class="remove-btn" onclick="removeAnswer('a3')">x</span>
