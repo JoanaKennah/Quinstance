@@ -40,10 +40,10 @@
 
         .csv-container {
             display: flex;
+            flex-direction: column;
             align-items: center;
             gap: 10px;
             margin: 20px 0;
-            flex-wrap: wrap;
         }
 
         .csv-text {
@@ -51,6 +51,7 @@
             font-size: 18px;
             margin: 0;
             white-space: nowrap;
+            text-align: center;
         }
 
         .csv-form {
@@ -59,11 +60,31 @@
             gap: 10px;
         }
 
+        .csv-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap; /* optional: wraps nicely on small screens */
+            justify-content: center;
+        }
+
         .button-bar {
             margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
+        }
+
+        .left {
+            justify-self: start;
+        }
+
+        .centre {
+            justify-self: center;
+        }
+
+        .right {
+            justify-self: end;
         }
 
         .add-btn {
@@ -72,6 +93,7 @@
             padding: 10px 15px;
             text-decoration: none;
             border-radius: 5px;
+            white-space: nowrap;
         }
       
         .add-btn:hover {
@@ -202,34 +224,42 @@
 
     <div class="button-bar">
 
-        <a class="add-btn" href="/add-question/{{ quizId }}">
-            + Add a Question
-        </a>
-
-        <div class="csv-container">
-            <b class="csv-text">Already have some questions? Submit a .csv file:</b>
-
-            <button class="btn-download" onclick="window.location.href='/questionTemplate'">Template</button>
-
-            <form method="post"
-                  action="/view-quiz-questions/{{ quizId }}"
-                  enctype="multipart/form-data"
-                  class = "csv.form"
-                  onsubmit={% if questions is not empty %}"return deleteQuestions()"{% endif %}>
-                <input type="file" id="fileInput" name="filename" style="display:none;">
-                <button type="button" class="btn-download" onclick="document.getElementById('fileInput').click();">Choose File</button>
-                <input type="hidden" name="quizId" value={{ quizId }}>
-                <input type="hidden" name="resetQuestions" id="csvChoice">
-                <button class="btn" type="submit">Submit</button>
-            </form>
+        <div class="left">
+            <a class="add-btn" href="/add-question/{{ quizId }}">
+                + Add a Question
+            </a>
         </div>
 
-        <form method="post" action="/quiz-created/{{ quizId }}" onsubmit="return validateForm()">
-            <button class="next-btn" type="submit"
-                {% if questions is empty %}disabled{% endif %}>
-                Next
-            </button>
-        </form>
+        <div class="centre">
+            <div class="csv-container">
+                <b class="csv-text">Already have some questions? Submit a .csv file:</b>
+
+                <div class="csv-actions">
+                    <button class="btn-download" onclick="window.location.href='/questionTemplate'">Template</button>
+
+                    <form method="post"
+                        action="/view-quiz-questions/{{ quizId }}"
+                        enctype="multipart/form-data"
+                        class = "csv.form"
+                        onsubmit={% if questions is not empty %}"return deleteQuestions()"{% endif %}>
+                        <input type="file" id="fileInput" name="filename" style="display:none;">
+                        <button type="button" class="btn-download" onclick="document.getElementById('fileInput').click();">Choose File</button>
+                        <input type="hidden" name="quizId" value={{ quizId }}>
+                        <input type="hidden" name="resetQuestions" id="csvChoice">
+                        <button class="btn" type="submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="right">
+            <form method="post" action="/quiz-created/{{ quizId }}" onsubmit="return validateForm()">
+                <button class="next-btn" type="submit"
+                    {% if questions is empty %}disabled{% endif %}>
+                    Next
+                </button>
+            </form>
+        </div>
 
     </div>
 
