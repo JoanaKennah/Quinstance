@@ -14,14 +14,14 @@ class UserAnswersTest : StringSpec({
     }
 
     "addAnswer stores answer - valid answer posted and retrieved" {
-        val answer = SentAnswerData(username = "linguin0", chosenAnswer = "testanswer")
+        val answer = SentAnswerData(username = "linguin0", chosenAnswer = "testanswer", timeRemaining = 30)
         UserAnswers.addAnswer(answer)
         UserAnswers.allUserAnswers() shouldContain answer
         UserAnswers.allUserAnswers().size shouldBe 1
     }
 
     "addAnswer throws IllegalArgumentException for duplicate answer" {
-        val answer = SentAnswerData(username = "linguin0", chosenAnswer = "testanswer2")
+        val answer = SentAnswerData(username = "linguin0", chosenAnswer = "testanswer2", timeRemaining = 30)
         UserAnswers.addAnswer(answer)
         shouldThrow<IllegalArgumentException> {
             UserAnswers.addAnswer(answer)
@@ -29,15 +29,15 @@ class UserAnswersTest : StringSpec({
     }
 
     "clearAnswers clears listof answers - empties list" {
-        val answer = SentAnswerData(username = "linguin0", chosenAnswer = "testanswer3")
+        val answer = SentAnswerData(username = "linguin0", chosenAnswer = "testanswer3", timeRemaining = 30)
         UserAnswers.addAnswer(answer)
         UserAnswers.clearAnswers()
         UserAnswers.allUserAnswers().size shouldBe 0
     }
 
     "allUserAnswers returns all answers -correct list size" {
-        val answerOne = SentAnswerData(username = "linguin0", chosenAnswer = "testanswer4")
-        val answerTwo = SentAnswerData(username = "JoanaKennah", chosenAnswer = "testanswer5")
+        val answerOne = SentAnswerData(username = "linguin0", chosenAnswer = "testanswer4", timeRemaining = 30)
+        val answerTwo = SentAnswerData(username = "JoanaKennah", chosenAnswer = "testanswer5", timeRemaining = 30)
         UserAnswers.addAnswer(answerOne)
         UserAnswers.addAnswer(answerTwo)
         UserAnswers.allUserAnswers().size shouldBe 2
