@@ -45,6 +45,7 @@ fun configureDatabase() {
 
 /**
  * Retrieves user from UserTable using their username, returns null if no user found
+ * @throws IllegalArgumentException if the username is empty.
  */
 fun retrieveUser(username: String) : User? {
     require(username.isNotEmpty()) { "User can't be empty" }
@@ -55,9 +56,10 @@ fun retrieveUser(username: String) : User? {
 
 /**
  * Retrieves user from UserTable using their ID, returns null if no user found
+ * @throws IllegalArgumentException if userID is less than or equal to 0.
  */
 fun retrieveUserById(userId: Int): User? {
-    require(userId > 0) { "User ID must be positive" }
+    require(userId >= 0) { "User ID must be positive" }
 
     return transaction(TransactionManager.defaultDatabase) {
         User.findById(userId)
@@ -65,11 +67,14 @@ fun retrieveUserById(userId: Int): User? {
 }
 
 /**
- * Adds a new User to UserTable. Returns null if user already exists
+ * Adds a new User to UserTable.
+ * @return User object if user was added to Database, null if user already exists.
+ * @throws IllegalArgumentException if any params are empty.
+ * @throws IllegalArgumentException if username or email is greater than 50 characters.
  */
-fun addUser(username: String, password: String, name: String, email: String, key_stage: String, role: String) : User? {
+fun addUser(username: String, password: String, name: String, email: String, keyStage: String, role: String) : User? {
     // Check to ensure all parameters are not empty
-    for (parameter in listOf(username, password, name, email, key_stage, role)) {
+    for (parameter in listOf(username, password, name, email, keyStage, role)) {
         require(parameter.isNotEmpty())
     }
     require(username.length <= 50)
@@ -84,7 +89,7 @@ fun addUser(username: String, password: String, name: String, email: String, key
                 this.password = hash.result
                 this.name = name
                 this.email = email
-                this.key_stage = key_stage
+                this.key_stage = keyStage
                 this.role = role
             }
         }
@@ -92,7 +97,7 @@ fun addUser(username: String, password: String, name: String, email: String, key
 }
 
 /**
- * Deletes given user from UserTable (possibly used for Admin purposes)
+ * Deletes given user from UserTable (possibly used for Admin purposes).
  **/
 fun deleteUser(user : User) {
     // Checks if the user exists in the table before deleting it
@@ -110,23 +115,23 @@ fun deleteUser(user : User) {
 
 /**
  * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1.
+ * @throws IllegalArgumentException if any param is empty
  */
-fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
-    for (parameter in listOf(question, key_stage)) {
+fun addQuestion(quiz: Quiz, question: String, keyStage: String) : Question {
+    for (parameter in listOf(question, keyStage)) {
         require(parameter.isNotEmpty())
     }
     val newQuestion = transaction(TransactionManager.defaultDatabase) {
         // Don't need to check if Question already exists
         val question = Question.new {
             this.question = question
-            this.key_stage = key_stage
+            this.key_stage = keyStage
         }
         // Creates Quinstance so we know which Quiz is associated with what Question
         Quinstance.new {
             this.quiz = quiz
             this.question = question
         }
-
         quiz.num_of_questions += 1
 
         return@transaction question
@@ -135,7 +140,107 @@ fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
 }
 
 /**
+ * Takes each answer option the user inputted for their question and sets the correctAnswer to the answer indicated by
+ * correctIndex and returns the remaining three options. Need for this found during testing of reading Csv files.
+ * @return listOf(correctOption, option2, option3?, option4?)
+ * @throws IllegalArgumentException if option1 or option2 is empty, or if correctIndex isn't within 0 to 3.
+ */
+fun setAnswerOptions(option1: String, option2: String, option3: String? = null, option4: String? = null, correctIndex: Int): List<String?> {
+    require(option1 != "") { "option1 cannot be empty" }
+    require(option2 != "") { "option2 cannot be empty" }
+    require(correctIndex in 0..3) { "correctIndex must be between 0 and 3" }
+
+    val allOptions = listOfNotNull(option1, option2, option3, option4)
+    val correctOption = allOptions[correctIndex]
+    var finalOption2 = ""
+    var finalOption3: String? = null
+    var finalOption4: String? = null
+
+    // Not happy about this implementation but avoids issues found in developing csv reading. Ensures there are
+    // no duplicate answers.
+    when (correctOption) {
+        option1 -> {
+            finalOption2 = option2
+            if (option3 != null) finalOption3 = option3
+            if (option4 != null) finalOption4 = option4
+        }
+        option2 -> {
+            finalOption2 = option1
+            if (option3 != null) finalOption3 = option3
+            if (option4 != null) finalOption4 = option4
+        }
+        option3 -> {
+            finalOption2 = option1
+            finalOption3 = option2
+            finalOption4 = option4
+        }
+        option4 -> {
+            finalOption2 = option1
+            finalOption3 = option2
+            finalOption4 = option3
+        }
+    }
+    return listOf(correctOption, finalOption2, finalOption3, finalOption4)
+}
+
+/**
+ * Edits given Question and Answer in the Database.
+ * @throws IllegalArgumentException if questionData or answerData is empty.
+ * @throws IllegalArgumentException if question given doesn't exist
+ * @throws IllegalArgumentException if answer given doesn't exist or the answer is not associated with the question.
+ */
+fun editQuestion(question: Question, questionData: Map<String, String>, answer: Answer, answerData: Map<String, String?>) {
+    require(questionData.isNotEmpty() && answerData.isNotEmpty()) { "Nothing to edit" }
+    transaction(TransactionManager.defaultDatabase) {
+        require(Question.findById(question.id) != null) { "Question must exist "}
+        require(Answer.findById(answer.id) != null) { "Answer must exist" }
+        require(answer.question.id == question.id) { "Answer must be for the given Question "}
+    }
+
+    for (item in questionData) {
+        require(item.key in listOf("question", "keyStage")) { "questionData key must be an existing attribute" }
+    }
+    for (item in answerData) {
+        require(item.key in listOf("option1", "option2", "option3", "option4", "correctIndex")) { "answerData key must be an existing attribute" }
+        if (item.key == "correctIndex") {
+            require(item.value?.toIntOrNull() != null) { "correctIndex must be an integer" }
+            require(item.value?.toInt() in 0..3){ "correctIndex must in range 0..3" }
+        }
+    }
+
+    transaction(TransactionManager.defaultDatabase) {
+        if (questionData.isNotEmpty()) {
+            questionData.forEach {
+                when(it.key) {
+                    "question" -> question.question = it.value
+                    "keyStage" -> question.key_stage = it.value
+                }
+            }
+        }
+
+        if (answerData.isNotEmpty()) {
+            val answerOptions = setAnswerOptions(
+                answerData["option1"]!!,
+                answerData["option2"]!!,
+                answerData["option3"],
+                answerData["option4"],
+                answerData["correctIndex"]!!.toInt())
+
+            answerData.forEach {
+                when(it.key) {
+                    "correctIndex" -> answer.correct_answer = answerOptions[0]!!
+                    "option2" -> answer.option2 = answerOptions[1]!!
+                    "option3" -> answer.option3 = answerOptions[2]
+                    "option4" -> answer.option4 = answerOptions[3]
+                }
+            }
+        }
+    }
+}
+
+/**
  * Deletes given question from QuestionTable. Returns true if the question is successfully deleted
+ * Created by Minghao in Routing.kt, refactored and edited in Database.kt for testing purposes.
  */
 fun deleteQuestion(question: Question): Boolean {
     return transaction(TransactionManager.defaultDatabase) {
@@ -266,7 +371,6 @@ fun retrieveUserQuizzes(username: String) : MutableList<Quiz>? {
         return@transaction quizList
     }
 }
-
 /**
  * Creates and adds an Answer (to a Question) to AnswerTable
  */
@@ -286,43 +390,14 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
             return@transaction null
         }
 
-        val allOptions = listOfNotNull(option1, option2, option3, option4)
-        val correctOption = allOptions[correctIndex]
-        var finalOption2: String = ""
-        var finalOption3: String? = null
-        var finalOption4: String? = null
-
-        // Not happy about this implementation but avoids issues found in developing csv reading. Ensures there are
-        // no duplicate answers.
-        when (correctOption) {
-            option1 -> {
-                finalOption2 = option2
-                if (option3 != null) finalOption3 = option3
-                if (option4 != null) finalOption4 = option4
-            }
-            option2 -> {
-                finalOption2 = option1
-                if (option3 != null) finalOption3 = option3
-                if (option4 != null) finalOption4 = option4
-            }
-            option3 -> {
-                finalOption2 = option1
-                finalOption3 = option2
-                finalOption4 = option4
-            }
-            option4 -> {
-                finalOption2 = option1
-                finalOption3 = option2
-                finalOption4 = option3
-            }
-        }
+        val answers = setAnswerOptions(option1, option2, option3, option4, correctIndex)
 
         val newAnswer = Answer.new {
             this.question = question
-            this.correct_answer = allOptions[correctIndex]
-            this.option2 = finalOption2
-            this.option3 = finalOption3
-            this.option4 = finalOption4
+            this.correct_answer = answers[0]!!
+            this.option2 = answers[1]!!
+            this.option3 = answers[2]
+            this.option4 = answers[3]
         }
         return@transaction newAnswer
     }
