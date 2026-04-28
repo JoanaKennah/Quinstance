@@ -18,6 +18,7 @@ import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import com.password4j.Password
 import com.example.database.objects.*
+import com.example.sendConfirmationEmail
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
 import io.ktor.utils.io.jvm.javaio.toInputStream
@@ -966,7 +967,7 @@ fun Application.configureRouting() {
             // Retrieve player scores, sort by highest
             val allUserScores = retrieveAllUserScoresDescending(game)
             val players = allUserScores.map {
-                mapOf<String, Any>("username" to it.username, "score" to it.score)
+                mapOf<String, Any>("username" to it.username, "score" to it.score, "isGhost" to it.isGhost)
             }
 
             call.respond(PebbleContent("end_leaderboard.peb", mapOf(
