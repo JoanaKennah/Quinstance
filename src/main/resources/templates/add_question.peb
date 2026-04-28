@@ -85,7 +85,7 @@
             flex-grow: 1;
         }
 
-        .answer-box input[type="checkbox"] {
+        .answer-box input[type="radio"] {
             margin-left: 10px;
         }
 
@@ -128,13 +128,6 @@
     </style>
 
     <script>
-        function onlyOneCheckbox(clicked) {
-            const checkboxes = document.getElementsByName("correct");
-            checkboxes.forEach(cb => {
-                if (cb !== clicked) cb.checked = false;
-            });
-        }
-
         let answerCount = 4;
 
         function removeAnswer(id) {
@@ -166,7 +159,7 @@
             div.innerHTML = `
                 <span class="remove-btn" onclick="removeAnswer('a${newIndex}')">x</span>
                 <input type="text" name="answers[]" placeholder="Answer ${newIndex}">
-                <input type="checkbox" name="correct" value="${newIndex - 1}" onclick="onlyOneCheckbox(this)">
+                <input type="radio" name="correct" value="${newIndex - 1}">
             `;
             col.appendChild(div);
         }
@@ -235,27 +228,27 @@
                 <div class="answer-box" id="a1">
                     <input type="text" value='{{ previousCorrectAnswer }}' name="answers[]" placeholder="Answer 1">
                     {% if isEdit %}
-                        <input type="checkbox" name="correct" value="0" onclick="onlyOneCheckbox(this)" checked>
+                        <input type="radio" name="correct" value="0" checked>
                     {% else %}
-                        <input type="checkbox" name="correct" value="0" onclick="onlyOneCheckbox(this)">
+                        <input type="radio" name="correct" value="0">
                     {% endif %}
                 </div>
                 <div class="answer-box" id="a3">
                     <span class="remove-btn" onclick="removeAnswer('a3')">x</span>
                     <input type="text" value='{{ previousOption3 }}' name="answers[]" placeholder="Answer 3">
-                    <input type="checkbox" name="correct" value="2" onclick="onlyOneCheckbox(this)">
+                    <input type="radio" name="correct" value="2">
                 </div>
             </div>
 
             <div class="column">
                 <div class="answer-box" id="a2">
                     <input type="text" value='{{ previousOption2 }}' name="answers[]" placeholder="Answer 2">
-                    <input type="checkbox" name="correct" value="1" onclick="onlyOneCheckbox(this)">
+                    <input type="radio" name="correct" value="1">
                 </div>
                 <div class="answer-box" id="a4">
                     <span class="remove-btn" onclick="removeAnswer('a4')">x</span>
                     <input type="text" value='{{ previousOption4 }}' name="answers[]" placeholder="Answer 4">
-                    <input type="checkbox" name="correct" value="3" onclick="onlyOneCheckbox(this)">
+                    <input type="radio" name="correct" value="3">
                 </div>
             </div>
 
@@ -266,7 +259,7 @@
         </div>
 
         {% if isEdit %}
-            <input type="hidden" name="isEdit" value=true>
+            <input type="hidden" name="isEdit" value="true">
             <input type="hidden" name="questionId" value={{ questionId }}>
         {% endif %}
 
