@@ -495,10 +495,22 @@ fun Application.configureRouting() {
                     "keyStage" to quiz.key_stage,
                 )
 
+                val mappedOption2 =
+                    when(option3) {
+                        null -> option2
+                        else -> option3
+                    }
+
+                val mappedOption3 =
+                    when(option3) {
+                        null -> null
+                        else -> option2
+                    }
+
                 val answerData = mapOf(
                     "option1" to option1,
-                    "option2" to option3,
-                    "option3" to option2,
+                    "option2" to mappedOption2,
+                    "option3" to mappedOption3,
                     "option4" to option4,
                     "correctIndex" to correctIndex.toString(),
                 )
