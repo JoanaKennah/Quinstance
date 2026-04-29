@@ -23,6 +23,7 @@ import kotlin.math.roundToInt
 import com.password4j.Password
 import com.example.database.objects.*
 import com.example.sendConfirmationEmail
+import com.example.sendResetEmail
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
 import io.ktor.utils.io.jvm.javaio.toInputStream
@@ -92,6 +93,18 @@ fun Application.configureRouting() {
             }  else {
                 call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Incorrect password")))
             }
+        }
+
+        //enter email to reset password page
+        get("/forgot-password") {
+            call.respond(PebbleContent("forgot_password.peb", mapOf()))
+        }
+
+        post("/forgot-password") {
+            val parameters = call.receiveParameters()
+            val email = parameters["email"]?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing email")))
+            sendResetEmail(email)
+            call.respondText("OK")
         }
 
         //serves signup page 
