@@ -45,6 +45,7 @@ data class GameSession(
     var isStarted: Boolean = false,
     var isFinished: Boolean = false,
     val timeLimit: Int = 30,
+    val maxPlayers: Int = 40,
     val miniGamesEnabled: Boolean = false,
     val activeMinigames: List<String> = listOf("maths", "potions", "rooms", "words"),
     val theme: String = "default",

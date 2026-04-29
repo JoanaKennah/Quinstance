@@ -811,6 +811,16 @@ fun Application.configureRouting() {
                 return@post
             }
 
+            //block players after lobby cap reached
+            if (gameSession != null && retrieveGamePlayers(game).size >= gameSession.maxPlayers) {
+                call.respond(PebbleContent("join_lobby.peb", mapOf(
+                    "returnURL" to returnURL,
+                    "roomCode" to roomCode,
+                    "errorMessage" to "This lobby is full!"
+                )))
+                return@post
+            }
+
             addUserScore(game, user)
             call.respondRedirect("/lobby-client/${game.id.value}")
         }
