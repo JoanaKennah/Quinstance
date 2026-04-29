@@ -274,16 +274,16 @@
 </div>
 
 <script>
-    //polls for joined players once per sec
     let currentPlayerCount = 0;
     const pollPlayers = setInterval(() => {
         fetch("/lobby-players/{{ gameId }}")
             .then(response => response.json())
             .then(players => {
                 currentPlayerCount = players.length;
+                const fontSize = players.length > 25 ? "12px" : players.length > 15 ? "18px" : "32px";
                 const grid = document.getElementById("player-grid");
                 grid.innerHTML = players
-                    .map(p => `<div class="player-name">${p}</div>`)
+                    .map(p => `<div class="player-name" style="font-size:${fontSize}">${p}</div>`)
                     .join("");
             })
             .catch(err => console.log("Player poll error: " + err));

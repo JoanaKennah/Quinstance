@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Words</title>
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+            color: #2DC84D;
+        }
+
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            color: black;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .top-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .title-box {
+            border: 2px solid #2DC84D;
+            border-radius: 10px;
+            padding: 15px 30px;
+            display: inline-block;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .description {
+            border: 2px solid #2DC84D;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .countdown {
+            font-size: 60px;
+            font-weight: bold;
+            margin: 10px 0 30px 0;
+        }
+
+        .grid {
+            display: inline-grid;
+            grid-template-columns: repeat(5, 60px);
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #2DC84D;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            margin: 40px;
+            text-align: center;
+        }
+
+        .top-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .title-box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 15px 30px;
+            display: inline-block;
+        }
+
+        .title-box h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        .description {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .countdown {
+            font-size: 60px;
+            font-weight: bold;
+            color: #e63973;
+            margin: 10px 0 30px 0;
+        }
+
+        .grid {
+            display: inline-grid;
+            grid-template-columns: repeat(5, 60px);
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #e63973;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+    {% endif %}
+</head>
+<body>
+    <div class="navbar">
+        <form method="post" action="/logout">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="content">
+        <div class="top-row">
+            <div></div>
+            <div class="title-box"><h1>Words</h1></div>
+            <div></div>
+        </div>
+
+        <div class="description">Make the longest, REAL word that you can with the letters below!</div>
+
+        <div class="countdown" id="timer">30</div>
+
+        <div class="grid">
+            {% for letter in grid %}
+                <div class="cell">{{ letter }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 30;
+        const timerDisplay = document.getElementById("timer");
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerDisplay.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                fetch("/words-end/{{ gameId }}", { method: "POST" })
+                    .then(() => window.location.href = "/words-end-host/{{ gameId }}");
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

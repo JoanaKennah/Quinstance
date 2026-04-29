@@ -70,6 +70,9 @@
             opacity: 0.8;
         }
 
+        .player-name-small { font-size: 12px; }
+        .player-name-medium { font-size: 18px; }
+
         .controls {
             display: flex;
             flex-direction: column;
@@ -192,6 +195,9 @@
             opacity: 0.8;
         }
 
+        .player-name-small { font-size: 12px; }
+        .player-name-medium { font-size: 18px; }
+
         .controls {
             display: flex;
             flex-direction: column;
@@ -267,7 +273,8 @@
         <div class="players-section">
             <div class="player-grid" id="player-grid">
                 {% for player in players %}
-                    <div class="player-name" onclick="toggleSelect(this)" data-username="{{ player }}">
+                    <div class="player-name {% if players|length > 25 %}player-name-small{% elseif players|length > 15 %}player-name-medium{% endif %}"
+                        onclick="toggleSelect(this)" data-username="{{ player }}">
                         {{ player }}
                     </div>
                 {% endfor %}
@@ -288,13 +295,9 @@
 </div>
 
 <script>
-    //usernames currently selected (red)
     const selectedPlayers = new Set();
-
-    //usernames confirmed for kicking (removed)
     const kickedPlayers = new Set();
 
-    //selects username in red
     function toggleSelect(el) {
         const username = el.dataset.username;
         if (selectedPlayers.has(username)) {
@@ -307,20 +310,15 @@
         updateCount();
     }
 
-    //on kick selected - 
-    //removed players from grid
     function kickSelected() {
         if (selectedPlayers.size === 0) return;
 
         selectedPlayers.forEach(username => {
-           
             kickedPlayers.add(username);
 
-            //remove from grid
             const el = document.querySelector(`[data-username="${username}"]`);
             if (el) el.remove();
 
-            //hidden input for save form
             const input = document.createElement("input");
             input.type = "hidden";
             input.name = "kickedPlayers";
@@ -328,12 +326,10 @@
             document.getElementById("kicked-inputs").appendChild(input);
         });
 
-        //re-init list for next selection
         selectedPlayers.clear();
         updateCount();
     }
 
-    //updates selected counter
     function updateCount() {
         const count = document.getElementById("selected-count");
         count.textContent = selectedPlayers.size > 0
