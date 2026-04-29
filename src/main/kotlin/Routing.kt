@@ -917,6 +917,7 @@ fun Application.configureRouting() {
             gameSession.mathsGameState = null
             gameSession.potionsGameState = null
             gameSession.roomsGameState = null
+            gameSession.wordsGameState = null
             gameSession.autoGhostedPlayer = null
             gameSession.minigameJustPlayed = false
 
@@ -1261,6 +1262,21 @@ fun Application.configureRouting() {
                                 "quizName" to quiz.quiz_name,
                                 "gameId" to gameId,
                                 "theme" to session.theme
+                            )))
+                        }
+
+                        "words" -> {
+                            gameSession.wordsGameState = WordsGameState()
+
+                            gameSession.connections.forEach { connection ->
+                                connection.send(Frame.Text("{\"redirect\":\"/words-start/$gameId\"}"))
+                            }
+
+                            call.respond(PebbleContent("words_minigame_server_playing.peb", mapOf(
+                                "quizName" to quiz.quiz_name,
+                                "gameId" to gameId,
+                                "theme" to session.theme,
+                                "grid" to gameSession.wordsGameState!!.grid
                             )))
                         }
 
@@ -1671,7 +1687,14 @@ fun Application.configureRouting() {
         //polling endpoint - returns minigame state
         get("/minigame-active/{gameId}") {
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("{\"active\":false}", ContentType.Application.Json) 
-            val active = activeSessions[gameId]?.mathsGameState?.isFinished == false
+            val session = activeSessions[gameId]
+            val active = when {
+                session?.mathsGameState != null -> session.mathsGameState!!.isFinished == false
+                session?.potionsGameState != null -> session.potionsGameState!!.isFinished == false
+                session?.roomsGameState != null -> session.roomsGameState!!.isFinished == false
+                session?.wordsGameState != null -> session.wordsGameState!!.isFinished == false
+                else -> false
+            }
             call.respondText("{\"active\":$active}", ContentType.Application.Json)
         }
 
