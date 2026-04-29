@@ -1070,7 +1070,6 @@ fun Application.configureRouting() {
                 .filter { it.username !in gameSession.ghostPlayers }
                 .map { it.username }
                 .shuffled()
-                .take(6)
             
             gameSession.lastIncorrectPlayers = dangerPlayers
             gameSession.lastCorrectPlayers = answers
@@ -1236,6 +1235,7 @@ fun Application.configureRouting() {
                         }
 
                         "potions" -> {
+                            gameSession.lastIncorrectPlayers = gameSession.lastIncorrectPlayers.take(6)
                             gameSession.potionsGameState = PotionsGameState()
 
                             gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/potions-start/$gameId\"}")) }
@@ -1250,6 +1250,7 @@ fun Application.configureRouting() {
                         }
 
                         "rooms" -> {
+                            gameSession.lastIncorrectPlayers = gameSession.lastIncorrectPlayers.take(16)
                             gameSession.roomsGameState = RoomsGameState()
 
                             gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/rooms-start/$gameId\"}")) }
