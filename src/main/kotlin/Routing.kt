@@ -1248,7 +1248,7 @@ fun Application.configureRouting() {
                             gameSession.lastIncorrectPlayers = gameSession.lastIncorrectPlayers.take(6)
                             gameSession.potionsGameState = PotionsGameState()
 
-                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/potions-start/$gameId\"}")) }
+                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/potions-wait/$gameId\"}")) }
 
                             call.respond(PebbleContent("minigame_server_intro.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
@@ -1263,7 +1263,7 @@ fun Application.configureRouting() {
                             gameSession.lastIncorrectPlayers = gameSession.lastIncorrectPlayers.take(16)
                             gameSession.roomsGameState = RoomsGameState()
 
-                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/rooms-start/$gameId\"}")) }
+                            gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/rooms-wait/$gameId\"}")) }
 
                             call.respond(PebbleContent("minigame_server_intro.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
@@ -1773,7 +1773,7 @@ fun Application.configureRouting() {
             val gameSession = activeSessions[gameId] ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
 
             gameSession.connections.forEach { connection ->
-                connection.send(Frame.Text("{\"redirect\":\"/potions-pick/$gameId\"}"))
+                connection.send(Frame.Text("{\"redirect\":\"/potions-start/$gameId\"}"))
             }
 
             gameSession.potionsGameState?.isStarted = true
@@ -1974,7 +1974,7 @@ fun Application.configureRouting() {
             val gameSession = activeSessions[gameId] ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
 
             gameSession.connections.forEach { connection ->
-                connection.send(Frame.Text("{\"redirect\":\"/rooms-pick/$gameId\"}"))
+                connection.send(Frame.Text("{\"redirect\":\"/rooms-start/$gameId\"}"))
             }
 
             gameSession.roomsGameState?.isStarted = true
@@ -2511,8 +2511,8 @@ fun Application.configureRouting() {
 
             val redirect = when {
                 session?.mathsGameState?.isStarted == true -> "/minigame-question/$gameId"
-                session?.potionsGameState?.isStarted == true -> "/potions-pick/$gameId"
-                session?.roomsGameState?.isStarted == true -> "/rooms-pick/$gameId"
+                session?.potionsGameState?.isStarted == true -> "/potions-start/$gameId"
+                session?.roomsGameState?.isStarted == true -> "/rooms-start/$gameId"
                 session?.wordsGameState?.isStarted == true -> "/words-start/$gameId"
                 else -> null
             }
@@ -2544,5 +2544,62 @@ fun Application.configureRouting() {
                 )))
             }
         }
+        //tested up to here
+
+        //serves uh-oh or safe screen while host is on intro
+        get("/potions-wait/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
+            val gameSession = activeSessions[gameId] ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+            val game = retrieveGame(gameId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Game not found")))
+            val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
+
+            val userScore = retrieveUserScore(game, user)?.score ?: 0
+            val isExistingGhost = session.username in gameSession.ghostPlayers
+
+            if (session.username in gameSession.lastIncorrectPlayers) {
+                call.respond(PebbleContent("mini_game_uhoh.peb", mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme
+                )))
+            } else {
+                call.respond(PebbleContent("minigame_client_safe_wait.peb", mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme,
+                    "isExistingGhost" to isExistingGhost
+                )))
+            }
+        }
+
+        //serves uh-oh or safe screen while host is on intro
+        get("/rooms-wait/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
+            val gameSession = activeSessions[gameId] ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+            val game = retrieveGame(gameId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Game not found")))
+            val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
+
+            val userScore = retrieveUserScore(game, user)?.score ?: 0
+            val isExistingGhost = session.username in gameSession.ghostPlayers
+
+            if (session.username in gameSession.lastIncorrectPlayers) {
+                call.respond(PebbleContent("mini_game_uhoh.peb", mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme
+                )))
+            } else {
+                call.respond(PebbleContent("minigame_client_safe_wait.peb", mapOf(
+                    "gameId" to gameId,
+                    "score" to userScore,
+                    "theme" to session.theme,
+                    "isExistingGhost" to isExistingGhost
+                )))
+            }
+        }
+
+
     }
 }
