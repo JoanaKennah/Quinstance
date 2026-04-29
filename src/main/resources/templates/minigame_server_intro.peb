@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Safe from Maths Mini-Game</title>
+    <title>Minigame</title>
 
     {% if theme == "spooky" %}
     <style>
@@ -17,16 +17,6 @@
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
-        }
-
-        .navbar a {
-            color: black;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .navbar a:hover {
-            text-decoration: underline;
         }
 
         .container {
@@ -46,14 +36,26 @@
             margin-bottom: 20px;
         }
 
-        .score-label {
-            font-size: 22px;
-            margin-bottom: 10px;
+        h2 {
+            font-size: 28px;
+            margin: 0;
         }
 
-        .score {
-            font-size: 40px;
+        .btn-start {
+            margin-top: 30px;
+            padding: 12px 40px;
+            font-size: 18px;
             font-weight: bold;
+            background-color: black;
+            color: #2dc84d;
+            border: 2px solid #2dc84d;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-start:hover {
+            background-color: #2dc84d;
+            color: black;
         }
 
         .logout-btn {
@@ -86,16 +88,6 @@
             padding: 12px 20px;
         }
 
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .navbar a:hover {
-            text-decoration: underline;
-        }
-
         .container {
             text-align: center;
             margin-top: 100px;
@@ -113,15 +105,26 @@
             margin-bottom: 20px;
         }
 
-        .score-label {
-            font-size: 22px;
-            margin-bottom: 10px;
+        h2 {
+            font-size: 28px;
+            margin: 0;
         }
 
-        .score {
-            font-size: 40px;
+        .btn-start {
+            margin-top: 30px;
+            padding: 12px 40px;
+            font-size: 18px;
             font-weight: bold;
-            color: #e63973;
+            background-color: white;
+            color: black;
+            border: 2px solid #e63973;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-start:hover {
+            background-color: #e63973;
+            color: white;
         }
 
         .logout-btn {
@@ -149,21 +152,12 @@
 
     <div class="container">
         <div class="box">
-            <h1>You are safe!</h1>
-            <div class="score-label">Total Score:</div>
-            <div class="score">{{ score }}</div>
+            <h1>Minigame Incoming:</h1>
+            <h2>{{ minigameName }}</h2>
+            <form method="post" action="{{ beginRoute }}">
+                <button type="submit" class="btn-start">Start</button>
+            </form>
         </div>
     </div>
-
-    <script>
-        let timeLeft = 5;
-        const countdown = setInterval(() => {
-            timeLeft--;
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
-                window.location.href = "/minigame-question/{{ gameId }}";
-            }
-        }, 1000);
-    </script>
 </body>
 </html>

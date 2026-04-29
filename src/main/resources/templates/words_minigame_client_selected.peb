@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Words</title>
+    {% if theme == "spooky" %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: black;
+            color: #2DC84D;
+        }
+
+        .navbar {
+            background-color: #2DC84D;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+            color: black;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 44px);
+        }
+
+        .card {
+            border: 3px solid #2DC84D;
+            border-radius: 20px;
+            padding: 50px 80px;
+            text-align: center;
+            min-width: 340px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .word-box {
+            border: 2px solid #2DC84D;
+            border-radius: 10px;
+            padding: 18px 40px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+    </style>
+    {% else %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #e63973;
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px;
+        }
+
+        .logout-btn {
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 0;
+        }
+
+        .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 44px);
+        }
+
+        .card {
+            border: 3px solid #e63973;
+            border-radius: 20px;
+            padding: 50px 80px;
+            text-align: center;
+            min-width: 340px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .word-box {
+            border: 2px solid #e63973;
+            border-radius: 10px;
+            padding: 18px 40px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+    </style>
+    {% endif %}
+</head>
+<body>
+    <div class="navbar">
+        <form method="post" action="/logout">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <div class="title">You submitted:</div>
+            <div class="word-box">{{ word }}</div>
+        </div>
+    </div>
+
+    <script>
+        const poll = setInterval(() => {
+            fetch("/minigame-active/{{ gameId }}")
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.active) {
+                        clearInterval(poll);
+                        window.location.href = "/words-result/{{ gameId }}";
+                    }
+                })
+                .catch(err => console.log("Poll error: " + err));
+        }, 500);
+    </script>
+</body>
+</html>

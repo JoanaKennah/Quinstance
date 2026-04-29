@@ -5,6 +5,7 @@ data class MathsGameState(
     val questionIndex: MutableMap<String, Int> = mutableMapOf(),
     val mathsScores: MutableMap<String, Int> = mutableMapOf(),
     var ghostPlayers: List<String> = emptyList(),
+    var isStarted: Boolean = false,
     var isFinished: Boolean = false
 )
 
