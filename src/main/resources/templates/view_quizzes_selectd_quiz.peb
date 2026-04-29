@@ -130,11 +130,6 @@
         </div>
 
         <div class="right">
-            <div class="subtitle">Mini Games:</div>
-            <div class="text">
-                NEEDED - Add when minigames implemented -------------------------------------------
-                N/A
-            </div>
             <div class="subtitle">Category:</div>
             <div class="text">
                 {{ categoryDisplay }}
