@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Words</title>
+    <title>Minigame</title>
 
     {% if theme == "spooky" %}
     <style>
@@ -153,8 +153,8 @@
     <div class="container">
         <div class="box">
             <h1>Minigame Incoming:</h1>
-            <h2>Words</h2>
-            <form method="post" action="/words-begin/{{ gameId }}">
+            <h2>{{ minigameName }}</h2>
+            <form method="post" action="{{ beginRoute }}">
                 <button type="submit" class="btn-start">Start</button>
             </form>
         </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Safe from Maths Mini-Game</title>
+    <title>You're Safe</title>
 
     {% if theme == "spooky" %}
     <style>
@@ -17,16 +17,6 @@
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
-        }
-
-        .navbar a {
-            color: black;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .navbar a:hover {
-            text-decoration: underline;
         }
 
         .container {
@@ -84,16 +74,6 @@
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .navbar a:hover {
-            text-decoration: underline;
         }
 
         .container {
@@ -156,14 +136,17 @@
     </div>
 
     <script>
-        let timeLeft = 5;
-        const countdown = setInterval(() => {
-            timeLeft--;
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
-                window.location.href = "/minigame-question/{{ gameId }}";
-            }
-        }, 1000);
+        const pollRedirect = setInterval(() => {
+            fetch("/minigame-redirect/{{ gameId }}")
+                .then(r => r.json())
+                .then(data => {
+                    if (data.redirect !== null) {
+                        clearInterval(pollRedirect);
+                        window.location.href = data.redirect;
+                    }
+                })
+                .catch(err => console.log("Poll error: " + err));
+        }, 500);
     </script>
 </body>
 </html>

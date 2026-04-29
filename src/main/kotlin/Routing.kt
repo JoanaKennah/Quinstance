@@ -1224,12 +1224,12 @@ fun Application.configureRouting() {
 
                             gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/minigame-start/$gameId\"}")) }
 
-                            call.respond(PebbleContent("mini_game_maths_server.peb", mapOf(
+                            call.respond(PebbleContent("minigame_server_intro.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
                                 "gameId" to gameId,
                                 "theme" to session.theme,
-                                "left_users" to gameSession.lastIncorrectPlayers.take(3),
-                                "right_users" to gameSession.lastIncorrectPlayers.drop(3)
+                                "minigameName" to "Maths",
+                                "beginRoute" to "/maths-begin/$gameId"
                             )))
                         }
 
@@ -1238,18 +1238,12 @@ fun Application.configureRouting() {
 
                             gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/potions-start/$gameId\"}")) }
 
-                            call.respond(PebbleContent("potions_minigame_server.peb", mapOf(
+                            call.respond(PebbleContent("minigame_server_intro.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
                                 "gameId" to gameId,
                                 "theme" to session.theme,
-                                "isReveal" to false,
-                                "ghostTrophy" to 0,
-                                "col1_users" to emptyList<String>(),
-                                "col2_users" to emptyList<String>(),
-                                "col3_users" to emptyList<String>(),
-                                "isGhostCol1" to false,
-                                "isGhostCol2" to false,
-                                "isGhostCol3" to false
+                                "minigameName" to "Potions",
+                                "beginRoute" to "/potions-begin/$gameId"
                             )))
                         }
 
@@ -1258,10 +1252,12 @@ fun Application.configureRouting() {
 
                             gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/rooms-start/$gameId\"}")) }
 
-                            call.respond(PebbleContent("rooms_minigame_server_playing.peb", mapOf(
+                            call.respond(PebbleContent("minigame_server_intro.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
                                 "gameId" to gameId,
-                                "theme" to session.theme
+                                "theme" to session.theme,
+                                "minigameName" to "Rooms",
+                                "beginRoute" to "/rooms-begin/$gameId"
                             )))
                         }
 
@@ -1272,11 +1268,12 @@ fun Application.configureRouting() {
                                 connection.send(Frame.Text("{\"redirect\":\"/words-start/$gameId\"}"))
                             }
 
-                            call.respond(PebbleContent("words_minigame_server_playing.peb", mapOf(
+                            call.respond(PebbleContent("minigame_server_intro.peb", mapOf(
                                 "quizName" to quiz.quiz_name,
                                 "gameId" to gameId,
                                 "theme" to session.theme,
-                                "grid" to gameSession.wordsGameState!!.grid
+                                "minigameName" to "Words",
+                                "beginRoute" to "/words-begin/$gameId"
                             )))
                         }
 
@@ -1464,6 +1461,26 @@ fun Application.configureRouting() {
             call.respondRedirect(returnUrl)
         }
 
+        //Maths Minigame
+        //serves start screens to clients and host when host presses start
+        post("/maths-begin/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
+            val gameSession = activeSessions[gameId] ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+
+            gameSession.connections.forEach { connection ->
+                connection.send(Frame.Text("{\"redirect\":\"/minigame-question/$gameId\"}"))
+            }
+
+            call.respond(PebbleContent("mini_game_maths_server.peb", mapOf(
+                "quizName" to (retrieveQuizFromGameID(gameId)?.quiz_name ?: ""),
+                "gameId" to gameId,
+                "theme" to session.theme,
+                "left_users" to gameSession.lastIncorrectPlayers.take(3),
+                "right_users" to gameSession.lastIncorrectPlayers.drop(3)
+            )))
+        }
+
         //sends clients to uh-oh or safe screen, split by dangerPlayers
         get("/minigame-start/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
@@ -1481,7 +1498,7 @@ fun Application.configureRouting() {
                     "theme" to session.theme
                 )))
             } else {
-                call.respond(PebbleContent("mini_game_safe_from_maths.peb", mapOf(
+                call.respond(PebbleContent("minigame_client_safe_wait.peb", mapOf(
                     "gameId" to gameId,
                     "score" to userScore,
                     "theme" to session.theme
@@ -1733,6 +1750,32 @@ fun Application.configureRouting() {
             }
         }
 
+        //Potions Minigame - 
+        //serves start screens to clients and host when host presses start
+        post("/potions-begin/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
+            val gameSession = activeSessions[gameId] ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+
+            gameSession.connections.forEach { connection ->
+                connection.send(Frame.Text("{\"redirect\":\"/potions-pick/$gameId\"}"))
+            }
+
+            call.respond(PebbleContent("potions_minigame_server.peb", mapOf(
+                "quizName" to (retrieveQuizFromGameID(gameId)?.quiz_name ?: ""),
+                "gameId" to gameId,
+                "theme" to session.theme,
+                "isReveal" to false,
+                "ghostTrophy" to 0,
+                "col1_users" to emptyList<String>(),
+                "col2_users" to emptyList<String>(),
+                "col3_users" to emptyList<String>(),
+                "isGhostCol1" to false,
+                "isGhostCol2" to false,
+                "isGhostCol3" to false
+            )))
+        }
+
         //sends clients to potions pick or safe screen
         get("/potions-start/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
@@ -1904,6 +1947,24 @@ fun Application.configureRouting() {
                     "isExistingGhost" to isExistingGhost
                 )))
             }
+        }
+
+        //Rooms Minigame - 
+        //serves start screens to clients and host after host presses start
+        post("/rooms-begin/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
+            val gameSession = activeSessions[gameId] ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+
+            gameSession.connections.forEach { connection ->
+                connection.send(Frame.Text("{\"redirect\":\"/rooms-pick/$gameId\"}"))
+            }
+
+            call.respond(PebbleContent("rooms_minigame_server_playing.peb", mapOf(
+                "quizName" to (retrieveQuizFromGameID(gameId)?.quiz_name ?: ""),
+                "gameId" to gameId,
+                "theme" to session.theme
+            )))
         }
 
         get("/rooms-start/{gameId}") {
@@ -2175,6 +2236,25 @@ fun Application.configureRouting() {
             val kicked = gameSession?.kickedUsernames?.contains(session.username) ?: false
             call.respondText("{\"kicked\":$kicked}", ContentType.Application.Json)
         }
+        //Words minigame -
+        //serves start screens to clients and host
+        post("/words-begin/{gameId}") {
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
+            val gameSession = activeSessions[gameId] ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+            val wordsState = gameSession.wordsGameState ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No minigame active")))
+
+            gameSession.connections.forEach { connection ->
+                connection.send(Frame.Text("{\"redirect\":\"/words-start/$gameId\"}"))
+            }
+
+            call.respond(PebbleContent("words_minigame_server_playing.peb", mapOf(
+                "quizName" to (retrieveQuizFromGameID(gameId)?.quiz_name ?: ""),
+                "gameId" to gameId,
+                "theme" to session.theme,
+                "grid" to wordsState.grid
+            )))
+        }
 
         //serves all clients pick screen - safe players play along
         get("/words-start/{gameId}") {
@@ -2401,6 +2481,22 @@ fun Application.configureRouting() {
                     "isExistingGhost" to isExistingGhost
                 )))
             }
+        }
+
+        //polling endpoint - redirects when a minigame is active
+        get("/minigame-redirect/{gameId}") {
+            val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("{\"redirect\":null}", ContentType.Application.Json)
+            val session = activeSessions[gameId]
+
+            val redirect = when {
+                session?.mathsGameState != null -> "/minigame-question/$gameId"
+                session?.potionsGameState != null -> "/potions-pick/$gameId"
+                session?.roomsGameState != null -> "/rooms-pick/$gameId"
+                session?.wordsGameState != null -> "/words-start/$gameId"
+                else -> null
+            }
+
+            call.respondText("{\"redirect\":${if (redirect != null) "\"$redirect\"" else "null"}}", ContentType.Application.Json)
         }
     }
 }

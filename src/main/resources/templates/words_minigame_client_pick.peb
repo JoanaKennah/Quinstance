@@ -257,18 +257,31 @@
         </div>
     </div>
 
+   
     <script>
-        let timeLeft = 30;
+        const GAME_DURATION = 30;
+
+        if (!sessionStorage.getItem("wordsStartTime_{{ gameId }}")) {
+            sessionStorage.setItem("wordsStartTime_{{ gameId }}", Date.now().toString());
+        }
+
+        const startTime = parseInt(sessionStorage.getItem("wordsStartTime_{{ gameId }}"));
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        let timeLeft = Math.max(0, GAME_DURATION - elapsedTime);
+
         const timerDisplay = document.getElementById("timer");
+        timerDisplay.textContent = timeLeft;
 
         const countdown = setInterval(() => {
             timeLeft--;
             timerDisplay.textContent = timeLeft;
             if (timeLeft <= 0) {
                 clearInterval(countdown);
+                sessionStorage.removeItem("wordsStartTime_{{ gameId }}");
                 document.getElementById("word-form").submit();
             }
         }, 1000);
     </script>
+   
 </body>
 </html>
