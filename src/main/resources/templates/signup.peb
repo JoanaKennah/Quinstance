@@ -110,15 +110,39 @@
     </style>
 
     <script>
-        function checkPasswords() {
-            console.log("hi")
+        function validateForm() {
+            var firstName = document.getElementsByName("firstname")[0].value;
+            var lastName = document.getElementsByName("lastname")[0].value;
+            var email = document.getElementsByName("email")[0].value;
+            var username = document.getElementsByName("username")[0].value;
             var userPass = document.getElementById("password").value;
             var confirmedPass = document.getElementById("confirmedPassword").value;
 
-            if (userPass != confirmedPass) {
-                alert("Passwords must be equal");
+            if (userPass !== confirmedPass) {
+                alert("Passwords must match.");
                 return false;
             }
+
+            if (username.length > 50) {
+                alert("Username must be 50 characters or less.");
+                return false;
+            }
+
+            if (password.length > 255) {
+                alert("Password must be 255 characters or less.");
+                return false;
+            }
+
+            if ((firstName + lastName).length > 50) {
+                alert("First name and last name combined must be 50 characters or less.");
+                return false;
+            }
+
+            if (email.length > 50) {
+                alert("Email must be 50 characters or less.");
+                return false;
+            }
+
             return true;
         }
     </script>
@@ -132,7 +156,7 @@
 
 <h1>Join Us!</h1>
 
-<form method="post" action="/signup" onsubmit="return checkPasswords()">
+<form method="post" action="/signup" onsubmit="return validateForm()">
 
     <div class="row">
         <div class="field">
