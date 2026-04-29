@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Maths Result</title>
+    <!-- graphics from svgrepo -->
     {% if theme == "spooky" %}
     <style>
         body {
