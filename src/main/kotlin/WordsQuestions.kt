@@ -5,6 +5,7 @@ data class WordsGameState(
     val playerWords: MutableMap<String, String> = mutableMapOf(),
     val validatedWords: MutableMap<String, String> = mutableMapOf(),
     var ghostPlayers: List<String> = emptyList(),
+    var isStarted: Boolean = false,
     var isFinished: Boolean = false
 )
 

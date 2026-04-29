@@ -32,7 +32,7 @@ data class QuestionData(
 @Serializable
 data class SentAnswerData(
     val username: String,
-    val chosenAnswer: String, // actual text as the questions are jumbled up
+    val chosenAnswer: String,
     val timeRemaining: Int
 )
 
@@ -41,7 +41,7 @@ data class GameSession(
     val hostUsername: String,
     val questions: List<Question>,
     var currentQuestionIndex: Int = 0,
-    var isAdvanced: Boolean = false,                //flag for advancing question
+    var isAdvanced: Boolean = false,
     var isStarted: Boolean = false,
     var isFinished: Boolean = false,
     val timeLimit: Int = 30,
@@ -75,66 +75,76 @@ fun Application.configureSockets() {
     }
     println("Server socket configured")
 
-    //routing for sockets - added here to keep wesockets code in the same place
     routing {
-    webSocket("/game/{gameId}") {
-        val gameId = call.parameters["gameId"]?.toIntOrNull()              //read gameId from URL
+        webSocket("/game/{gameId}") {
+            val gameId = call.parameters["gameId"]?.toIntOrNull()
 
-        println("WebSocket connection attempt for gameId: $gameId")
-        println("Active sessions: ${activeSessions.keys}")
+            println("WebSocket connection attempt for gameId: $gameId")
+            println("Active sessions: ${activeSessions.keys}")
 
-        if (gameId == null) {
-            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid Game Id"))
-            return@webSocket
-        }
+            if (gameId == null) {
+                close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid Game Id"))
+                return@webSocket
+            }
 
-        //Fetch active session for game
-        val session = activeSessions[gameId]
-        if (session == null) {
-            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Game Not Found"))
-            return@webSocket
-        }
+            val session = activeSessions[gameId]
+            if (session == null) {
+                close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Game Not Found"))
+                return@webSocket
+            }
 
-        //set connection per player
-        session.connections.add(this)
-        println("Player Connected To Game $gameId, ${session.connections.size} players connected")
+            session.connections.add(this)
+            println("Player Connected To Game $gameId, ${session.connections.size} players connected")
 
-        //monitor for incoming messages from player
-        try {
-            for (frame in incoming) {
-                if (frame is Frame.Text) {
-                    val rawText = frame.readText()
-                    println("Raw frame recieved: $rawText")
-                    try {
-                        val answerData = Json.decodeFromString<SentAnswerData>(frame.readText())
-                        UserAnswers.addAnswer(answerData)
-                        println("Answer recieved from ${answerData.username}: ${answerData.chosenAnswer}")
-                    } catch (e: Exception) {
-                        println("Could not deserialise answer: ${e.message}")
-                    }
+            //immediately send current question to newly connected client
+            //prevents mismatch where client connects after broadcastQuestion sends
+            if (session.isStarted) {
+                val question = session.questions[session.currentQuestionIndex]
+                val answers = retrieveQuestionAnswer(question)
+                if (answers != null) {
+                    val answerList = listOf(answers.correct_answer, answers.option2, answers.option3, answers.option4)
+                        .filterNotNull().shuffled()
+                    val questionData = QuestionData(
+                        questionNumber = session.currentQuestionIndex + 1,
+                        questionText = question.question,
+                        answerOne = answerList[0],
+                        answerTwo = answerList[1],
+                        answerThree = answerList.getOrNull(2),
+                        answerFour = answerList.getOrNull(3)
+                    )
+                    sendSerialized(questionData)
                 }
             }
-        } finally {
-            //remove connection when player disconnects
-            session.connections.remove(this)
-            println("Player Disconnected From Game $gameId, ${session.connections.size} players remaining")
-        }
 
+            try {
+                for (frame in incoming) {
+                    if (frame is Frame.Text) {
+                        val rawText = frame.readText()
+                        println("Raw frame recieved: $rawText")
+                        try {
+                            val answerData = Json.decodeFromString<SentAnswerData>(frame.readText())
+                            UserAnswers.addAnswer(answerData)
+                            println("Answer recieved from ${answerData.username}: ${answerData.chosenAnswer}")
+                        } catch (e: Exception) {
+                            println("Could not deserialise answer: ${e.message}")
+                        }
+                    }
+                }
+            } finally {
+                session.connections.remove(this)
+                println("Player Disconnected From Game $gameId, ${session.connections.size} players remaining")
+            }
+        }
     }
 }
-}
-
-
 
 suspend fun broadcastQuestion(session: GameSession) {
     val question = session.questions[session.currentQuestionIndex]
-    val answers = retrieveQuestionAnswer(question) ?: return 
+    val answers = retrieveQuestionAnswer(question) ?: return
 
-    //builds list of answers & shuffles
-    val answerList = listOf(answers.correct_answer, answers.option2, answers.option3, answers.option4).filterNotNull().shuffled()
+    val answerList = listOf(answers.correct_answer, answers.option2, answers.option3, answers.option4)
+        .filterNotNull().shuffled()
 
-
-    
     val questionData = QuestionData(
         questionNumber = session.currentQuestionIndex + 1,
         questionText = question.question,
@@ -143,8 +153,5 @@ suspend fun broadcastQuestion(session: GameSession) {
         answerThree = answerList.getOrNull(2),
         answerFour = answerList.getOrNull(3)
     )
-    //sends to each player connected concurrrently
     session.connections.forEach { connection -> connection.sendSerialized(questionData) }
-
 }
-
