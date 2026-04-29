@@ -209,6 +209,31 @@
             btn.classList.toggle("selected");
             const input = document.getElementById(game + "-input");
             input.disabled = !btn.classList.contains("selected");
+            const selectedGames = document.querySelectorAll(".minigame-btn.selected");
+            const errorBox = document.getElementById("minigameError");
+
+            if (selectedGames.length > 0) {
+                errorBox.style.display = "none";
+            }
+        }
+
+        function validateForm(event) {
+            const toggle = document.getElementById("minigamesToggle");
+            const errorBox = document.getElementById("minigameError");
+
+            errorBox.style.display = "none";
+
+            if (toggle.checked) {
+                const selectedGames = document.querySelectorAll(".minigame-btn.selected");
+
+                if (selectedGames.length === 0) {
+                    errorBox.style.display = "block";
+                    event.preventDefault();
+                    return false;
+                }
+            }
+
+            return true;
         }
     </script>
 </head>
@@ -225,7 +250,7 @@
         <h1>Create a Lobby</h1>
     </div>
 
-    <form method="post" action="/create-lobby/{{ quizId }}">
+    <form method="post" action="/create-lobby/{{ quizId }}" onsubmit="validateForm(event)">
 
         <input type="hidden" id="timeLimit" name="timeLimit" value="30">
 
@@ -305,6 +330,18 @@
                     <input type="hidden" id="potions-input" name="activeMinigames" value="potions">
                     <input type="hidden" id="rooms-input" name="activeMinigames" value="rooms">
                     <input type="hidden" id="words-input" name="activeMinigames" value="words">
+
+                    <div id="minigameError" style="
+                            display: none;
+                            margin-top: 10px;
+                            padding: 10px;
+                            border: 1px solid #e63973;
+                            border-radius: 6px;
+                            background-color: #ffe6ee;
+                            color: #b3003c;
+                            font-size: 14px;">
+                            You need to select at least one minigame or turn minigames off to continue.
+                    </div>
                 </div>
 
             </div>
