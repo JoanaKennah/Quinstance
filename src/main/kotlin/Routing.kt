@@ -930,6 +930,7 @@ fun Application.configureRouting() {
             gameSession.wordsGameState = null
             gameSession.autoGhostedPlayer = null
             gameSession.minigameJustPlayed = false
+            gameSession.answeredPlayers.clear()
 
             if (gameSession.isAdvanced) {
                 return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Already advancing")))
