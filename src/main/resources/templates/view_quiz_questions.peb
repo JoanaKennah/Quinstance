@@ -276,10 +276,10 @@
     <div class="questions-container">
         {% if error == "none" %}
             {% for question in questions %}
-                <div class="question-box" onclick="window.location.href='/edit-question/{{ question.id }}'" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; flex-grow: 1;">
-                    <div style="flex-grow: 1;">
+                <div class="question-box" style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="/edit-question/{{ question.id }}" style="flex-grow: 1; text-decoration: none; color: black;">
                         {{ loop.index + 1 }}. {{ question.question }}
-                    </div>
+                    </a>
 
                     <form action="/delete-question/{{ question.id }}" method="post" style="margin: 0;">
                         <button
