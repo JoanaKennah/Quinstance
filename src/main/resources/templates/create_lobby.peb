@@ -226,16 +226,16 @@
                 <div id="minigameOptions" style="margin-top: 10px; display: {% if minigamesEnabled %}block{% else %}none{% endif %};">
                     <div style="font-size: 14px; color: black; margin-bottom: 8px;">Select minigames:</div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'maths')">Maths</button>
-                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'potions')">Potions</button>
-                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'rooms')">Rooms</button>
-                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'words')">Words</button>
+                        <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'maths')">Maths</button>
+                        <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'potions')">Potions</button>
+                        <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'rooms')">Rooms</button>
+                        <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'words')">Words</button>
                     </div>
 
-                    <input type="hidden" id="maths-input" name="activeMinigames" value="maths">
-                    <input type="hidden" id="potions-input" name="activeMinigames" value="potions">
-                    <input type="hidden" id="rooms-input" name="activeMinigames" value="rooms">
-                    <input type="hidden" id="words-input" name="activeMinigames" value="words">
+                    <input type="hidden" id="maths-input" name="activeMinigames" value="maths" disabled>
+                    <input type="hidden" id="potions-input" name="activeMinigames" value="potions" disabled>
+                    <input type="hidden" id="rooms-input" name="activeMinigames" value="rooms" disabled>
+                    <input type="hidden" id="words-input" name="activeMinigames" value="words" disabled>
                 </div>
 
             </div>
