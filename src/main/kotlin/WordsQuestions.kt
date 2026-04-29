@@ -38,7 +38,7 @@ object WordsQuestions {
         repeat(2)  { add("Y") }
         repeat(1)  { add("Z") }
     }
-}
 
-//generate a list of 25 letters to populate grid
-fun generateGrid(): List<String> = letterPool.shuffled().take(25)
+    //generate a list of 25 letters to populate grid
+    fun generateGrid(): List<String> = letterPool.shuffled().take(25)
+}
