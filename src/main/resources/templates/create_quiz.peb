@@ -120,16 +120,16 @@
     <div class="container">
 
         <div class="left">
-            <label>Quiz Name:</label>
-            <input type="text" name="quizName" required>
+            <label for="quizName">Quiz Name:</label>
+            <input type="text" id="quizName" name="quizName" required>
 
-            <label>Description:</label>
-            <textarea name="description" required></textarea>
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required></textarea>
         </div>
 
         <div class="right">
-            <label>Key Stage:</label>
-            <select name="keystage" required>
+            <label for="keyStage">Key Stage:</label>
+            <select id="keyStage" name="keystage" required>
                 <option value="">Select...</option>
                 <option value="KS1">KS1</option>
                 <option value="KS2">KS2</option>
@@ -140,8 +140,8 @@
                 <optin value ="nonapplicable">N/A</option>
             </select>
 
-            <label>Category:</label>
-            <select name="category" required>
+            <label for="category">Category:</label>
+            <select id="category" name="category" required>
                 <option value="">Select...</option>
                 <option value="art">Art and Design</option>
                 <option value="biology">Biology</option>

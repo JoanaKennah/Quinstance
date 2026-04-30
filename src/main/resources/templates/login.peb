@@ -102,15 +102,15 @@
 <a href="/home">Home</a>
 </div>
 
-<h1>Welcome Back!<h1>
+<h1>Welcome Back!</h1>
 
 <form method="post" action="/login">
 
-    <label>Username:</label>
-    <input type="text" name="username" required>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required>
 
-    <label>Password:</label>
-    <input type="password" name="password" required>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
 
     <div class="forgot">
         <a href="/forgot-password">Forgot Password?</a>
