@@ -798,6 +798,17 @@ fun Application.configureRouting() {
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
 
             val gameSession = activeSessions[game.id.value]
+
+            //block host from joining own game
+            if (gameSession != null && session.username == gameSession.hostUsername) {
+                call.respond(PebbleContent("join_lobby.peb", mapOf(
+                    "returnURL" to returnURL,
+                    "roomCode" to roomCode,
+                    "errorMessage" to "You cannot join your own game!"
+                )))
+                return@post
+            }
+
             val theme = gameSession?.theme ?: "default"
             call.sessions.set(session.copy(theme = theme))
 
@@ -930,6 +941,7 @@ fun Application.configureRouting() {
             gameSession.wordsGameState = null
             gameSession.autoGhostedPlayer = null
             gameSession.minigameJustPlayed = false
+            gameSession.answeredPlayers.clear()
 
             if (gameSession.isAdvanced) {
                 return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Already advancing")))
