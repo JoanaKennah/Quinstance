@@ -86,15 +86,19 @@
             flex-grow: 1;
         }
 
-        .answer-box input[type="checkbox"] {
+        .answer-box input[type="radio"] {
             margin-left: 10px;
         }
 
         .remove-btn {
             margin-right: 10px;
+            background: none;
+            border: none;
             cursor: pointer;
             color: #e63973;
             font-weight: bold;
+            font-size: 16px;
+            padding: 0;
         }
 
         .bottom-bar {
@@ -126,16 +130,21 @@
             background-color: #d6285f;
         }
 
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
     </style>
 
     <script>
-        function onlyOneCheckbox(clicked) {
-            const checkboxes = document.getElementsByName("correct");
-            checkboxes.forEach(cb => {
-                if (cb !== clicked) cb.checked = false;
-            });
-        }
-
         let answerCount = 4;
 
         function removeAnswer(id) {
@@ -167,7 +176,7 @@
             div.innerHTML = `
                 <span class="remove-btn" onclick="removeAnswer('a${newIndex}')">x</span>
                 <input type="text" name="answers[]" placeholder="Answer ${newIndex}">
-                <input type="checkbox" name="correct" value="${newIndex - 1}" onclick="onlyOneCheckbox(this)">
+                <input type="radio" name="correct" value="${newIndex - 1}">
             `;
             col.appendChild(div);
         }
@@ -226,38 +235,53 @@
     <form method="post" action="/add-question/{{ quizId }}" onsubmit="return validateForm()"> <!--- NEED TO CHECK AFTER ROUTING --->
 
         <div class="question-row">
-            <label>Question:</label>
+            <label for="question">Question:</label>
             <input type="text" id="question" value='{{ previousQuestionText }}' name="question" class="question-input" required>
         </div>
 
         <div class="answers">
-
             <div class="column">
                 <div class="answer-box" id="a1">
-                    <input type="text" value='{{ previousCorrectAnswer }}' name="answers[]" placeholder="Answer 1">
-                    {% if isEdit %}
-                        <input type="checkbox" name="correct" value="0" onclick="onlyOneCheckbox(this)" checked>
-                    {% else %}
-                        <input type="checkbox" name="correct" value="0" onclick="onlyOneCheckbox(this)">
-                    {% endif %}
+                    <label for="answer1" class="visually-hidden">Answer 1</label>
+                    <input type="text" id="answer1" value='{{ previousCorrectAnswer }}' name="answers[]" placeholder="Answer 1">
+
+                    <input type="radio" id="correct1" name="correct" value="0"
+                        {% if isEdit %}checked{% endif %}>
+                    <label for="correct1" class="visually-hidden">Mark Answer 1 as correct</label>
                 </div>
+
                 <div class="answer-box" id="a3">
-                    <span class="remove-btn" onclick="removeAnswer('a3')">x</span>
-                    <input type="text" value='{{ previousOption3 }}' name="answers[]" placeholder="Answer 3">
-                    <input type="checkbox" name="correct" value="2" onclick="onlyOneCheckbox(this)">
+                    <button type="button" class="remove-btn" onclick="removeAnswer('a3')">x</button>
+
+                    <label for="answer3" class="visually-hidden">Answer 3</label>
+                    <input type="text" id="answer3" value='{{ previousOption3 }}' name="answers[]" placeholder="Answer 3">
+
+                    <input type="radio" id="correct3" name="correct" value="2">
+                    <label for="correct3" class="visually-hidden">Mark Answer 3 as correct</label>
                 </div>
+
             </div>
 
             <div class="column">
+
                 <div class="answer-box" id="a2">
-                    <input type="text" value='{{ previousOption2 }}' name="answers[]" placeholder="Answer 2">
-                    <input type="checkbox" name="correct" value="1" onclick="onlyOneCheckbox(this)">
+                    <label for="answer2" class="visually-hidden">Answer 2</label>
+                    <input type="text" id="answer2" value='{{ previousOption2 }}' name="answers[]" placeholder="Answer 2">
+
+                    <input type="radio" id="correct2" name="correct" value="1">
+                    <label for="correct2" class="visually-hidden">Mark Answer 2 as correct</label>
                 </div>
+
                 <div class="answer-box" id="a4">
-                    <span class="remove-btn" onclick="removeAnswer('a4')">x</span>
-                    <input type="text" value='{{ previousOption4 }}' name="answers[]" placeholder="Answer 4">
-                    <input type="checkbox" name="correct" value="3" onclick="onlyOneCheckbox(this)">
+                    <button type="button" class="remove-btn" onclick="removeAnswer('a4')">x</button>
+
+                    <label for="answer4" class="visually-hidden">Answer 4</label>
+                    <input type="text" id="answer4" value='{{ previousOption4 }}' name="answers[]" placeholder="Answer 4">
+
+                    <input type="radio" id="correct4" name="correct" value="3">
+                    <label for="correct4" class="visually-hidden">Mark Answer 4 as correct</label>
                 </div>
+
             </div>
 
         </div>
@@ -267,7 +291,7 @@
         </div>
 
         {% if isEdit %}
-            <input type="hidden" name="isEdit" value=true>
+            <input type="hidden" name="isEdit" value="true">
             <input type="hidden" name="questionId" value={{ questionId }}>
         {% endif %}
 

@@ -59,11 +59,6 @@
             height: 100px;
         }
 
-        .mini-games {
-            margin-top: 20px;
-            font-size: 14px;
-        }
-
         .games-options {
             display: none;
             margin-top: 10px;
@@ -99,46 +94,6 @@
             background-color: #d6285f;
         }
       
-        .tooltip {
-            display: inline-block;
-            position: relative;
-            margin-left: 8px;
-            cursor: pointer;
-        }
-
-        .tooltip-icon {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            background-color: #e63973;
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            font-size: 12px;
-            line-height: 16px;
-            font-weight: bold;
-        }
-
-        .tooltip-text {
-            visibility: hidden;
-            width: 180px;
-            background-color: #333;
-            color: #fff;
-            text-align: left;
-            padding: 6px;
-            border-radius: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%; 
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-        }
-
-        .tooltip:hover .tooltip-text {
-            visibility: visible;
-        }
-      
     </style>
 
     <script>
@@ -166,16 +121,16 @@
     <div class="container">
 
         <div class="left">
-            <label>Quiz Name:</label>
-            <input type="text" name="quizName" required>
+            <label for="quizName">Quiz Name:</label>
+            <input type="text" id="quizName" name="quizName" required>
 
-            <label>Description:</label>
-            <textarea name="description" required></textarea>
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required></textarea>
         </div>
 
         <div class="right">
-            <label>Key Stage:</label>
-            <select name="keystage" required>
+            <label for="keyStage">Key Stage:</label>
+            <select id="keyStage" name="keystage" required>
                 <option value="">Select...</option>
                 <option value="KS1">KS1</option>
                 <option value="KS2">KS2</option>
@@ -186,8 +141,8 @@
                 <optin value ="nonapplicable">N/A</option>
             </select>
 
-            <label>Category:</label>
-            <select name="category" required>
+            <label for="category">Category:</label>
+            <select id="category" name="category" required>
                 <option value="">Select...</option>
                 <option value="art">Art and Design</option>
                 <option value="biology">Biology</option>
@@ -215,37 +170,6 @@
             </select>
         </div>
 
-    </div>
-
-    <div class="mini-games">
-        <label>Mini Games?</label>
-        <input type="checkbox" id="miniGamesToggle" name="miniGames" onchange="toggleMiniGames()">
-        Yes
-    </div>
-
-    <div id="gamesOptions" class="games-options">
-
-    <input type="radio" name="gameType" value="murder_party">
-    Murder Party
-
-    <span class="tooltip">
-        <span class="tooltip-icon">?</span>
-        <span class="tooltip-text">
-            People who answer incorrectly go into a head-to-head to see who will remain in the game.
-        </span>
-    </span>
-
-    <br>
-
-    <input type="radio" name="gameType" value="gold_quest">
-    Gold Quest
-
-    <span class="tooltip">
-        <span class="tooltip-icon">?</span>
-        <span class="tooltip-text">
-            Players can answer questions to collect/lose gold to see who will come out with the most.
-        </span>
-    </span>
     </div>
 
     <div class="bottom-bar">

@@ -233,8 +233,10 @@
 
         function toggleMinigame(btn, game) {
             btn.classList.toggle("selected");
+            const isSelected = btn.classList.contains("selected");
             const input = document.getElementById(game + "-input");
             input.disabled = !btn.classList.contains("selected");
+            btn.setAttribute("aria-pressed", isSelected);
         }
     </script>
 </head>
@@ -262,7 +264,7 @@
             </div>
 
             <div style="margin-top: 20px; font-size: 16px;">
-                Mini Games:
+                <label for="minigamesToggle">Mini Games:</label>
                 <input type="checkbox"
                     id="minigamesToggle"
                     name="minigames"
@@ -277,15 +279,19 @@
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button type="button"
                         class="minigame-btn {% if mathsEnabled %}selected{% endif %}"
+                        aria-pressed="{% if mathsEnabled %}true{% else %}false{% endif %}"
                         onclick="toggleMinigame(this, 'maths')">Maths</button>
                     <button type="button"
                         class="minigame-btn {% if potionsEnabled %}selected{% endif %}"
+                        aria-pressed="{% if potionsEnabled %}true{% else %}false{% endif %}"
                         onclick="toggleMinigame(this, 'potions')">Potions</button>
                     <button type="button"
                         class="minigame-btn {% if roomsEnabled %}selected{% endif %}"
+                        aria-pressed="{% if roomsEnabled %}true{% else %}false{% endif %}"
                         onclick="toggleMinigame(this, 'rooms')">Rooms</button>
                     <button type="button"
                         class="minigame-btn {% if wordsEnabled %}selected{% endif %}"
+                        aria-pressed="{% if wordsEnabled %}true{% else %}false{% endif %}"
                         onclick="toggleMinigame(this, 'words')">Words</button>
                 </div>
 

@@ -123,7 +123,7 @@
             cursor: pointer;
         }
 
-        .btn-start:hover {
+        .btn-start:hover, .btn-start:focus {
             background-color: #e63973;
             color: white;
         }
@@ -137,7 +137,7 @@
             padding: 0;
         }
 
-        .logout-btn:hover {
+        .logout-btn:hover, .logout-btn:focus {
             text-decoration: underline;
         }
     </style>

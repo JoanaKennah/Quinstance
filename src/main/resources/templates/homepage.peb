@@ -193,7 +193,7 @@
 
         <!-- What is this? -->
         <div class="block-left">
-            <p class="section-title">What is this?</p>
+            <h2 class="section-title">What is this?</h2>
             <div class="content-box">
                 <!-- TODO: Add a short description of the website here -->
             </div>
@@ -201,7 +201,7 @@
 
         <!-- What do we offer? -->
         <div class="block-right">
-            <p class="section-title">What do we offer?</p>
+            <h2 class="section-title">What do we offer?</h2>
             <div class="content-box">
                 <!-- TODO: Add a description of your features/offerings here -->
             </div>

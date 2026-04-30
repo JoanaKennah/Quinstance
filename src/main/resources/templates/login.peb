@@ -34,7 +34,7 @@
         }
 
         label {
-            color: #a2d192;
+            color: #20882E;
             font-weight: bold;
             display: block;
             margin-top: 20px;
@@ -103,18 +103,18 @@
 <a href="/home">Home</a>
 </div>
 
-<h1>Welcome Back!<h1>
+<h1>Welcome Back!</h1>
 
 <form method="post" action="/login">
 
-    <label>Username:</label>
-    <input type="text" name="username" required>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required>
 
-    <label>Password:</label>
-    <input type="password" name="password" required>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
 
     <div class="forgot">
-        <a href="#">Forgot Password?</a>
+        <a href="/forgot-password">Forgot Password?</a>
     </div>
 
     <button type="submit">Enter</button>

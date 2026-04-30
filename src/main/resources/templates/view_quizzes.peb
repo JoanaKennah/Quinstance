@@ -97,9 +97,9 @@
         <div class="quiz-container">
             {% for quiz in quizzes %}
                 <div class="quiz-box" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div onclick="window.location.href='/view-quiz/{{ quiz.id }}'" style="cursor: pointer; flex-grow: 1;">
+                    <a href="/view-quiz/{{ quiz.id }}" style="flex-grow: 1"; text-decoration: none; color: black;">
                         {{ loop.index + 1 }}. {{ quiz.quiz_name }}
-                    </div>
+                    </a>
 
                     <form action="/delete-quiz/{{ quiz.id }}" method="post" style="margin: 0;">
                         <button

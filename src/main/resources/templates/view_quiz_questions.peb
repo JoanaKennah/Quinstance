@@ -41,10 +41,10 @@
 
         .csv-container {
             display: flex;
+            flex-direction: column;
             align-items: center;
             gap: 10px;
             margin: 20px 0;
-            flex-wrap: wrap;
         }
 
         .csv-text {
@@ -52,6 +52,7 @@
             font-size: 18px;
             margin: 0;
             white-space: nowrap;
+            text-align: center;
         }
 
         .csv-form {
@@ -60,11 +61,31 @@
             gap: 10px;
         }
 
+        .csv-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         .button-bar {
             margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
+        }
+
+        .left {
+            justify-self: start;
+        }
+
+        .centre {
+            justify-self: center;
+        }
+
+        .right {
+            justify-self: end;
         }
 
         .add-btn {
@@ -73,6 +94,7 @@
             padding: 10px 15px;
             text-decoration: none;
             border-radius: 5px;
+            white-space: nowrap;
         }
       
         .add-btn:hover {
@@ -126,13 +148,17 @@
         }
 
         .btn-download {
-            padding: 5px 20px;
+            padding: 10px 20px;
             background-color: white;
             color: black;
             border: 2px solid #e63973;
             cursor: pointer;
             border-radius: 5px;
-            height: 40px;
+            font-size: 15px;
+            font-family: Arial, sans-serif;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn:hover, .btn-download:hover {
@@ -203,34 +229,42 @@
 
     <div class="button-bar">
 
-        <a class="add-btn" href="/add-question/{{ quizId }}">
-            + Add a Question
-        </a>
-
-        <div class="csv-container">
-            <b class="csv-text">Already have some questions? Submit a .csv file:</b>
-
-            <button class="btn-download" onclick="window.location.href='/questionTemplate'">Template</button>
-
-            <form method="post"
-                  action="/view-quiz-questions/{{ quizId }}"
-                  enctype="multipart/form-data"
-                  class = "csv.form"
-                  onsubmit={% if questions is not empty %}"return deleteQuestions()"{% endif %}>
-                <input type="file" id="fileInput" name="filename" style="display:none;">
-                <button type="button" class="btn-download" onclick="document.getElementById('fileInput').click();">Choose File</button>
-                <input type="hidden" name="quizId" value={{ quizId }}>
-                <input type="hidden" name="resetQuestions" id="csvChoice">
-                <button class="btn" type="submit">Submit</button>
-            </form>
+        <div class="left">
+            <a class="add-btn" href="/add-question/{{ quizId }}">
+                + Add a Question
+            </a>
         </div>
 
-        <form method="post" action="/quiz-created/{{ quizId }}" onsubmit="return validateForm()">
-            <button class="next-btn" type="submit"
-                {% if questions is empty %}disabled{% endif %}>
-                Next
-            </button>
-        </form>
+        <div class="centre">
+            <div class="csv-container">
+                <b class="csv-text">Already have some questions? Submit a .csv file:</b>
+
+                <div class="csv-actions">
+                    <button class="btn-download" onclick="window.location.href='/questionTemplate'">Template</button>
+
+                    <form method="post"
+                        action="/view-quiz-questions/{{ quizId }}"
+                        enctype="multipart/form-data"
+                        class = "csv-form"
+                        onsubmit={% if questions is not empty %}"return deleteQuestions()"{% endif %}>
+                        <label for="fileInput" class="btn-download" style="cursor:pointer;">Choose File</label>
+                        <input type="file" id="fileInput" name="filename" style="display:none;">
+                        <input type="hidden" name="quizId" value={{ quizId }}>
+                        <input type="hidden" name="resetQuestions" id="csvChoice">
+                        <button class="btn" type="submit">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="right">
+            <form method="post" action="/quiz-created/{{ quizId }}" onsubmit="return validateForm()">
+                <button class="next-btn" type="submit"
+                    {% if questions is empty %}disabled{% endif %}>
+                    Next
+                </button>
+            </form>
+        </div>
 
     </div>
 
@@ -247,10 +281,10 @@
     <div class="questions-container">
         {% if error == "none" %}
             {% for question in questions %}
-                <div class="question-box" onclick="window.location.href='/edit-question/{{ question.id }}'" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; flex-grow: 1;">
-                    <div style="flex-grow: 1;">
+                <div class="question-box" style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="/edit-question/{{ question.id }}" style="flex-grow: 1; text-decoration: none; color: black;">
                         {{ loop.index + 1 }}. {{ question.question }}
-                    </div>
+                    </a>
 
                     <form action="/delete-question/{{ question.id }}" method="post" style="margin: 0;">
                         <button
