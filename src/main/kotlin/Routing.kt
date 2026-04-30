@@ -1,3 +1,7 @@
+/* 
+//Legacy file - code is now all refactored into modular Routing files
+
+
 package com.example
 
 import com.example.database.tables.*
@@ -2633,3 +2637,5 @@ fun Application.configureRouting() {
 
     }
 }
+
+*/
