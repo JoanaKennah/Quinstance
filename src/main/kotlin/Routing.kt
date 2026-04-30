@@ -25,6 +25,7 @@ import com.example.database.objects.*
 import com.example.sendConfirmationEmail
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
+import io.ktor.server.http.content.resolveResource
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import java.io.File
 
@@ -34,6 +35,10 @@ private val httpClient = HttpClient(CIO)
 
 fun Application.configureRouting() {
     routing {
+
+        get("/favicon.ico") {
+            call.respond("/resources/favicon.ico")
+        }
 
         //serves homepage - default
         get("/") {
