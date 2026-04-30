@@ -6,6 +6,7 @@ import com.example.UserAnswers
 import io.ktor.serialization.kotlinx.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
 import io.ktor.server.websocket.*
 import io.ktor.server.websocket.receiveDeserialized
 import io.ktor.websocket.*
@@ -61,6 +62,7 @@ data class GameSession(
     var autoGhostedPlayer: String? = null,
     var kickedUsernames: MutableList<String> = mutableListOf(),
     var barredUsernames: MutableList<String> = mutableListOf(),
+    var answeredPlayers: MutableSet<String> = mutableSetOf(),
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet())
 )
 
@@ -97,23 +99,29 @@ fun Application.configureSockets() {
             session.connections.add(this)
             println("Player Connected To Game $gameId, ${session.connections.size} players connected")
 
-            //immediately send current question to newly connected client
-            //prevents mismatch where client connects after broadcastQuestion sends
+            //immediately send current question or redirect if already answered
+            //prevents sync issue where client connects after broadcastQuestion fires
             if (session.isStarted) {
-                val question = session.questions[session.currentQuestionIndex]
-                val answers = retrieveQuestionAnswer(question)
-                if (answers != null) {
-                    val answerList = listOf(answers.correct_answer, answers.option2, answers.option3, answers.option4)
-                        .filterNotNull().shuffled()
-                    val questionData = QuestionData(
-                        questionNumber = session.currentQuestionIndex + 1,
-                        questionText = question.question,
-                        answerOne = answerList[0],
-                        answerTwo = answerList[1],
-                        answerThree = answerList.getOrNull(2),
-                        answerFour = answerList.getOrNull(3)
-                    )
-                    sendSerialized(questionData)
+                val username = call.sessions.get<UserSession>()?.username
+                if (username != null && username in session.answeredPlayers) {
+                    //player already answered this question - send to waiting screen
+                    send(Frame.Text("{\"redirect\":\"/selected-answer/$gameId?answer=\"}"))
+                } else {
+                    val question = session.questions[session.currentQuestionIndex]
+                    val answers = retrieveQuestionAnswer(question)
+                    if (answers != null) {
+                        val answerList = listOf(answers.correct_answer, answers.option2, answers.option3, answers.option4)
+                            .filterNotNull().shuffled()
+                        val questionData = QuestionData(
+                            questionNumber = session.currentQuestionIndex + 1,
+                            questionText = question.question,
+                            answerOne = answerList[0],
+                            answerTwo = answerList[1],
+                            answerThree = answerList.getOrNull(2),
+                            answerFour = answerList.getOrNull(3)
+                        )
+                        sendSerialized(questionData)
+                    }
                 }
             }
 
@@ -124,8 +132,14 @@ fun Application.configureSockets() {
                         println("Raw frame recieved: $rawText")
                         try {
                             val answerData = Json.decodeFromString<SentAnswerData>(frame.readText())
-                            UserAnswers.addAnswer(answerData)
-                            println("Answer recieved from ${answerData.username}: ${answerData.chosenAnswer}")
+                            //only process if player hasn't already answered current question
+                            if (answerData.username !in session.answeredPlayers) {
+                                session.answeredPlayers.add(answerData.username)
+                                UserAnswers.addAnswer(answerData)
+                                println("Answer recieved from ${answerData.username}: ${answerData.chosenAnswer}")
+                            } else {
+                                println("Duplicate answer ignored from ${answerData.username}")
+                            }
                         } catch (e: Exception) {
                             println("Could not deserialise answer: ${e.message}")
                         }

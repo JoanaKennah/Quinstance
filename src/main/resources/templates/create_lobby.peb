@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Create a Lobby</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         body {
@@ -307,34 +308,34 @@
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
 
                         <div class="info-container">
-                            <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'maths')">Maths</button>
+                            <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'maths')">Maths</button>
                             <div class="info-icon" tabindex="0">i</div>
                             <div class="tooltip">Solve quick maths problems in time pressure to avoid becoming a ghost.</div>
                         </div>
 
                         <div class="info-container">
-                            <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'potions')">Potions</button>
+                            <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'potions')">Potions</button>
                             <div class="info-icon" tabindex="0">i</div>
                             <div class="tooltip">Choose the correct potion to avoid becoming a ghost.</div>
                         </div>
 
                         <div class="info-container">
-                            <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'rooms')">Rooms</button>
+                            <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'rooms')">Rooms</button>
                             <div class="info-icon" tabindex="0">i</div>
                             <div class="tooltip">Choose the same door as everyone else or run the risk of becoming a ghost.</div>
                         </div>
 
                         <div class="info-container">
-                            <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'words')">Words</button>
+                            <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'words')">Words</button>
                             <div class="info-icon" tabindex="0">i</div>
                             <div class="tooltip">Create the longest word possible from the given letters to avoid becoming a ghost.</div>
                         </div>
                     </div>
 
-                    <input type="hidden" id="maths-input" name="activeMinigames" value="maths">
-                    <input type="hidden" id="potions-input" name="activeMinigames" value="potions">
-                    <input type="hidden" id="rooms-input" name="activeMinigames" value="rooms">
-                    <input type="hidden" id="words-input" name="activeMinigames" value="words">
+                    <input type="hidden" id="maths-input" name="activeMinigames" value="maths" disabled>
+                    <input type="hidden" id="potions-input" name="activeMinigames" value="potions" disabled>
+                    <input type="hidden" id="rooms-input" name="activeMinigames" value="rooms" disabled>
+                    <input type="hidden" id="words-input" name="activeMinigames" value="words" disabled>
 
                     <div id="minigameError" style="
                             display: none;
