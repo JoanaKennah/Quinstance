@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Create a Lobby</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         body {
@@ -139,6 +140,60 @@
             background-color: #e63973;
             color: white;
         }
+
+        .info-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #e63973;
+            color: white;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            width: 180px;
+            background-color: white;
+            color: black;
+            text-align: left;
+            border: 1px solid #e63973;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            transition: opacity 0.2s;
+            z-index: 1;
+        }
+
+        .info-icon:hover + .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+      
+        .tooltip:hover {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .info-icon:focus + .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 
     <script>
@@ -160,6 +215,31 @@
             btn.classList.toggle("selected");
             const input = document.getElementById(game + "-input");
             input.disabled = !btn.classList.contains("selected");
+            const selectedGames = document.querySelectorAll(".minigame-btn.selected");
+            const errorBox = document.getElementById("minigameError");
+
+            if (selectedGames.length > 0) {
+                errorBox.style.display = "none";
+            }
+        }
+
+        function validateForm(event) {
+            const toggle = document.getElementById("minigamesToggle");
+            const errorBox = document.getElementById("minigameError");
+
+            errorBox.style.display = "none";
+
+            if (toggle.checked) {
+                const selectedGames = document.querySelectorAll(".minigame-btn.selected");
+
+                if (selectedGames.length === 0) {
+                    errorBox.style.display = "block";
+                    event.preventDefault();
+                    return false;
+                }
+            }
+
+            return true;
         }
     </script>
 </head>
@@ -176,7 +256,7 @@
         <h1>Create a Lobby</h1>
     </div>
 
-    <form method="post" action="/create-lobby/{{ quizId }}">
+    <form method="post" action="/create-lobby/{{ quizId }}" onsubmit="validateForm(event)">
 
         <input type="hidden" id="timeLimit" name="timeLimit" value="30">
 
@@ -208,12 +288,12 @@
                 </div>
 
                 <div style="margin-top: 20px; font-size: 16px; color: black;">
-                    Spooky theme:
-                    <input type="checkbox" name="theme" value="spooky" style="margin-left: 8px;">
+                    <label for="themeToggle">Spooky theme:</label>
+                    <input type="checkbox" id="themeToggle" name="theme" value="spooky" style="margin-left: 8px;">
                 </div>
 
                 <div style="margin-top: 20px; font-size: 16px; color: black;">
-                    Mini Games:
+                    <label for="minigamesToggle">Mini Games:</label>
                     <input type="checkbox" 
                         id="minigamesToggle" 
                         name="minigames" 
@@ -226,16 +306,48 @@
                 <div id="minigameOptions" style="margin-top: 10px; display: {% if minigamesEnabled %}block{% else %}none{% endif %};">
                     <div style="font-size: 14px; color: black; margin-bottom: 8px;">Select minigames:</div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'maths')">Maths</button>
-                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'potions')">Potions</button>
-                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'rooms')">Rooms</button>
-                        <button type="button" class="minigame-btn selected" onclick="toggleMinigame(this, 'words')">Words</button>
+
+                        <div class="info-container">
+                            <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'maths')">Maths</button>
+                            <div class="info-icon" tabindex="0">i</div>
+                            <div class="tooltip">Solve quick maths problems in time pressure to avoid becoming a ghost.</div>
+                        </div>
+
+                        <div class="info-container">
+                            <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'potions')">Potions</button>
+                            <div class="info-icon" tabindex="0">i</div>
+                            <div class="tooltip">Choose the correct potion to avoid becoming a ghost.</div>
+                        </div>
+
+                        <div class="info-container">
+                            <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'rooms')">Rooms</button>
+                            <div class="info-icon" tabindex="0">i</div>
+                            <div class="tooltip">Choose the same door as everyone else or run the risk of becoming a ghost.</div>
+                        </div>
+
+                        <div class="info-container">
+                            <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'words')">Words</button>
+                            <div class="info-icon" tabindex="0">i</div>
+                            <div class="tooltip">Create the longest word possible from the given letters to avoid becoming a ghost.</div>
+                        </div>
                     </div>
 
-                    <input type="hidden" id="maths-input" name="activeMinigames" value="maths">
-                    <input type="hidden" id="potions-input" name="activeMinigames" value="potions">
-                    <input type="hidden" id="rooms-input" name="activeMinigames" value="rooms">
-                    <input type="hidden" id="words-input" name="activeMinigames" value="words">
+                    <input type="hidden" id="maths-input" name="activeMinigames" value="maths" disabled>
+                    <input type="hidden" id="potions-input" name="activeMinigames" value="potions" disabled>
+                    <input type="hidden" id="rooms-input" name="activeMinigames" value="rooms" disabled>
+                    <input type="hidden" id="words-input" name="activeMinigames" value="words" disabled>
+
+                    <div id="minigameError" style="
+                            display: none;
+                            margin-top: 10px;
+                            padding: 10px;
+                            border: 1px solid #e63973;
+                            border-radius: 6px;
+                            background-color: #ffe6ee;
+                            color: #b3003c;
+                            font-size: 14px;">
+                            You need to select at least one minigame or turn minigames off to continue.
+                    </div>
                 </div>
 
             </div>

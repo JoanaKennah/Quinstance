@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Manage Participants</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% if theme == "spooky" %}
     <style>
         body {
@@ -274,7 +275,7 @@
             <div class="player-grid" id="player-grid">
                 {% for player in players %}
                     <div class="player-name {% if players|length > 25 %}player-name-small{% elseif players|length > 15 %}player-name-medium{% endif %}"
-                        onclick="toggleSelect(this)" data-username="{{ player }}">
+                        onclick="toggleSelect(this)" tabindex="0" role="button" onkeydown="handlePlayerKey(event, this)" data-username="{{ player }}">
                         {{ player }}
                     </div>
                 {% endfor %}
@@ -335,6 +336,13 @@
         count.textContent = selectedPlayers.size > 0
             ? `${selectedPlayers.size} selected`
             : "";
+    }
+
+    function handlePlayerKey(event, el) {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            toggleSelect(el);
+        }
     }
 </script>
 

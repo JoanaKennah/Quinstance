@@ -2,6 +2,52 @@
 <html lang="en">
 <head>
     <title>Game Night</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        <!--- ALL OF THIS IS JUST TO TEST HOW WEBSOCKETS WORK :) --->
+        let serverURL;
+        let socket;
+
+        function setupSocket() {
+            serverURL = 'ws://127.0.0.1:8080/gameServer';
+            socket = new WebSocket(serverURL);
+
+            socket.onopen = logOpenToConsole;
+            socket.onclose = logCloseToConsole;
+            socket.onmessage = test;
+        }
+
+        function logOpenToConsole() {
+            console.log("Web socket connection opened");
+        }
+
+        function logCloseToConsole() {
+            console.log("Web socket connection closed");
+        }
+
+        function test(event) {
+            let questionData = JSON.parse(event.data);
+            console.log(`Retrieved question: ${questionData.questionText}`);
+            console.log(`Retrieved answers: ${questionData.answerOne}, ${questionData.answerTwo}, ${questionData.answerThree}, ${questionData.answerFour} `);
+
+            let data = buildAnswer()
+            sendAnswerViaSocket(data)
+
+        }
+
+        <!--- temp userID, will need to pass this into peb file --->
+        function buildAnswer() {
+            return {
+                userID: 1,
+                chosenAnswer: 0,
+                answerSpeed: 1.0
+            }
+        }
+
+        function sendAnswerViaSocket(data) {
+            socket.send(JSON.stringify(data));
+        }
+    </script>
     <style>
 
         * {
@@ -163,6 +209,7 @@
 
         <!-- What is this? -->
         <div class="block-left">
+            <h2 class="section-title">What is this?</h2>
             <div class="content-box">
                 <p class="section-title">What is this?</p>
                 This is our COMP2850 module group project for 2026. The project idea we all picked was 'Games Night'
@@ -174,6 +221,7 @@
 
         <!-- What do we offer? -->
         <div class="block-right">
+            <h2 class="section-title">What do we offer?</h2>
             <div class="content-box">
                 <p class="section-title">What do we offer?</p>
                 Our aim is to provide a platform for teachers and students alike to host and play custom made quizzes.

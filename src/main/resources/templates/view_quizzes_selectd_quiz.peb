@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Quiz Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         body {
@@ -130,11 +131,6 @@
         </div>
 
         <div class="right">
-            <div class="subtitle">Mini Games:</div>
-            <div class="text">
-                NEEDED - Add when minigames implemented -------------------------------------------
-                N/A
-            </div>
             <div class="subtitle">Category:</div>
             <div class="text">
                 {{ categoryDisplay }}

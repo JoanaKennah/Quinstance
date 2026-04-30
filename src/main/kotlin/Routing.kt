@@ -23,6 +23,7 @@ import kotlin.math.roundToInt
 import com.password4j.Password
 import com.example.database.objects.*
 import com.example.sendConfirmationEmail
+import com.example.sendResetEmail
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
 import io.ktor.server.http.content.resolveResource
@@ -97,6 +98,18 @@ fun Application.configureRouting() {
             }  else {
                 call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Incorrect password")))
             }
+        }
+
+        //enter email to reset password page
+        get("/forgot-password") {
+            call.respond(PebbleContent("forgot_password.peb", mapOf()))
+        }
+
+        post("/forgot-password") {
+            val parameters = call.receiveParameters()
+            val email = parameters["email"]?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing email")))
+            sendResetEmail(email)
+            call.respondText("OK")
         }
 
         //serves signup page 
@@ -803,6 +816,17 @@ fun Application.configureRouting() {
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
 
             val gameSession = activeSessions[game.id.value]
+
+            //block host from joining own game
+            if (gameSession != null && session.username == gameSession.hostUsername) {
+                call.respond(PebbleContent("join_lobby.peb", mapOf(
+                    "returnURL" to returnURL,
+                    "roomCode" to roomCode,
+                    "errorMessage" to "You cannot join your own game!"
+                )))
+                return@post
+            }
+
             val theme = gameSession?.theme ?: "default"
             call.sessions.set(session.copy(theme = theme))
 
@@ -935,6 +959,7 @@ fun Application.configureRouting() {
             gameSession.wordsGameState = null
             gameSession.autoGhostedPlayer = null
             gameSession.minigameJustPlayed = false
+            gameSession.answeredPlayers.clear()
 
             if (gameSession.isAdvanced) {
                 return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Already advancing")))

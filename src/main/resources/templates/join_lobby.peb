@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Join a Lobby</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         body {
@@ -112,6 +113,18 @@
             background-color: #e63973;
             color: white;
         }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
     </style>
 </head>
 
@@ -129,11 +142,14 @@
 
     <div class="subtitle">
         Enter 8-character Room Code below to join a quiz lobby!
-    </div>
+    </dive>
+
+    <label for="roomCode" class="sr-only">Room Code</label>
 
     <form method="post" action="/join-lobby">
 
         <input type="text"
+               id="roomCode"
                name="roomCode"
                class="code-input"
                placeholder="Enter Room Code"

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Sign Up</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
 
         body {
@@ -55,7 +56,7 @@
         }
 
         label {
-            color: #a2d192;
+            color: #20882E;
             font-weight: bold;
         }
 
@@ -110,15 +111,39 @@
     </style>
 
     <script>
-        function checkPasswords() {
-            console.log("hi")
+        function validateForm() {
+            var firstName = document.getElementsByName("firstname")[0].value;
+            var lastName = document.getElementsByName("lastname")[0].value;
+            var email = document.getElementsByName("email")[0].value;
+            var username = document.getElementsByName("username")[0].value;
             var userPass = document.getElementById("password").value;
             var confirmedPass = document.getElementById("confirmedPassword").value;
 
-            if (userPass != confirmedPass) {
-                alert("Passwords must be equal");
+            if (userPass !== confirmedPass) {
+                alert("Passwords must match.");
                 return false;
             }
+
+            if (username.length > 50) {
+                alert("Username must be 50 characters or less.");
+                return false;
+            }
+
+            if (userPass.length > 255) {
+                alert("Password must be 255 characters or less.");
+                return false;
+            }
+
+            if ((firstName + lastName).length > 50) {
+                alert("First name and last name combined must be 50 characters or less.");
+                return false;
+            }
+
+            if (email.length > 50) {
+                alert("Email must be 50 characters or less.");
+                return false;
+            }
+
             return true;
         }
     </script>
@@ -132,30 +157,30 @@
 
 <h1>Join Us!</h1>
 
-<form method="post" action="/signup" onsubmit="return checkPasswords()">
+<form method="post" action="/signup" onsubmit="return validateForm()">
 
     <div class="row">
         <div class="field">
-            <label>First Name:</label>
-            <input type="text" name="firstname" required>
+            <label for="firstname">First Name:</label>
+            <input type="text" id="firstname" name="firstname" required>
         </div>
         <div class="field">
-            <label>Last Name:</label>
-            <input type="text" name="lastname" required>
+            <label for="lastname">Last Name:</label>
+            <input type="text" id="lastname" name="lastname" required>
         </div>
     </div>
 
     <div class="single">
         <div class="field full-width" style="align-items:center;">
-            <label>Email Address:</label>
-            <input type="email" name="email" required>
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email" required>
         </div>
     </div>
 
     <div class="row">
         <div class="field">
-            <label>Key Stage:</label>
-            <select name="keystage">
+            <label for="keystage">Key Stage:</label>
+            <select id="keystage" name="keystage">
                 <option value="">Select...</option>
                 <option value="keystageone">KS1</option>
                 <option value="keystagetwo">KS2</option>
@@ -167,8 +192,8 @@
             </select>
         </div>
         <div class="field">
-            <label>Role:</label>
-            <select name="role">
+            <label for="role">Role:</label>
+            <select id="role" name="role">
                 <option value="">Select...</option>
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
@@ -178,19 +203,19 @@
 
     <div class="single">
         <div class="field full-width" style="align-items:center;">
-            <label>Username:</label>
-            <input type="text" name="username" required>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
         </div>
     </div>
 
     <div class="row">
         <div class="field">
-            <label>Password:</label>
-            <input type="password" name="password" id="password" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
         </div>
         <div class="field">
-            <label>Confirm Password:</label>
-            <input type="password" name="confirmpassword" id="confirmedPassword" required>
+            <label for="confirmedPassword">Confirm Password:</label>
+            <input type="password" id="confirmedPassword" name="confirmpassword" required>
         </div>
     </div>
 
