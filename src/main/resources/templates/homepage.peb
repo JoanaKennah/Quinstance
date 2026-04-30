@@ -58,6 +58,7 @@
 
         body {
             font-family: Arial, sans-serif;
+            background: linear-gradient(#FFFFFF, #cfe2f3);
         }
 
         /* ── Navbar ── */
@@ -67,6 +68,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            background: linear-gradient(#B0D0ED, #cfe2f3);
         }
 
         .navbar-left {
@@ -98,7 +100,7 @@
         .btn-signup {
             background-color: #1a5276;
             color: white;
-            border: none;
+            border: 3px solid #133E58;
             padding: 8px 22px;
             cursor: pointer;
             font-size: 14px;
@@ -111,7 +113,7 @@
         .btn-login {
             background-color: white;
             color: #1a5276;
-            border: 2px solid #aaa;
+            border: 2px solid #1a5276;
             padding: 8px 22px;
             cursor: pointer;
             font-size: 14px;
@@ -129,7 +131,7 @@
         h1 {
             text-align: center;
             font-weight: bold;
-            font-size: 2em;
+            font-size: 3em;
             color: black;
             margin-bottom: 30px;
         }
@@ -137,37 +139,52 @@
         /* ── Content sections ── */
         .section-title {
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 1.5em;
+            text-align: center;
             color: black;
             margin-bottom: 8px;
         }
 
         .content-box {
-            border: 1px solid #1a5276;
+            /*border: 1px solid #1a5276;*/
+            border-radius: 15px;
             background-color: white;
             min-height: 160px;
             width: 100%;
-            padding: 16px;
-            font-size: 14px;
+            padding: 10px;
+            font-size: 20px;
             color: #333;
-            /* Add your description text between these tags when ready */
+            text-align: center;
         }
 
         /* Left-aligned block (What is this?) */
         .block-left {
-            width: 58%;
+            width: 60%;
             margin-bottom: 30px;
         }
 
         /* Right-aligned block (What do we offer?) */
         .block-right {
-            width: 58%;
+            width: 60%;
             margin-left: auto;
             text-align: right;
+            margin-bottom: 30px;
+        }
+
+        /* Centre-aligned block (Further Information) */
+        .block-center {
+            width: 30%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .block-right .content-box {
-            text-align: left;
+            text-align: center;
+        }
+
+        li {
+            list-style-type: none;
         }
 
     </style>
@@ -188,14 +205,17 @@
 
     <!-- Page content -->
     <main class="main">
-
         <h1>Welcome to Game Night!</h1>
 
         <!-- What is this? -->
         <div class="block-left">
             <h2 class="section-title">What is this?</h2>
             <div class="content-box">
-                <!-- TODO: Add a short description of the website here -->
+                <p class="section-title">What is this?</p>
+                This is our COMP2850 module group project for 2026. The project idea we all picked was 'Games Night'
+                and were assigned our lovelyProduct Owner Amy, who is hopefully reading this right now (hello!). After
+                countless hours working on this and many meetings, we hope whoever is reading this enjoys our project
+                and has fun.
             </div>
         </div>
 
@@ -203,10 +223,34 @@
         <div class="block-right">
             <h2 class="section-title">What do we offer?</h2>
             <div class="content-box">
-                <!-- TODO: Add a description of your features/offerings here -->
+                <p class="section-title">What do we offer?</p>
+                Our aim is to provide a platform for teachers and students alike to host and play custom made quizzes.
+                We offer the ability to create your own quiz, add custom questions, and host your quiz with a range of
+                different options and even some minigames that can be toggled on/off! We currently have four minigames
+                to offer and have detailed explanations for each one when toggled on. We hope our project offers teachers
+                the ability to make teaching fun and for students to enjoy revising.
             </div>
         </div>
 
+        <div class="block-left">
+            <div class="content-box">
+                <p class="section-title">Who are we?</p>
+                There are four of us who worked on this project: Emily, Ethan, Joana and Minghao. Also special thanks to
+                 a few people outside of the project who have kindly play-tested parts of our website - Joana's mum, her
+                 flatmates and Ethan's partner Alfie.
+            </div>
+        </div>
+
+        <div class="block-center">
+            <div class="content-box">
+                <p class="section-title">Further Information</p>
+                <svg width=30 height=30 viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>github [#142]</title> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -7559.000000)" fill="#000000"> <g id="icons" transform="translate(56.000000, 160.000000)"> <path d="M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,7409.253 C84,7403.59 88.478,7399 94,7399" id="github-[#142]"> </path> </g> </g> </g> </g></svg>
+                <ul>
+                    <li><a href="https://github.com/JoanaKennah/Group-Project">Wiki</a></li>
+                    <li><a href="https://github.com/JoanaKennah/Group-Project">Project Repo</a></li>
+                </ul>
+            </div>
+        </div>
     </main>
 
 </body>
