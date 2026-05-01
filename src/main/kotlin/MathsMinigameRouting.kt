@@ -1,20 +1,23 @@
 package com.example
 
-import com.example.database.objects.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.pebble.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.pebble.PebbleContent
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondRedirect
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
+import io.ktor.server.sessions.get
+import io.ktor.server.sessions.sessions
 import io.ktor.websocket.Frame
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 fun Application.configureMathsMinigameRouting() {
+    // Maths Minigame
     routing {
-        // Maths Minigame
-        // serves start screens to clients and host when host presses start
+        // Serves start screens to clients and host when host presses start
         post("/maths-begin/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -44,7 +47,7 @@ fun Application.configureMathsMinigameRouting() {
             )
         }
 
-        // sends clients to uh-oh or safe screen, split by dangerPlayers
+        // Sends clients to uh-oh or safe screen, split by dangerPlayers
         get("/minigame-start/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -84,6 +87,7 @@ fun Application.configureMathsMinigameRouting() {
             }
         }
 
+        // Serves client with a given maths question and four options, one being the correct answer.
         get("/minigame-question/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -127,6 +131,7 @@ fun Application.configureMathsMinigameRouting() {
             )
         }
 
+        // If the client gets the maths question right, update the maths state and send the client a new maths question.
         get("/minigame-correct/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -140,15 +145,18 @@ fun Application.configureMathsMinigameRouting() {
                 gameSession.mathsGameState
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No minigames active")))
 
+            // Increments client score by one.
             mathsState.mathsScores[session.username] =
                 (mathsState.mathsScores.getOrDefault(session.username, 0)) + 1
 
+            // Increments which question the user is on by 1 and redirects them to a new question. This repeats until the host's timer ends.
             val currentIndex = mathsState.questionIndex.getOrDefault(session.username, 0)
             mathsState.questionIndex[session.username] = currentIndex + 1
 
             call.respondRedirect("/minigame-question/$gameId")
         }
 
+        // If the client gets the maths question wrong, send them to the incorrect page.
         get("/minigame-incorrect/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -168,6 +176,7 @@ fun Application.configureMathsMinigameRouting() {
             )
         }
 
+        // Calculate which clients got the lowest score (can be a draw) and add them to the Maths state ghost player list.
         post("/minigame-end/{gameId}") {
             call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -193,9 +202,9 @@ fun Application.configureMathsMinigameRouting() {
                     .filter { it.value == minScore }
                     .map { it.key }
 
-            // consolation points for winning minigame, if players > 3
+            // Consolation points for winning minigame, if players > 3.
             if (gameSession.lastIncorrectPlayers.size >= 3) {
-                // sort scores descending, disclude 0s
+                // Sort scores descending, exclude 0s.
                 val topScorers =
                     mathsState.mathsScores
                         .filter { it.value > 0 }
@@ -203,7 +212,7 @@ fun Application.configureMathsMinigameRouting() {
                         .sortedByDescending { it.value }
 
                 transaction(TransactionManager.defaultDatabase) {
-                    // winner - 200 points
+                    // Winner - 200 points
                     topScorers.getOrNull(0)?.let { (username, _) ->
                         val bonusUser = retrieveUser(username)
                         val bonusGame = retrieveGame(gameId)
@@ -215,7 +224,7 @@ fun Application.configureMathsMinigameRouting() {
                         }
                     }
 
-                    // second - 100 points
+                    // Second - 100 points
                     topScorers.getOrNull(1)?.let { (username, _) ->
                         val bonusUser = retrieveUser(username)
                         val bonusGame = retrieveGame(gameId)
@@ -229,10 +238,10 @@ fun Application.configureMathsMinigameRouting() {
                 }
             }
 
-            // add new ghosts to master list of ghosts in GameSession
+            // Add new ghosts to master list of ghosts in GameSession
             gameSession.ghostPlayers.addAll(mathsState.ghostPlayers)
 
-            // mark minigame finished
+            // Mark minigame finished
             mathsState.isFinished = true
 
             gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/minigame-result/$gameId\"}")) }
@@ -240,6 +249,7 @@ fun Application.configureMathsMinigameRouting() {
             call.respond(HttpStatusCode.OK)
         }
 
+        // Serves end screen to host showing which client/s became ghosts.
         get("/minigame-end-host/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -265,6 +275,7 @@ fun Application.configureMathsMinigameRouting() {
             )
         }
 
+        // Serves client screen with their result, showing if they are safe or became a ghost.
         get("/minigame-result/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -290,7 +301,7 @@ fun Application.configureMathsMinigameRouting() {
             if (session.username in mathsState.ghostPlayers &&
                 session.username in gameSession.lastIncorrectPlayers
             ) {
-                // newly ghosted this minigame
+                // Newly ghosted this minigame
                 call.respond(
                     PebbleContent(
                         "mini_game_maths_ur_ghost.peb",
@@ -302,7 +313,7 @@ fun Application.configureMathsMinigameRouting() {
                     ),
                 )
             } else {
-                // safe or existing ghost
+                // Safe or existing ghost
                 call.respond(
                     PebbleContent(
                         "mini_games_maths_ur_safe.peb",

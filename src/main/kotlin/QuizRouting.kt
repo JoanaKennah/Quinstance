@@ -51,7 +51,7 @@ fun Application.configureQuizRouting() {
 
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
 
-            val quiz = addQuiz(user, quizName, description, category, keystage, minigamesEnabled = minigamesEnabled)
+            val quiz = addQuiz(user, quizName, description, category, keystage)
 
             call.respondRedirect("/view-quiz-questions/${quiz.id.value}")
         }
@@ -88,7 +88,7 @@ fun Application.configureQuizRouting() {
             var quizId: Int? = null
             var quiz: Quiz? = null
             var deleteQuestions: Boolean? = null
-            var data: List<ReadQuestionData>? = null
+            var data: List<CsvQuestionData>? = null
             var csvReadError = "none"
 
             multipart.forEachPart { part ->

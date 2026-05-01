@@ -16,7 +16,6 @@ class Quiz(
     var description by QuizTable.description
     var category by QuizTable.category
     var key_stage by QuizTable.key_stage
-    var minigames_enabled by QuizTable.minigames_enabled
 
     override fun toString() = quiz_name
 }

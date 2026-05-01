@@ -15,6 +15,10 @@ fun main(args: Array<String>) {
         .main(args)
 }
 
+/**
+ * Configures the project Database (if it doesn't already exist), sets the default database to this for Database.kt and
+ * configures all routing files and session file.
+ */
 fun Application.module() {
     TransactionManager.defaultDatabase = ProjectDatabase.database
     configureSessions()
@@ -32,6 +36,10 @@ fun Application.module() {
     configureWordsMinigameRouting()
 }
 
+/**
+ * Configures sessions used throughout routing to store information about the given client and configures cookies for
+ * this client.
+ */
 fun Application.configureSessions() {
     install(Sessions) {
         cookie<UserSession>("user_session") {
@@ -48,8 +56,10 @@ fun Application.configureSessions() {
     }
 }
 
-// Used for testing :)
-
+/**
+ * Creates Test Database, populates it with test data, sets the default database to this for Database.kt and
+ * configures all routing files and session file.
+ */
 fun Application.testModule() {
     TestDatabase.create()
     TransactionManager.defaultDatabase = TestDatabase.db

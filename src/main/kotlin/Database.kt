@@ -5,8 +5,8 @@ import com.example.database.objects.Answer
 import com.example.database.objects.Game
 import com.example.database.objects.InUseCode
 import com.example.database.objects.Question
-import com.example.database.objects.Quiz
 import com.example.database.objects.Quinstance
+import com.example.database.objects.Quiz
 import com.example.database.objects.User
 import com.example.database.objects.UserScore
 import com.example.database.tables.AnswerTable
@@ -15,8 +15,8 @@ import com.example.database.tables.InUseTable
 import com.example.database.tables.QuestionTable
 import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
-import com.example.database.tables.UserTable
 import com.example.database.tables.UserScoreTable
+import com.example.database.tables.UserTable
 import com.password4j.Password
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
@@ -26,6 +26,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import kotlin.text.isNotEmpty
 
 //  All code here was written by a human :>
+
 /*  Websites used for debugging/learning
     - https://kotlinlang.org
     - https://www.jetbrains.com/help/exposed
@@ -34,14 +35,20 @@ import kotlin.text.isNotEmpty
 
 /**
  * Data class for a User's attempt at playing a Quiz.
+ * @property quizName name of the quiz
+ * @property score current user score for a Quiz
  */
-data class UserAttemptView(
+data class UserQuizAttempt(
     val quizName: String,
     val score: Int,
 )
 
 /**
  * Information about a Player's score.
+ * @property userID unique identifier for a User in the database
+ * @property username unique custom name for a User
+ * @property score current user score for a Quiz
+ * @property isGhost True/False if a User is a ghost or not
  */
 data class PlayerScoreInfo(
     val userID: Int,
@@ -51,7 +58,7 @@ data class PlayerScoreInfo(
 )
 
 /**
- * Creates all required tables if they do not already exist.
+ * Creates all required tables if they do not already exist
  */
 fun configureDatabase() {
     // Establishes connection from ProjectDatabase object
@@ -73,6 +80,8 @@ fun configureDatabase() {
 
 /**
  * Retrieves user from UserTable using their username, returns null if no user found
+ * @param username Unique identifier for a User
+ * @return User object if User exists, null if they don't
  * @throws IllegalArgumentException if the username is empty.
  */
 fun retrieveUser(username: String): User? {
@@ -85,7 +94,9 @@ fun retrieveUser(username: String): User? {
 /**
  * Adds a new User to UserTable. Returns null if user already exists
  * Retrieves user from UserTable using their ID, returns null if no user found
- * @throws IllegalArgumentException if userID is less than or equal to 0.
+ * @param userId Unique identifier for a User in the Database
+ * @return User object if User exists, null if they don't
+ * @throws IllegalArgumentException if userID is less than or equal to 0
  */
 fun retrieveUserById(userId: Int): User? {
     require(userId >= 0) { "User ID must be positive" }
@@ -97,9 +108,14 @@ fun retrieveUserById(userId: Int): User? {
 
 /**
  * Adds a new User to UserTable.
- * @return User object if user was added to Database, null if user already exists.
- * @throws IllegalArgumentException if any params are empty.
- * @throws IllegalArgumentException if username or email is greater than 50 characters.
+ * @param username Unique identifier for a User
+ * @param password Plaintext password for a User to be hashed before being added to the Database
+ * @param name First name and last name for a User, combined for Database purposes
+ * @param keyStage Key stage for the User, e.g. Key Stage 1 or Further Education
+ * @param role Role self-assigned, can either be Student or Teacher
+ * @return User object if user was added to Database, null if user already exists
+ * @throws IllegalArgumentException If any params are empty
+ * @throws IllegalArgumentException If username or email is greater than 50 characters
  */
 fun addUser(
     username: String,
@@ -135,22 +151,22 @@ fun addUser(
 
 /**
  * Deletes given user from UserTable (possibly used for Admin purposes).
+ * @param user User object
  **/
 fun deleteUser(user: User) {
     // Checks if the user exists in the table before deleting it
-    val userExists = retrieveUser(user.username)
-    if (userExists != null) {
-        transaction(TransactionManager.defaultDatabase) {
-            user.delete()
-        }
-    } else {
-        // Throws an exception as it shouldn't be possible for a website user to have this error
-        throw Exception("User doesn't exist")
+    require(retrieveUser(user.username) != null) { "User must exist" }
+    transaction(TransactionManager.defaultDatabase) {
+        user.delete()
     }
 }
 
 /**
- * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1.
+ * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1
+ * @param quiz Quiz object that will be associated with the new question
+ * @param question question text
+ * @param keyStage Key stage for the Question, e.g. Key Stage 1 or Further Education
+ * @return new Question object
  * @throws IllegalArgumentException if any param is empty
  */
 fun addQuestion(
@@ -184,8 +200,13 @@ fun addQuestion(
 /**
  * Takes each answer option the user inputted for their question and sets the correctAnswer to the answer indicated by
  * correctIndex and returns the remaining three options. Need for this found during testing of reading Csv files.
+ * @param option1 First possible answer for a question, cannot be empty
+ * @param option2 Second possible answer for a question, can be empty
+ * @param option3 Third possible answer for a question, can be empty
+ * @param option4 Fourth possible answer for a question, can be empty
  * @return listOf(correctOption, option2, option3?, option4?)
  * @throws IllegalArgumentException if option1 or option2 is empty, or if correctIndex isn't within 0 to 3.
+ * @return listOf(correctOption, finalOption2, finalOption3, finalOption4)
  */
 fun setAnswerOptions(
     option1: String,
@@ -204,8 +225,7 @@ fun setAnswerOptions(
     var finalOption3: String? = null
     var finalOption4: String? = null
 
-    // Not happy about this implementation but avoids issues found in developing csv reading. Ensures there are
-    // no duplicate answers.
+    // Not happy about this implementation but avoids issues found in developing csv reading. Ensures there are no duplicate answers.
     when (correctOption) {
         option1 -> {
             finalOption2 = option2
@@ -233,6 +253,11 @@ fun setAnswerOptions(
 
 /**
  * Edits given Question and Answer in the Database.
+ * @param question Question object to be edited
+ * @param questionData map containing new/edited data for Question. Includes two keys, "question" and "keyStage"
+ * @param answer Answer object to be edited
+ * @param answerData map containing new/edited data for Answer. Includes five keys, "option1", "option2", "option3",
+ * "option4", "correctIndex"
  * @throws IllegalArgumentException if questionData or answerData is empty.
  * @throws IllegalArgumentException if question given doesn't exist
  * @throws IllegalArgumentException if answer given doesn't exist or the answer is not associated with the question.
@@ -298,6 +323,8 @@ fun editQuestion(
 /**
  * Deletes given question from QuestionTable. Returns true if the question is successfully deleted
  * Created by Minghao in Routing.kt, refactored and edited in Database.kt for testing purposes.
+ * @param question Question object to be deleted
+ * @return True/False if the question has been successfully deleted or not
  */
 fun deleteQuestion(question: Question): Boolean {
     return transaction(TransactionManager.defaultDatabase) {
@@ -321,12 +348,14 @@ fun deleteQuestion(question: Question): Boolean {
 /**
  * Retrieves all Questions associated with the given Quiz. If there are no questions associated with the quiz,
  * a null value is returned.
+ * @param quiz Quiz object to retrieve Questions from
+ * @return List of Question objects
+ * @throws IllegalArgumentException If Quiz does not exist
  */
 fun retrieveQuizQuestions(quiz: Quiz): MutableList<Question> {
     // Find all question ID's associated with the given Quiz
     return transaction(TransactionManager.defaultDatabase) {
         // Check to see if quiz actually exists
-        println("test ${quiz.id}")
         require((Quiz.findById(quiz.id))?.id == quiz.id) { "Quiz received does not exist" }
 
         val foundQuestionQuinstances = Quinstance.find { QuinstanceTable.quiz eq quiz.id }
@@ -346,39 +375,47 @@ fun retrieveQuizQuestions(quiz: Quiz): MutableList<Question> {
 
 /**
  * Creates and adds a new Quiz to QuizTable
+ * @param user User object who owns the Quiz-to-be
+ * @param quizName Name of the Quiz (ADD LENGTH LIMIT)
+ * @param description Quiz description (ADD LENGTH LIMIT)
+ * @param category Quiz category selected from a given list
+ * @param keyStage Key stage for the Question, e.g. Key Stage 1 or Further Education
+ * @param numOfQuestions number of questions in the Quiz, initialised to 0
+ * @throws IllegalArgumentException If User doesn't exist
+ * @throws IllegalArgumentException If User doesn't exist
  */
 fun addQuiz(
     user: User,
-    quiz_name: String,
+    quizName: String,
     description: String,
     category: String,
-    key_stage: String,
-    num_of_questions: Int = 0,
-    minigamesEnabled: Boolean = false,
+    keyStage: String,
+    numOfQuestions: Int = 0,
 ): Quiz {
     // Checks the User exists
     require(retrieveUser(user.username) != null) { "User must not be null" }
-    require(num_of_questions >= 0) { "Number of questions must be greater than or equal to 0" }
+    require(numOfQuestions >= 0) { "Number of questions must be greater than or equal to 0" }
     // Checks string parameters are no empty
-    for (parameter in listOf(quiz_name, description, category, key_stage)) {
+    for (parameter in listOf(quizName, description, category, keyStage)) {
         require(parameter.isNotEmpty()) { "Parameter $parameter must not be empty" }
     }
     // Don't need to check if Quiz already exists
     return transaction(TransactionManager.defaultDatabase) {
         Quiz.new {
             this.user = user
-            this.quiz_name = quiz_name
+            this.quiz_name = quizName
             this.description = description
             this.category = category
-            this.key_stage = key_stage
-            this.num_of_questions = num_of_questions
-            this.minigames_enabled = minigamesEnabled
+            this.key_stage = keyStage
+            this.num_of_questions = numOfQuestions
         }
     }
 }
 
 /**
- * Deletes given Quiz from QuizTable. Returns true if the quiz is successfully deleted
+ * Deletes given Quiz from QuizTable.
+ * @param quiz Quiz object to be deleted
+ * @return True if Quiz is successfully deleted, False if it doesn't exist
  */
 fun deleteQuiz(quiz: Quiz): Boolean {
     // Finds if given Quiz exists, then deletes it
@@ -395,6 +432,9 @@ fun deleteQuiz(quiz: Quiz): Boolean {
 /**
  * Retrieves Quiz from QuizTable using a quizID, returns null if no Quiz found.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @param quizID Unique identifier for Quiz object in Database to be found
+ * @return Quiz if found, null otherwise
+ * @throws IllegalArgumentException If quizId is less than or equal to 0
  */
 fun retrieveQuiz(quizID: Int): Quiz? {
     require(quizID > 0) { "QuizID must be greater than or equal to 0" }
@@ -406,6 +446,9 @@ fun retrieveQuiz(quizID: Int): Quiz? {
 /**
  * Retrieves Quiz from QuizTable using a gameID, returns null if no Quiz found.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @param gameID Unique identifier for Game object in Database
+ * @return Retrieved Quiz if found, null otherwise
+ * @throws IllegalArgumentException If gameID is less than or equal to 0
  */
 fun retrieveQuizFromGameID(gameID: Int): Quiz? {
     // Check to see if given game actually exists
@@ -419,6 +462,8 @@ fun retrieveQuizFromGameID(gameID: Int): Quiz? {
 /**
  * Retrieve all Quizzes that a User has created. Will return null if the User passed in does not exist. An empty list
  * can be returned if the User has no quizzes.
+ * @param username Unique custom identifier for a User
+ * @return List of Quiz objects associated with the User or null if the User doesn't exist
  */
 fun retrieveUserQuizzes(username: String): MutableList<Quiz>? {
     // Returns null if the user doesn't exist
@@ -439,6 +484,16 @@ fun retrieveUserQuizzes(username: String): MutableList<Quiz>? {
 
 /**
  * Creates and adds an Answer (to a Question) to AnswerTable
+ * @param question Question object for the Answer to be associated with
+ * @param option1 First possible answer for a question, cannot be empty
+ * @param option2 Second possible answer for a question, can be empty
+ * @param option3 Third possible answer for a question, can be empty
+ * @param option4 Fourth possible answer for a question, can be empty
+ * @param correctIndex Integer from 0 to 3 indicating which option is correct
+ * @return Answer object if successfully added, null if the Question already has an existing Answer object associated with it
+ * @throws IllegalArgumentException If given Question doesn't exist
+ * @throws IllegalArgumentException If option1 or option2 is empty and correctIndex isn't between 0 and 3
+ * @throws IllegalArgumentException If the correctIndex indicates an empty answer is the correct option
  */
 fun addAnswer(
     question: Question,
@@ -457,8 +512,7 @@ fun addAnswer(
     require(correctIndex in 0..3) { "CorrectIndex must be between 0 and 3" }
     require(listOf(option1, option2, option3, option4)[correctIndex] != null) { "Correct answer cannot be null" }
 
-    // Check to see if an Answer already exists (Question and Answer have 1:1 relationship), return null if Answer
-    // already exists
+    // Check to see if an Answer already exists (Question and Answer have 1:1 relationship), return null if Answer already exists
     return transaction(TransactionManager.defaultDatabase) {
         val check = Answer.find { AnswerTable.question eq question.id }
         if (check.firstOrNull() != null) return@transaction null
@@ -478,7 +532,10 @@ fun addAnswer(
 }
 
 /**
- * Retrieves Answer for given Question. Will return null if there is no answer.
+ * Retrieves Answer for given Question
+ * @param question Question object to receive Answer from
+ * @return Retrieved Answer object if it exists, null otherwise
+ * @throws IllegalArgumentException If Question given doesn't exist
  */
 fun retrieveQuestionAnswer(question: Question): Answer? {
     return transaction(TransactionManager.defaultDatabase) {
@@ -495,6 +552,9 @@ fun retrieveQuestionAnswer(question: Question): Answer? {
 /**
  * Retrieves Game from GameTable using its gameID, returns null if no Game found.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @param gameID Unique identifier for the Game object in Database to be received
+ * @return Retrieved Game object if it exists, null otherwise
+ * @throws IllegalArgumentException If gameID is less than or equal to 0
  */
 fun retrieveGame(gameID: Int): Game? {
     // Check given gameID is valid
@@ -507,6 +567,9 @@ fun retrieveGame(gameID: Int): Game? {
 /**
  * Creates and adds a new Game to GameTable.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @param quiz Quiz object to be associated with new Game object
+ * @return Created Game object
+ * @throws IllegalArgumentException if Quiz does not exist
  */
 fun addGame(quiz: Quiz): Game {
     // Check to see if given quiz actually exists
@@ -525,6 +588,9 @@ fun addGame(quiz: Quiz): Game {
 /**
  * Retrieve all players from an existing Game and return them inside a List.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @param game Game object to receive players from
+ * @return List of User usernames
+ * @throws IllegalArgumentException If Game given does not exist
  */
 fun retrieveGamePlayers(game: Game): List<String> {
     // Check to see if given game actually exists
@@ -536,7 +602,10 @@ fun retrieveGamePlayers(game: Game): List<String> {
 
 /**
  * Checks InUseTable to see if there is an InUseCode object that already exists with the given room code.
- * @return true if the room code already exists, false otherwise
+ * @param roomCode Unique code associated with an ongoing Game
+ * @return True if the room code already exists, False otherwise
+ * @throws IllegalArgumentException If the given room code is empty or does not have length 8
+ * @throws IllegalArgumentException If the given room code contains anything other than letters or numbers
  */
 fun roomCodeAlreadyExists(roomCode: String): Boolean {
     require(roomCode.isNotEmpty()) { "Room code must not be empty" }
@@ -556,6 +625,12 @@ fun roomCodeAlreadyExists(roomCode: String): Boolean {
 /**
  * Creates and adds a new InUseCode record to InUseCodeTable.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @param roomCode Unique code associated with an ongoing Game
+ * @param game Game object to be associated with the given room code
+ * @return InUseCode object
+ * @throws IllegalArgumentException If the given Game does not exist
+ * @throws IllegalArgumentException If the given room code is empty or contains characters that aren't letters or numbers
+ * @throws IllegalArgumentException If the given room code doesn't have a length of 8 or already exists
  */
 fun addInUseCode(
     roomCode: String,
@@ -582,6 +657,9 @@ fun addInUseCode(
 /**
  * Retrieves room code attribute for the given Game, stored in InUseCodeTable.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @param game Game object to retrieve room code for
+ * @return Room code associated with the given Game or null if it doesn't exist
+ * @throws IllegalArgumentException If the given Game doesn't exist
  */
 fun retrieveRoomCode(game: Game): String? {
     // Check to see if given game actually exists
@@ -595,6 +673,10 @@ fun retrieveRoomCode(game: Game): String? {
 /**
  * Retrieves InUseCode object from InUseCodeTable using its room code, returns null if it doesn't exist
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @param roomCode Unique identifier for an ongoing Game
+ * @return InUseCode object associated with given room code or null if one doesn't exist
+ * @throws IllegalArgumentException If the given room code is empty or contains characters that aren't letters or numbers
+ * @throws IllegalArgumentException If the given room code doesn't have a length of 8
  */
 fun retrieveInUseCode(roomCode: String): InUseCode? {
     // Checks to see if room code given is not empty and has length 8
@@ -613,6 +695,9 @@ fun retrieveInUseCode(roomCode: String): InUseCode? {
 /**
  * Retrieves Game associated with given InUseCode record. Required in some parts of Routing.kt due to init errors.
  * Exposed DAO is shite.
+ * @param inUseCode InUseCode object associated with the wanted Game
+ * @return Game object if it exists, null otherwise
+ * @throws IllegalArgumentException if inUseCode doesn't exist
  */
 fun retrieveInUseCodeGame(inUseCode: InUseCode): Game? {
     require(retrieveInUseCode(inUseCode.room_code) != null) { "InUseCode must exist" }
@@ -624,11 +709,12 @@ fun retrieveInUseCodeGame(inUseCode: InUseCode): Game? {
 /**
  * Delete InUseCode record from InUseCodeTable using given game object.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @param game Game object associated with the InUseCode to be deleted
+ * @throws IllegalArgumentException If Game given does not exist
  */
 fun deleteInUseCode(game: Game) {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     transaction(TransactionManager.defaultDatabase) {
-        // delete room code
         InUseCode.find { InUseTable.game eq game.id }.firstOrNull()?.delete()
     }
 }
@@ -636,6 +722,12 @@ fun deleteInUseCode(game: Game) {
 /**
  * Creates and adds a new UserScore record to UserScoreTable
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @param game Game object
+ * @param user User object
+ * @return New UserScore object, with score attribute being set to 0
+ * @throws IllegalArgumentException If given Game does not exist
+ * @throws IllegalArgumentException If given User does not exist
+ *
  */
 fun addUserScore(
     game: Game,
@@ -657,6 +749,11 @@ fun addUserScore(
 /**
  * Retrieves UserScore from UserScoreTable, returns null if UserScore doesn't exist.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * @param game Game object associated with the wanted UserScore
+ * @param user User object associated with the wanted UserScore
+ * @return UserScore object if found, null otherwise
+ * @throws IllegalArgumentException If given Game does not exist
+ * @throws IllegalArgumentException If given User does not exist
  */
 fun retrieveUserScore(
     game: Game,
@@ -676,7 +773,9 @@ fun retrieveUserScore(
 /**
  * Retrieves all UserScores from a given Game
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
- * @return list of PlayerScoreInfo objects.
+ * @param game Game object needed to retrieve all associated UserScore objects
+ * @return List of PlayerScoreInfo objects (can be empty)
+ * @throws IllegalArgumentException If given Game does not exist
  */
 fun retrieveAllUserScoresDescending(game: Game): List<PlayerScoreInfo> {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
@@ -693,8 +792,10 @@ fun retrieveAllUserScoresDescending(game: Game): List<PlayerScoreInfo> {
 /**
  * Deletes UserScore object for a given User.
  * Created by Emily in Routing.kt, refactored and edited in Database.kt for testing purposes.
- * @return True if delete is successful, false if UserScore doesn't exist.
- * @throws IllegalArgumentException if the Game or User doesn't exist.
+ * @param game Game object associated with the UserScore to be deleted
+ * @param user User object associated with the UserScore to be deleted
+ * @return True if delete is successful, false if UserScore doesn't exist
+ * @throws IllegalArgumentException If the Game or User doesn't exist
  */
 fun deleteUserScoreForGivenUser(
     game: Game,
@@ -716,8 +817,9 @@ fun deleteUserScoreForGivenUser(
 /**
  * Deletes all UserScores for a given Game.
  * Created by Emily in Routing.kt, refactored and edited in Database.kt for testing purposes.
- * @return True if delete is successful, false if there are no UserScores to delete.
- * @throws java.lang.IllegalArgumentException if the Game doesn't exist.
+ * @param game Game object associated with UserScore objects to be deleted
+ * @return True if delete is successful, false if there are no UserScores to delete
+ * @throws IllegalArgumentException If the given Game does not exist
  */
 fun deleteGameUserScores(game: Game): Boolean {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
@@ -733,15 +835,17 @@ fun deleteGameUserScores(game: Game): Boolean {
 
 /**
  * Retrieve all quizzes a user has played (or attempted to play) and return the quiz name and the user's score.
- * Returns a list of UserAttemptView objects, can be empty.
+ * @param user User object
+ * @return List of UserQuizAttempt objects (can be empty)
+ * @throws IllegalArgumentException If given User does not exist
  */
-fun retrieveUserAttempts(user: User): List<UserAttemptView> {
+fun retrieveUserQuizAttempts(user: User): List<UserQuizAttempt> {
     require(retrieveUser(user.username) != null) { "User must exist" }
     return transaction(TransactionManager.defaultDatabase) {
         UserScore
             .find { UserScoreTable.user eq user.id }
             .map {
-                UserAttemptView(
+                UserQuizAttempt(
                     quizName = it.game.quiz.quiz_name,
                     score = it.score,
                 )

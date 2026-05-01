@@ -11,11 +11,11 @@ import io.ktor.server.sessions.sessions
 
 fun Application.configureDashboardRouting() {
     routing {
-        // serves teacher dash
+        // Serves teacher dashboard if client has the role 'Teacher'
         get("/teacher-dashboard") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
 
-            if (session.role != "teacher" && session.role != "admin") {
+            if (session.role != "teacher") {
                 return@get call.respond(
                     PebbleContent(
                         "error.peb",
@@ -34,7 +34,7 @@ fun Application.configureDashboardRouting() {
             )
         }
 
-        // serves student dash
+        // Serves student dashboard if client has the role 'Student'
         get("/student-dashboard") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
 
@@ -57,6 +57,7 @@ fun Application.configureDashboardRouting() {
             )
         }
 
+        // Serves user statistic page showing all previous games the client has played
         get("/user-stats") {
             val session =
                 call.sessions.get<UserSession>()
@@ -66,7 +67,7 @@ fun Application.configureDashboardRouting() {
                 retrieveUser(session.username)
                     ?: return@get call.respondRedirect("/login")
 
-            val attempts = retrieveUserAttempts(user)
+            val attempts = retrieveUserQuizAttempts(user)
             val returnURL =
                 when (session.role) {
                     "teacher" -> "/teacher-dashboard"

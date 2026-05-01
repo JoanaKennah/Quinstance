@@ -3,8 +3,13 @@ package com.example
 import java.io.InputStream
 
 /**
- * Question data from a .csv file, includes Question info (question, keyStage) and Answer info (correctAnswer, option2,
- * option3, option4)
+ * Question data from a .csv file,
+ * @param question Question text
+ * @param option1 First possible answer for a question, cannot be empty
+ * @param option2 Second possible answer for a question, can be empty
+ * @param option3 Third possible answer for a question, can be empty
+ * @param option4 Fourth possible answer for a question, can be empty
+ * @param correctOption Value from 0 to 3 indicating which option is correct. This is saved as a String but is converted to an Integer later
  */
 data class CsvQuestionData(
     val question: String,
@@ -19,6 +24,8 @@ data class CsvQuestionData(
 /**
  * Reads file input and converts data into ReadQuestionData so they can be turned into Questions. Returns null
  * if data cannot be read correctly or file is empty. Returns a DISTINCT list of ReadQuestionData
+ * @param inputStream Stream of data retrieved from the User
+ * @return List of CsvQuestionData objects or null if there was an error in reading
  */
 fun readCsv(inputStream: InputStream): List<CsvQuestionData>? {
     val reader = inputStream.bufferedReader()

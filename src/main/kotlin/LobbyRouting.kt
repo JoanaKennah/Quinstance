@@ -22,7 +22,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 fun Application.configureLobbyRouting() {
     routing {
-        // serves create lobby page, same formatting for category & Kstage
+        // Sserves create lobby page, same formatting for category & Kstage
         get("/create-lobby/{quizId}") {
             call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val quizId =
@@ -79,13 +79,12 @@ fun Application.configureLobbyRouting() {
                         "numQuestions" to quiz.num_of_questions,
                         "category" to categoryDisplay,
                         "keyStage" to keyStageDisplay,
-                        "minigamesEnabled" to quiz.minigames_enabled,
                     ),
                 ),
             )
         }
 
-        // create game in DB, gen room code, create GameSession, redirect to host lobby view
+        // Create game in DB, gen room code, create GameSession and redirect to host lobby view
         post("/create-lobby/{quizId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val quizId =
@@ -97,7 +96,7 @@ fun Application.configureLobbyRouting() {
             val parameters = call.receiveParameters()
             val timeLimit = parameters["timeLimit"]?.toIntOrNull() ?: 30
 
-            // read and update theme from checkbox
+            // Read and update theme from checkbox
             val theme = if (parameters["theme"] == "spooky") "spooky" else "default"
             val miniGamesEnabled = parameters["minigames"] == "true"
             val activeMinigames = parameters.getAll("activeMinigames") ?: emptyList()
@@ -118,6 +117,7 @@ fun Application.configureLobbyRouting() {
                 )
             activeSessions[game.id.value] = gameSession
 
+            // Generates a unique room code
             var roomCode: String?
             do {
                 roomCode = generateRoomCode()
@@ -127,7 +127,7 @@ fun Application.configureLobbyRouting() {
             call.respondRedirect("/lobby-server/${game.id.value}")
         }
 
-        // serves host lobby view w/ joined players
+        // Serves host lobby view with joined players
         get("/lobby-server/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -160,7 +160,7 @@ fun Application.configureLobbyRouting() {
             )
         }
 
-        // serves join lobby page for client
+        // Serves join lobby page for client
         get("/join-lobby") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val returnURL =
@@ -173,7 +173,7 @@ fun Application.configureLobbyRouting() {
             call.respond(PebbleContent("join_lobby.peb", mapOf("returnURL" to returnURL, "roomCode" to "", "errorMessage" to "")))
         }
 
-        // validates room code, creates UserScore for client, redirects to client lobby view
+        // Validates room code, creates UserScore for client, redirects to client lobby view
         post("/join-lobby") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val parameters = call.receiveParameters()
@@ -207,7 +207,7 @@ fun Application.configureLobbyRouting() {
                 retrieveInUseCodeGame(inUseCode)
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Game not found")))
 
-            // stop players joining after game started
+            // Stop players joining after game started
             if (activeSessions[game.id.value]?.isStarted == true) {
                 call.respond(
                     PebbleContent(
@@ -226,7 +226,7 @@ fun Application.configureLobbyRouting() {
 
             val gameSession = activeSessions[game.id.value]
 
-            // block host from joining own game
+            // Block host from joining their own game
             if (gameSession != null && session.username == gameSession.hostUsername) {
                 call.respond(
                     PebbleContent(
@@ -244,7 +244,7 @@ fun Application.configureLobbyRouting() {
             val theme = gameSession?.theme ?: "default"
             call.sessions.set(session.copy(theme = theme))
 
-            // block prev removed players from joining
+            // Block previously removed players from joining back
             if (gameSession != null && session.username in gameSession.barredUsernames) {
                 call.respond(
                     PebbleContent(
@@ -259,7 +259,7 @@ fun Application.configureLobbyRouting() {
                 return@post
             }
 
-            // block players after lobby cap reached
+            // Block players after the lobby cap is reached
             if (gameSession != null && retrieveGamePlayers(game).size >= gameSession.maxPlayers) {
                 call.respond(
                     PebbleContent(
@@ -278,7 +278,7 @@ fun Application.configureLobbyRouting() {
             call.respondRedirect("/lobby-client/${game.id.value}")
         }
 
-        // serves client lobby view, verified player is in game
+        // Serves client lobby view and checks verified player is in the game
         get("/lobby-client/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -312,7 +312,7 @@ fun Application.configureLobbyRouting() {
             )
         }
 
-        // removes UserScore entry for player, redirects to dashboard
+        // Removes UserScore entry for player and redirects to their dashboard
         post("/leave-lobby/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -341,7 +341,7 @@ fun Application.configureLobbyRouting() {
             call.respondRedirect(returnURL)
         }
 
-        // deletes room code, player scores and game, redirects host to dash
+        // Deletes room code, player scores and game, then redirects host to their dashboard
         post("/close-lobby/{gameId}") {
             call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -350,10 +350,10 @@ fun Application.configureLobbyRouting() {
             val game =
                 retrieveGame(gameId) ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Game not found")))
 
-            // always delete room code when lobby is closed
+            // Always delete room code when lobby is closed
             deleteInUseCode(game)
 
-            // IF game did not start, delete game and scores
+            // If game did not start, delete game and scores
             if (activeSessions[gameId]?.isStarted != true) {
                 deleteGameUserScores(game)
                 transaction(TransactionManager.defaultDatabase) { game.delete() }
@@ -361,7 +361,7 @@ fun Application.configureLobbyRouting() {
             call.respondRedirect("/teacher-dashboard")
         }
 
-        // gets game session details, populated and serves settings page
+        // Gets game session details, populated and serves settings page
         get("/settings/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -390,7 +390,7 @@ fun Application.configureLobbyRouting() {
             )
         }
 
-        // updates game session w/ new settings & redirects
+        // Updates game session w/ new settings and redirects back to previous page
         post("/settings/{gameId}") {
             call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -416,7 +416,7 @@ fun Application.configureLobbyRouting() {
             call.respondRedirect(returnUrl)
         }
 
-        // serves manage page with current player list
+        // Serves manage participant page with current player list
         get("/manage-participants/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
@@ -438,7 +438,7 @@ fun Application.configureLobbyRouting() {
             )
         }
 
-        // processes kicklist, removes scores, redirects clients to kicked route, redirects host back to settings
+        // Processes kick list, removes scores, redirects clients to kicked route and redirects host back to settings
         post("/manage-participants/{gameId}") {
             call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@post call.respondText("Invalid game ID")
@@ -452,14 +452,14 @@ fun Application.configureLobbyRouting() {
                 kickedPlayers.forEach { username ->
                     val user = retrieveUser(username)
                     if (user != null) {
-                        // remove UserScore entry
+                        // Remove UserScore entry
                         UserScore
                             .find {
                                 UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
                             }.firstOrNull()
                             ?.delete()
 
-                        // remove ghost entry if ghost
+                        // Remove ghost entry if ghost
                         gameSession.ghostPlayers.remove(username)
                     }
                 }
@@ -474,7 +474,7 @@ fun Application.configureLobbyRouting() {
             call.respondRedirect("/settings/$gameId")
         }
 
-        // serves client page depending on if kicked
+        // Serves client page depending on if they were kicked
         get("/kicked/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("Invalid game ID")
@@ -482,7 +482,7 @@ fun Application.configureLobbyRouting() {
             val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
             val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
 
-            // send host back to settings
+            // Send host back to settings
             if (session.username == gameSession.hostUsername) {
                 call.respondRedirect("/settings/$gameId")
                 return@get
@@ -491,7 +491,7 @@ fun Application.configureLobbyRouting() {
             val userScore = retrieveUserScore(game, user)
 
             if (userScore == null) {
-                // score == null - kicked
+                // If their userScore doesn't exist, client was kicked
                 call.respond(
                     PebbleContent(
                         "kicked.peb",
@@ -502,12 +502,12 @@ fun Application.configureLobbyRouting() {
                     ),
                 )
             } else {
-                // score exists - not kicked
+                // If userScore exists, they were not kicked
                 call.respondRedirect("/client-position/$gameId")
             }
         }
 
-        // polling endpoint - returns if current user kicked
+        // Polling endpoint - returns if current user kicked
         get("/is-kicked/{gameId}") {
             val session =
                 call.sessions.get<UserSession>() ?: return@get call.respondText("{\"kicked\":false}", ContentType.Application.Json)
@@ -518,7 +518,7 @@ fun Application.configureLobbyRouting() {
             call.respondText("{\"kicked\":$kicked}", ContentType.Application.Json)
         }
 
-        // polling endpoint, returns player list in lobby, for host lobby view
+        // Polling endpoint - returns player list in lobby, for host lobby view
         get("/lobby-players/{gameId}") {
             val gameId = call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("[]", ContentType.Application.Json)
             val game = retrieveGame(gameId) ?: return@get call.respondText("[]", ContentType.Application.Json)
