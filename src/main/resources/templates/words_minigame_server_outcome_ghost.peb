@@ -263,7 +263,7 @@
 
         <div class="layout">
             <div class="left-content">
-                <div class="description">The shortest word/s were:</div>
+                <div class="description">The shortest word/(s) were:</div>
 
                 <div class="shortest-words">
                     {% for word in shortestWords %}

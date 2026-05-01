@@ -227,6 +227,7 @@
         .username {
             font-size: 16px;
             font-weight: bold;
+            color: #d33469;
         }
 
         .trophy-col {
@@ -305,7 +306,7 @@
 
             <div class="username-col" id="col1">
                 {% for user in col1_users %}
-                    <div class="username" {% if isReveal and isGhostCol1 %}style="color: white;"{% endif %}>{{ user }}</div>
+                    <div class="username" {% if isReveal and isGhostCol1 %}style="color: {% if theme == 'spooky' %}white{% else %}black{% endif %};"{% endif %}>{{ user }}</div>
                 {% endfor %}
             </div>
 
@@ -336,7 +337,7 @@
 
             <div class="username-col" id="col2">
                 {% for user in col2_users %}
-                    <div class="username" {% if isReveal and isGhostCol2 %}style="color: white;"{% endif %}>{{ user }}</div>
+                    <div class="username" {% if isReveal and isGhostCol2 %}style="color: {% if theme == 'spooky' %}white{% else %}black{% endif %};"{% endif %}>{{ user }}</div>
                 {% endfor %}
             </div>
 
@@ -367,7 +368,7 @@
 
             <div class="username-col" id="col3">
                 {% for user in col3_users %}
-                    <div class="username" {% if isReveal and isGhostCol3 %}style="color: white;"{% endif %}>{{ user }}</div>
+                    <div class="username" {% if isReveal and isGhostCol3 %}style="color: {% if theme == 'spooky' %}white{% else %}black{% endif %};"{% endif %}>{{ user }}</div>
                 {% endfor %}
             </div>
 
@@ -400,6 +401,12 @@
     </div>
 
     <script>
+        const theme = "{{ theme }}";
+
+        function getGhostColor() {
+            return theme === "spooky" ? "white" : "black";
+        }
+
         const pollPicks = setInterval(() => {
             fetch("/potions-picks/{{ gameId }}")
                 .then(response => response.json())
@@ -408,14 +415,18 @@
                     const col2 = document.getElementById("col2");
                     const col3 = document.getElementById("col3");
 
+                    const ghostColor = getGhostColor();
+
                     col1.innerHTML = data.column1.map(u =>
-                        `<div class="username" style="${data.ghostUsers.includes(u) ? 'color: white;' : ''}">${u}</div>`
+                        `<div class="username" style="${data.ghostUsers.includes(u) ? `color: ${ghostColor};` : ''}">${u}</div>`
                     ).join("");
+
                     col2.innerHTML = data.column2.map(u =>
-                        `<div class="username" style="${data.ghostUsers.includes(u) ? 'color: white;' : ''}">${u}</div>`
+                        `<div class="username" style="${data.ghostUsers.includes(u) ? `color: ${ghostColor};` : ''}">${u}</div>`
                     ).join("");
+
                     col3.innerHTML = data.column3.map(u =>
-                        `<div class="username" style="${data.ghostUsers.includes(u) ? 'color: white;' : ''}">${u}</div>`
+                        `<div class="username" style="${data.ghostUsers.includes(u) ? `color: ${ghostColor};` : ''}">${u}</div>`
                     ).join("");
                 })
                 .catch(err => console.log("Poll error: " + err));
