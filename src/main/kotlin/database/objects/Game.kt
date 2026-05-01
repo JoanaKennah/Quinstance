@@ -1,11 +1,13 @@
 package com.example.database.objects
 
+import com.example.database.tables.GameTable
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.IntEntity
 import org.jetbrains.exposed.v1.dao.IntEntityClass
-import org.jetbrains.exposed.v1.core.dao.id.EntityID
-import com.example.database.tables.GameTable
 
-class Game(id: EntityID<Int>) : IntEntity(id) {
+class Game(
+    id: EntityID<Int>,
+) : IntEntity(id) {
     companion object : IntEntityClass<Game>(GameTable)
 
     var quiz by Quiz referencedOn GameTable.quiz

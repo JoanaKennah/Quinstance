@@ -226,12 +226,12 @@ class RoutingTest : StringSpec({
             checkForRedirect(response, "/student-dashboard")
         }
     }
-    
+
 
     //Authenticated get routes
     "GET /teacher-dashboard with valid teacher session returns 200 OK with HTML - authenticated teacher access works" {
         testApplication {
-            application { testModule() } 
+            application { testModule() }
             val client = createClient { install(HttpCookies) }
             preLogin(client, "JoanaKennah", "password456")
             client.get("/teacher-dashboard").also { checkForHtml(it) }
@@ -240,7 +240,7 @@ class RoutingTest : StringSpec({
 
     "GET /student-dashboard with valid student session returns 200 OK with HTML - authenticated student access works" {
         testApplication {
-            application { testModule() } 
+            application { testModule() }
             val client = createClient { install(HttpCookies) }
             preLogin(client, "linguin0", "password123")
             client.get("/student-dashboard").also { checkForHtml(it) }
@@ -249,7 +249,7 @@ class RoutingTest : StringSpec({
 
     "GET /create-quiz with valid teacher session returns 200 OK with HTML - authenticated teacher access works" {
         testApplication {
-            application { testModule() } 
+            application { testModule() }
             val client = createClient { install(HttpCookies) }
             preLogin(client, "JoanaKennah", "password456")
             client.get("/create-quiz").also { checkForHtml(it) }
@@ -258,7 +258,7 @@ class RoutingTest : StringSpec({
 
     "GET /view-quizzes with valid student session returns 200 OK with HTML - authenticated student access works" {
         testApplication {
-            application { testModule() } 
+            application { testModule() }
             val client = createClient { install(HttpCookies) }
             preLogin(client, "linguin0", "password123")
             client.get("/view-quizzes").also { checkForHtml(it) }
@@ -267,7 +267,7 @@ class RoutingTest : StringSpec({
 
     "GET /join-lobby with valid student session returns 200 OK with HTML - authenticated student access works" {
         testApplication {
-            application { testModule() } 
+            application { testModule() }
             val client = createClient { install(HttpCookies) }
             preLogin(client, "linguin0", "password123")
             client.get("/join-lobby").also { checkForHtml(it) }
@@ -315,7 +315,7 @@ class RoutingTest : StringSpec({
             response.bodyAsText() shouldContain "Invalid gameID"
         }
     }
-    
+
     //valid int but no record in database
     "GET /view-quiz-questions/99999 returns error message - missing Quiz ID handled" {
         testApplication {
@@ -361,8 +361,8 @@ class RoutingTest : StringSpec({
     "POST /create-quiz w/ missing quiz name returns error message - createquiz missing field handled" {
         testApplication {
             application { testModule() }
-            val client = createClient { install(HttpCookies) } 
-            preLogin(client, "JoanaKennah", "password456") 
+            val client = createClient { install(HttpCookies) }
+            preLogin(client, "JoanaKennah", "password456")
             val response = client.post("/create-quiz") {
                 setBody(FormDataContent(Parameters.build {
                     append("description", "A test quiz")
@@ -375,10 +375,10 @@ class RoutingTest : StringSpec({
         }
     }
 
-    //invalid or missing room code 
+    //invalid or missing room code
     "POST /join-lobby w/ invalid room code returns error message - invalid room code handled" {
         testApplication {
-            application { testModule() } 
+            application { testModule() }
             val client = createClient { install(HttpCookies) }
             preLogin(client, "linguin0", "password123")
             val response = client.post("/join-lobby") {
@@ -393,7 +393,7 @@ class RoutingTest : StringSpec({
 
     "POST /join-lobby w/ missing room code returns error message - missing room code handled" {
         testApplication {
-            application { testModule() } 
+            application { testModule() }
             val client = createClient { install(HttpCookies) }
             preLogin(client, "linguin0", "password123")
             val response = client.post("/join-lobby") {
@@ -459,7 +459,7 @@ class RoutingTest : StringSpec({
     "POST /create-quiz w/ valid data redirects to quiz questions page - quiz creation works" {
         testApplication {
             application { testModule() }
-            val client = createClient { 
+            val client = createClient {
                 install(HttpCookies)
                 //inspect http response directly not redirect
                 followRedirects = false
@@ -650,7 +650,7 @@ class RoutingTest : StringSpec({
             // close lobby manually
             client.post("/close-lobby/$gameId")
 
-            // verify game no longer exists in DB 
+            // verify game no longer exists in DB
             val response = client.get("/lobby-server/$gameId")
             response.status shouldBe HttpStatusCode.OK
             response.bodyAsText() shouldContain "Game not found"
@@ -2578,7 +2578,7 @@ class RoutingTest : StringSpec({
         }
     }
 
-    //words Minigame - 
+    //words Minigame -
     //Words minigame start
     //words minigame - wait screen
     "GET /words-wait/{gameId} danger player sees uh-oh screen - danger player routing works" {
@@ -3316,7 +3316,7 @@ fun checkForHtml(response: HttpResponse) {
 fun checkForRedirect(response: HttpResponse, expectedLocation: String) {
     response.status shouldBe HttpStatusCode.Found
     response.headers["Location"] shouldContain expectedLocation
-} 
+}
 
 //handles login request for some tests (inc auth. get routes)
 suspend fun preLogin(client: HttpClient, username: String, password: String) {

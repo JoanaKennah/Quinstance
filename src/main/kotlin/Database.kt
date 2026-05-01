@@ -1,16 +1,29 @@
 package com.example
 
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
-import org.jetbrains.exposed.v1.core.eq
-import com.password4j.Password
-import kotlin.text.isNotEmpty
 import com.example.database.ProjectDatabase
-import com.example.database.TestDatabase
-import com.example.database.tables.*
-import com.example.database.objects.*
+import com.example.database.objects.Answer
+import com.example.database.objects.Game
+import com.example.database.objects.InUseCode
+import com.example.database.objects.Question
+import com.example.database.objects.Quiz
+import com.example.database.objects.Quinstance
+import com.example.database.objects.User
+import com.example.database.objects.UserScore
+import com.example.database.tables.AnswerTable
+import com.example.database.tables.GameTable
+import com.example.database.tables.InUseTable
+import com.example.database.tables.QuestionTable
+import com.example.database.tables.QuinstanceTable
+import com.example.database.tables.QuizTable
+import com.example.database.tables.UserTable
+import com.example.database.tables.UserScoreTable
+import com.password4j.Password
 import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import kotlin.text.isNotEmpty
 
 //  All code here was written by a human :>
 /*  Websites used for debugging/learning
@@ -24,7 +37,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
  */
 data class UserAttemptView(
     val quizName: String,
-    val score: Int
+    val score: Int,
 )
 
 /**
@@ -34,7 +47,7 @@ data class PlayerScoreInfo(
     val userID: Int,
     val username: String,
     val score: Int,
-    val isGhost: Boolean
+    val isGhost: Boolean,
 )
 
 /**
@@ -56,14 +69,13 @@ fun configureDatabase() {
             UserTable,
         )
     }
-
 }
 
 /**
  * Retrieves user from UserTable using their username, returns null if no user found
  * @throws IllegalArgumentException if the username is empty.
  */
-fun retrieveUser(username: String) : User? {
+fun retrieveUser(username: String): User? {
     require(username.isNotEmpty()) { "User can't be empty" }
     return transaction(TransactionManager.defaultDatabase) {
         User.find { UserTable.username eq username }.firstOrNull()
@@ -89,7 +101,14 @@ fun retrieveUserById(userId: Int): User? {
  * @throws IllegalArgumentException if any params are empty.
  * @throws IllegalArgumentException if username or email is greater than 50 characters.
  */
-fun addUser(username: String, password: String, name: String, email: String, keyStage: String, role: String) : User? {
+fun addUser(
+    username: String,
+    password: String,
+    name: String,
+    email: String,
+    keyStage: String,
+    role: String,
+): User? {
     // Check to ensure all parameters are not empty
     for (parameter in listOf(username, password, name, email, keyStage, role)) {
         require(parameter.isNotEmpty())
@@ -110,13 +129,14 @@ fun addUser(username: String, password: String, name: String, email: String, key
                 this.role = role
             }
         }
-    }; return null
+    }
+    return null
 }
 
 /**
  * Deletes given user from UserTable (possibly used for Admin purposes).
  **/
-fun deleteUser(user : User) {
+fun deleteUser(user: User) {
     // Checks if the user exists in the table before deleting it
     val userExists = retrieveUser(user.username)
     if (userExists != null) {
@@ -127,32 +147,37 @@ fun deleteUser(user : User) {
         // Throws an exception as it shouldn't be possible for a website user to have this error
         throw Exception("User doesn't exist")
     }
-
 }
 
 /**
  * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1.
  * @throws IllegalArgumentException if any param is empty
  */
-fun addQuestion(quiz: Quiz, question: String, keyStage: String) : Question {
+fun addQuestion(
+    quiz: Quiz,
+    question: String,
+    keyStage: String,
+): Question {
     for (parameter in listOf(question, keyStage)) {
         require(parameter.isNotEmpty())
     }
-    val newQuestion = transaction(TransactionManager.defaultDatabase) {
-        // Don't need to check if Question already exists
-        val question = Question.new {
-            this.question = question
-            this.key_stage = keyStage
-        }
-        // Creates Quinstance so we know which Quiz is associated with what Question
-        Quinstance.new {
-            this.quiz = quiz
-            this.question = question
-        }
-        quiz.num_of_questions += 1
+    val newQuestion =
+        transaction(TransactionManager.defaultDatabase) {
+            // Don't need to check if Question already exists
+            val question =
+                Question.new {
+                    this.question = question
+                    this.key_stage = keyStage
+                }
+            // Creates Quinstance so we know which Quiz is associated with what Question
+            Quinstance.new {
+                this.quiz = quiz
+                this.question = question
+            }
+            quiz.num_of_questions += 1
 
-        return@transaction question
-    }
+            return@transaction question
+        }
     return newQuestion
 }
 
@@ -162,7 +187,13 @@ fun addQuestion(quiz: Quiz, question: String, keyStage: String) : Question {
  * @return listOf(correctOption, option2, option3?, option4?)
  * @throws IllegalArgumentException if option1 or option2 is empty, or if correctIndex isn't within 0 to 3.
  */
-fun setAnswerOptions(option1: String, option2: String, option3: String? = null, option4: String? = null, correctIndex: Int): List<String?> {
+fun setAnswerOptions(
+    option1: String,
+    option2: String,
+    option3: String? = null,
+    option4: String? = null,
+    correctIndex: Int,
+): List<String?> {
     require(option1 != "") { "option1 cannot be empty" }
     require(option2 != "") { "option2 cannot be empty" }
     require(correctIndex in 0..3) { "correctIndex must be between 0 and 3" }
@@ -206,29 +237,36 @@ fun setAnswerOptions(option1: String, option2: String, option3: String? = null, 
  * @throws IllegalArgumentException if question given doesn't exist
  * @throws IllegalArgumentException if answer given doesn't exist or the answer is not associated with the question.
  */
-fun editQuestion(question: Question, questionData: Map<String, String>, answer: Answer, answerData: Map<String, String?>) {
+fun editQuestion(
+    question: Question,
+    questionData: Map<String, String>,
+    answer: Answer,
+    answerData: Map<String, String?>,
+) {
     require(questionData.isNotEmpty() && answerData.isNotEmpty()) { "Nothing to edit" }
     transaction(TransactionManager.defaultDatabase) {
-        require(Question.findById(question.id) != null) { "Question must exist "}
+        require(Question.findById(question.id) != null) { "Question must exist " }
         require(Answer.findById(answer.id) != null) { "Answer must exist" }
-        require(answer.question.id == question.id) { "Answer must be for the given Question "}
+        require(answer.question.id == question.id) { "Answer must be for the given Question " }
     }
 
     for (item in questionData) {
         require(item.key in listOf("question", "keyStage")) { "questionData key must be an existing attribute" }
     }
     for (item in answerData) {
-        require(item.key in listOf("option1", "option2", "option3", "option4", "correctIndex")) { "answerData key must be an existing attribute" }
+        require(
+            item.key in listOf("option1", "option2", "option3", "option4", "correctIndex"),
+        ) { "answerData key must be an existing attribute" }
         if (item.key == "correctIndex") {
             require(item.value?.toIntOrNull() != null) { "correctIndex must be an integer" }
-            require(item.value?.toInt() in 0..3){ "correctIndex must in range 0..3" }
+            require(item.value?.toInt() in 0..3) { "correctIndex must in range 0..3" }
         }
     }
 
     transaction(TransactionManager.defaultDatabase) {
         if (questionData.isNotEmpty()) {
             questionData.forEach {
-                when(it.key) {
+                when (it.key) {
                     "question" -> question.question = it.value
                     "keyStage" -> question.key_stage = it.value
                 }
@@ -236,15 +274,17 @@ fun editQuestion(question: Question, questionData: Map<String, String>, answer: 
         }
 
         if (answerData.isNotEmpty()) {
-            val answerOptions = setAnswerOptions(
-                answerData["option1"]!!,
-                answerData["option2"]!!,
-                answerData["option3"],
-                answerData["option4"],
-                answerData["correctIndex"]!!.toInt())
+            val answerOptions =
+                setAnswerOptions(
+                    answerData["option1"]!!,
+                    answerData["option2"]!!,
+                    answerData["option3"],
+                    answerData["option4"],
+                    answerData["correctIndex"]!!.toInt(),
+                )
 
             answerData.forEach {
-                when(it.key) {
+                when (it.key) {
                     "correctIndex" -> answer.correct_answer = answerOptions[0]!!
                     "option2" -> answer.option2 = answerOptions[1]!!
                     "option3" -> answer.option3 = answerOptions[2]
@@ -282,12 +322,12 @@ fun deleteQuestion(question: Question): Boolean {
  * Retrieves all Questions associated with the given Quiz. If there are no questions associated with the quiz,
  * a null value is returned.
  */
-fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
+fun retrieveQuizQuestions(quiz: Quiz): MutableList<Question> {
     // Find all question ID's associated with the given Quiz
     return transaction(TransactionManager.defaultDatabase) {
         // Check to see if quiz actually exists
         println("test ${quiz.id}")
-        require( (Quiz.findById(quiz.id))?.id == quiz.id ) { "Quiz received does not exist" }
+        require((Quiz.findById(quiz.id))?.id == quiz.id) { "Quiz received does not exist" }
 
         val foundQuestionQuinstances = Quinstance.find { QuinstanceTable.quiz eq quiz.id }
         val questionList = mutableListOf<Question>()
@@ -307,7 +347,15 @@ fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
 /**
  * Creates and adds a new Quiz to QuizTable
  */
-fun addQuiz(user: User, quiz_name: String, description: String, category: String, key_stage: String, num_of_questions: Int = 0, minigamesEnabled: Boolean = false) : Quiz {
+fun addQuiz(
+    user: User,
+    quiz_name: String,
+    description: String,
+    category: String,
+    key_stage: String,
+    num_of_questions: Int = 0,
+    minigamesEnabled: Boolean = false,
+): Quiz {
     // Checks the User exists
     require(retrieveUser(user.username) != null) { "User must not be null" }
     require(num_of_questions >= 0) { "Number of questions must be greater than or equal to 0" }
@@ -332,7 +380,7 @@ fun addQuiz(user: User, quiz_name: String, description: String, category: String
 /**
  * Deletes given Quiz from QuizTable. Returns true if the quiz is successfully deleted
  */
-fun deleteQuiz(quiz: Quiz) : Boolean {
+fun deleteQuiz(quiz: Quiz): Boolean {
     // Finds if given Quiz exists, then deletes it
     return transaction(TransactionManager.defaultDatabase) {
         val foundQuiz = Quiz.find { QuizTable.id eq quiz.id }
@@ -372,7 +420,7 @@ fun retrieveQuizFromGameID(gameID: Int): Quiz? {
  * Retrieve all Quizzes that a User has created. Will return null if the User passed in does not exist. An empty list
  * can be returned if the User has no quizzes.
  */
-fun retrieveUserQuizzes(username: String) : MutableList<Quiz>? {
+fun retrieveUserQuizzes(username: String): MutableList<Quiz>? {
     // Returns null if the user doesn't exist
     val currentUser = retrieveUser(username) ?: return null
     val userID = currentUser.id
@@ -388,82 +436,21 @@ fun retrieveUserQuizzes(username: String) : MutableList<Quiz>? {
         return@transaction quizList
     }
 }
-/**
- * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1.
- ---- commented out as duplicate
 
-fun addQuestion(quiz: Quiz, question: String, key_stage: String) : Question {
-    for (parameter in listOf(question, key_stage)) {
-        require(parameter.isNotEmpty())
-    }
-    val newQuestion = transaction(TransactionManager.defaultDatabase) {
-        // Don't need to check if Question already exists
-        val question = Question.new {
-            this.question = question
-            this.key_stage = key_stage
-        }
-        // Creates Quinstance so we know which Quiz is associated with what Question
-        Quinstance.new {
-            this.quiz = quiz
-            this.question = question
-        }
-
-        quiz.num_of_questions += 1
-
-        return@transaction question
-    }
-    return newQuestion
-}
- */
-/**
- * Deletes given question from QuestionTable. Returns true if the question is successfully deleted
- --- commented out as duplicate
-
-fun deleteQuestion(question: Question): Boolean {
-    // Finds if the given question exists, then deletes it
-    return transaction(TransactionManager.defaultDatabase) {
-        val foundQuestion = Question.find { QuestionTable.id eq question.id }
-        if (foundQuestion.firstOrNull() != null) {
-            question.delete()
-            return@transaction true
-        }
-        return@transaction false
-    }
-}
- */
-/**
- * Retrieves all Questions associated with the given Quiz. If there are no questions associated with the quiz,
- * a null value is returned.
- ---- commented out as duplicate
-
-fun retrieveQuizQuestions(quiz: Quiz) : MutableList<Question> {
-    // Find all question ID's associated with the given Quiz
-    return transaction(TransactionManager.defaultDatabase) {
-        // Check to see if quiz actually exists
-        require( (Quiz.findById(quiz.id))?.id == quiz.id ) { "Quiz received does not exist" }
-
-        val foundQuestionQuinstances = Quinstance.find { QuinstanceTable.quiz eq quiz.id }
-        val questionList = mutableListOf<Question>()
-
-        // Retrieves Question objects from the ID's found and appends them to a list, which is returned.
-        // Can be empty but never null
-        for (questionQuinstance in foundQuestionQuinstances) {
-            val question = Question.findById(questionQuinstance.id)
-            if (question != null) {
-                questionList.add(question)
-            }
-        }
-        return@transaction questionList
-    }
-}
- */
 /**
  * Creates and adds an Answer (to a Question) to AnswerTable
  */
-fun addAnswer(question: Question, option1: String, option2: String, option3: String? = null, option4: String? = null, correctIndex: Int) : Answer? {
+fun addAnswer(
+    question: Question,
+    option1: String,
+    option2: String,
+    option3: String? = null,
+    option4: String? = null,
+    correctIndex: Int,
+): Answer? {
     // Slightly changed this to accept 4 answers then flag the correct one, helped make the frontend a bit cleaner
     transaction(TransactionManager.defaultDatabase) {
-        require( (Question.findById(question.id))?.id == question.id ) { "Question given does not exist" }
+        require((Question.findById(question.id))?.id == question.id) { "Question given does not exist" }
     }
     require(option1.isNotEmpty()) { "Option 1 must not be empty" }
     require(option2.isNotEmpty()) { "Option 2 must not be empty" }
@@ -473,18 +460,19 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
     // Check to see if an Answer already exists (Question and Answer have 1:1 relationship), return null if Answer
     // already exists
     return transaction(TransactionManager.defaultDatabase) {
-        val check = Answer.find {AnswerTable.question eq question.id }
+        val check = Answer.find { AnswerTable.question eq question.id }
         if (check.firstOrNull() != null) return@transaction null
 
         val answers = setAnswerOptions(option1, option2, option3, option4, correctIndex)
 
-        val newAnswer = Answer.new {
-            this.question = question
-            this.correct_answer = answers[0]!!
-            this.option2 = answers[1]!!
-            this.option3 = answers[2]
-            this.option4 = answers[3]
-        }
+        val newAnswer =
+            Answer.new {
+                this.question = question
+                this.correct_answer = answers[0]!!
+                this.option2 = answers[1]!!
+                this.option3 = answers[2]
+                this.option4 = answers[3]
+            }
         return@transaction newAnswer
     }
 }
@@ -492,10 +480,10 @@ fun addAnswer(question: Question, option1: String, option2: String, option3: Str
 /**
  * Retrieves Answer for given Question. Will return null if there is no answer.
  */
-fun retrieveQuestionAnswer(question: Question) : Answer? {
+fun retrieveQuestionAnswer(question: Question): Answer? {
     return transaction(TransactionManager.defaultDatabase) {
         // Check to see if quiz given actually exists
-        require( (Question.findById(question.id))?.id == question.id ) { "Question given does not exist" }
+        require((Question.findById(question.id))?.id == question.id) { "Question given does not exist" }
 
         val foundAnswer = Answer.find(AnswerTable.question eq question.id)
         // Return null if there is no Answer to this Question
@@ -512,7 +500,7 @@ fun retrieveGame(gameID: Int): Game? {
     // Check given gameID is valid
     require(gameID > 0) { "GameID must be non-negative" }
     return transaction(TransactionManager.defaultDatabase) {
-       Game.findById(gameID)
+        Game.findById(gameID)
     }
 }
 
@@ -526,7 +514,10 @@ fun addGame(quiz: Quiz): Game {
     return transaction(TransactionManager.defaultDatabase) {
         Game.new {
             this.quiz = quiz
-            this.timeStamp = java.time.LocalDateTime.now().toString()
+            this.timeStamp =
+                java.time.LocalDateTime
+                    .now()
+                    .toString()
         }
     }
 }
@@ -566,7 +557,10 @@ fun roomCodeAlreadyExists(roomCode: String): Boolean {
  * Creates and adds a new InUseCode record to InUseCodeTable.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */
-fun addInUseCode(roomCode: String, game: Game): InUseCode {
+fun addInUseCode(
+    roomCode: String,
+    game: Game,
+): InUseCode {
     // Check to see if given game actually exists and that the room code is valid (length 8, not empty)
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     require(roomCode.isNotEmpty()) { "Room code must not be empty" }
@@ -621,7 +615,7 @@ fun retrieveInUseCode(roomCode: String): InUseCode? {
  * Exposed DAO is shite.
  */
 fun retrieveInUseCodeGame(inUseCode: InUseCode): Game? {
-    require(retrieveInUseCode(inUseCode.room_code) != null ) { "InUseCode must exist" }
+    require(retrieveInUseCode(inUseCode.room_code) != null) { "InUseCode must exist" }
     return transaction(TransactionManager.defaultDatabase) {
         Game.find { GameTable.id eq inUseCode.game.id }.firstOrNull()
     }
@@ -633,7 +627,8 @@ fun retrieveInUseCodeGame(inUseCode: InUseCode): Game? {
  */
 fun deleteInUseCode(game: Game) {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
-    transaction(TransactionManager.defaultDatabase) {                                                                   //delete room code
+    transaction(TransactionManager.defaultDatabase) {
+        // delete room code
         InUseCode.find { InUseTable.game eq game.id }.firstOrNull()?.delete()
     }
 }
@@ -642,7 +637,10 @@ fun deleteInUseCode(game: Game) {
  * Creates and adds a new UserScore record to UserScoreTable
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */
-fun addUserScore(game: Game, user: User): UserScore {
+fun addUserScore(
+    game: Game,
+    user: User,
+): UserScore {
     // Checks to see if the given game and user exists
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     require(retrieveUser(user.username) != null) { "User must exist" }
@@ -660,14 +658,18 @@ fun addUserScore(game: Game, user: User): UserScore {
  * Retrieves UserScore from UserScoreTable, returns null if UserScore doesn't exist.
  * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
  */
-fun retrieveUserScore(game: Game, user: User): UserScore? {
+fun retrieveUserScore(
+    game: Game,
+    user: User,
+): UserScore? {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     require(retrieveUser(user.username) != null) { "User must exist" }
 
     return transaction(TransactionManager.defaultDatabase) {
-        UserScore.find {
-            UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
-        }.firstOrNull()
+        UserScore
+            .find {
+                UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
+            }.firstOrNull()
     }
 }
 
@@ -679,11 +681,12 @@ fun retrieveUserScore(game: Game, user: User): UserScore? {
 fun retrieveAllUserScoresDescending(game: Game): List<PlayerScoreInfo> {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     return transaction(TransactionManager.defaultDatabase) {
-        UserScore.find { UserScoreTable.game eq game.id }
+        UserScore
+            .find { UserScoreTable.game eq game.id }
             .sortedByDescending { it.score }
             .map { userScore ->
                 PlayerScoreInfo(userScore.user.id.value, userScore.user.username, userScore.score, userScore.isGhost)
-        }
+            }
     }
 }
 
@@ -693,14 +696,18 @@ fun retrieveAllUserScoresDescending(game: Game): List<PlayerScoreInfo> {
  * @return True if delete is successful, false if UserScore doesn't exist.
  * @throws IllegalArgumentException if the Game or User doesn't exist.
  */
-fun deleteUserScoreForGivenUser(game: Game, user: User): Boolean {
+fun deleteUserScoreForGivenUser(
+    game: Game,
+    user: User,
+): Boolean {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
     require(retrieveUser(user.username) != null) { "User must exist" }
     val userScore =
         transaction(TransactionManager.defaultDatabase) {
-            UserScore.find {
-                UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
-            }.firstOrNull()
+            UserScore
+                .find {
+                    UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
+                }.firstOrNull()
         } ?: return false
     transaction(TransactionManager.defaultDatabase) { userScore.delete() }
     return true
@@ -714,9 +721,11 @@ fun deleteUserScoreForGivenUser(game: Game, user: User): Boolean {
  */
 fun deleteGameUserScores(game: Game): Boolean {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
-    val userScores = transaction(TransactionManager.defaultDatabase) {                                                                   //delete all user scores from this game
-        UserScore.find { UserScoreTable.game eq game.id }.toList()
-    }
+    val userScores =
+        transaction(TransactionManager.defaultDatabase) {
+            // delete all user scores from this game
+            UserScore.find { UserScoreTable.game eq game.id }.toList()
+        }
     if (userScores.isEmpty()) return false
     transaction(TransactionManager.defaultDatabase) { userScores.forEach { it.delete() } }
     return true
@@ -729,11 +738,12 @@ fun deleteGameUserScores(game: Game): Boolean {
 fun retrieveUserAttempts(user: User): List<UserAttemptView> {
     require(retrieveUser(user.username) != null) { "User must exist" }
     return transaction(TransactionManager.defaultDatabase) {
-        UserScore.find { UserScoreTable.user eq user.id }
+        UserScore
+            .find { UserScoreTable.user eq user.id }
             .map {
                 UserAttemptView(
                     quizName = it.game.quiz.quiz_name,
-                    score = it.score
+                    score = it.score,
                 )
             }
     }

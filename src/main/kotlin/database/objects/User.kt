@@ -1,9 +1,9 @@
 package com.example.database.objects
 
+import com.example.database.tables.UserTable
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.IntEntity
 import org.jetbrains.exposed.v1.dao.IntEntityClass
-import org.jetbrains.exposed.v1.core.dao.id.EntityID
-import com.example.database.tables.UserTable
 
 /**
  * User class connected to UserTable through IntEntityClass
@@ -14,7 +14,9 @@ import com.example.database.tables.UserTable
  * @property key_stage Age group of the user
  * @property role Account role (e.g. Student, Teacher, Admin)
  */
-class User(id: EntityID<Int>) : IntEntity(id) {
+class User(
+    id: EntityID<Int>,
+) : IntEntity(id) {
     companion object : IntEntityClass<User>(UserTable)
 
     var username by UserTable.username
