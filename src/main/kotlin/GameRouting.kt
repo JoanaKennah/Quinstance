@@ -108,6 +108,12 @@ fun Application.configureGameRouting() {
                         }
                     }
                 }
+
+                // send clients to end game screen before session ends
+                gameSession.connections.forEach { connection ->
+                    connection.send(Frame.Text("{\"redirect\":\"/end-game/$gameId\"}"))
+                }
+
                 activeSessions.remove(gameId)           //cut game and go to leaderboard
                 deleteInUseCode(game)
                 call.respondRedirect("/leaderboard/$gameId")
