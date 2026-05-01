@@ -101,6 +101,11 @@
             padding: 0;
         }
 
+        .remove-btn:hover {
+            background: none;
+            color: inherit;
+        }
+
         .bottom-bar {
             margin-top: 40px;
             display: flex;
@@ -174,7 +179,7 @@
             div.className = "answer-box";
             div.id = "a" + newIndex;
             div.innerHTML = `
-                <span class="remove-btn" onclick="removeAnswer('a${newIndex}')">x</span>
+                <button type="button" class="remove-btn" onclick="removeAnswer('a${newIndex}')">x</button>
                 <input type="text" name="answers[]" placeholder="Answer ${newIndex}">
                 <input type="radio" name="correct" value="${newIndex - 1}">
             `;
