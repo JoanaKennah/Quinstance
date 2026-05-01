@@ -37,7 +37,7 @@ fun Application.configureMathsMinigameRouting() {
                 PebbleContent(
                     "mini_game_maths_server.peb",
                     mapOf(
-                        "quizName" to (retrieveQuizFromGameID(gameId)?.quiz_name ?: ""),
+                        "quizName" to (retrieveQuizFromGameID(gameId)?.quizName ?: ""),
                         "gameId" to gameId,
                         "theme" to session.theme,
                         "left_users" to gameSession.lastIncorrectPlayers.take(3),

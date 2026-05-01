@@ -11,7 +11,7 @@ import org.jetbrains.exposed.v1.dao.IntEntityClass
  * @property password Account password, will be hashed before storing
  * @property name Should contain firstname and lastname
  * @property email Account email address, format checked in .peb file
- * @property key_stage Age group of the user
+ * @property keyStage Age group of the user
  * @property role Account role (e.g. Student, Teacher, Admin)
  */
 class User(
@@ -23,7 +23,7 @@ class User(
     var password by UserTable.password
     var name by UserTable.name
     var email by UserTable.email
-    var key_stage by UserTable.key_stage
+    var keyStage by UserTable.key_stage
     var role by UserTable.role
 
     override fun toString() = username

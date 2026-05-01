@@ -11,7 +11,7 @@ class Answer(
     companion object : IntEntityClass<Answer>(AnswerTable)
 
     var question by Question referencedOn AnswerTable.question
-    var correct_answer by AnswerTable.correct_answer
+    var correctAnswer by AnswerTable.correct_answer
     var option2 by AnswerTable.option2
     var option3 by AnswerTable.option3
     var option4 by AnswerTable.option4

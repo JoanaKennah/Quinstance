@@ -1,13 +1,18 @@
 package com.example
 
-import com.example.database.objects.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.pebble.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.pebble.PebbleContent
+import io.ktor.server.request.receiveParameters
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondRedirect
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
+import io.ktor.server.sessions.get
+import io.ktor.server.sessions.sessions
 import io.ktor.websocket.Frame
 import kotlinx.serialization.json.Json
 
@@ -34,7 +39,7 @@ fun Application.configurePotionsMinigameRouting() {
                 PebbleContent(
                     "potions_minigame_server.peb",
                     mapOf(
-                        "quizName" to (retrieveQuizFromGameID(gameId)?.quiz_name ?: ""),
+                        "quizName" to (retrieveQuizFromGameID(gameId)?.quizName ?: ""),
                         "gameId" to gameId,
                         "theme" to session.theme,
                         "isReveal" to false,
@@ -273,7 +278,7 @@ fun Application.configurePotionsMinigameRouting() {
                 PebbleContent(
                     "potions_minigame_server.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "gameId" to gameId,
                         "theme" to session.theme,
                         "isReveal" to true,

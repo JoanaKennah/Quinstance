@@ -1,19 +1,22 @@
 package com.example
 
-import com.example.database.objects.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.pebble.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.pebble.PebbleContent
+import io.ktor.server.request.receiveParameters
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondRedirect
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
+import io.ktor.server.sessions.get
+import io.ktor.server.sessions.sessions
 import io.ktor.websocket.Frame
 
 fun Application.configureRoomsMinigameRouting() {
+    // Routing for Rooms minigame
     routing {
-        // Rooms Minigame -
-        // serves start screens to clients and host after host presses start
+        // Serves start screens to clients and host after host presses start
         post("/rooms-begin/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -33,7 +36,7 @@ fun Application.configureRoomsMinigameRouting() {
                 PebbleContent(
                     "rooms_minigame_server_playing.peb",
                     mapOf(
-                        "quizName" to (retrieveQuizFromGameID(gameId)?.quiz_name ?: ""),
+                        "quizName" to (retrieveQuizFromGameID(gameId)?.quizName ?: ""),
                         "gameId" to gameId,
                         "theme" to session.theme,
                     ),
@@ -41,7 +44,7 @@ fun Application.configureRoomsMinigameRouting() {
             )
         }
 
-        // serves uh-oh or safe screen while host is on intro
+        // Serves uh-oh or safe screen while host is on intro
         get("/rooms-wait/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -83,6 +86,7 @@ fun Application.configureRoomsMinigameRouting() {
             }
         }
 
+        // Serves room client pick screen to client
         get("/rooms-start/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -123,7 +127,7 @@ fun Application.configureRoomsMinigameRouting() {
             }
         }
 
-        // records room pick and sends client to waiting screen
+        // Records room pick and sends client to waiting screen
         post("/rooms-pick/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -141,17 +145,18 @@ fun Application.configureRoomsMinigameRouting() {
             val room =
                 parameters["room"] ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid selection")))
 
-            // validation just in case
+            // Validation just in case
             if (room !in listOf("A", "B", "C")) {
                 return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid selection")))
             }
 
-            // record pick
+            // Client room pick
             roomsState.playerPicks[session.username] = room
 
             call.respondRedirect("/rooms-selected/$gameId")
         }
 
+        // Serves room selection screen to client
         get("/rooms-selected/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -181,6 +186,7 @@ fun Application.configureRoomsMinigameRouting() {
             )
         }
 
+        // Counts all client room picks and determines which room is the ghost room
         post("/rooms-end/{gameId}") {
             call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -194,14 +200,14 @@ fun Application.configureRoomsMinigameRouting() {
                 gameSession.roomsGameState
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No minigames active")))
 
-            // assign random room to late picks
+            // Assign random room to late picks
             gameSession.lastIncorrectPlayers.forEach { username ->
                 if (!roomsState.playerPicks.containsKey(username)) {
                     roomsState.playerPicks[username] = listOf("A", "B", "C").random()
                 }
             }
 
-            // count picks per room
+            // Count picks per room
             val roomCounts =
                 mapOf(
                     "A" to roomsState.playerPicks.count { it.value == "A" },
@@ -209,7 +215,7 @@ fun Application.configureRoomsMinigameRouting() {
                     "C" to roomsState.playerPicks.count { it.value == "C" },
                 )
 
-            // check if all players in same room
+            // Check if all players in same room
             val uniqueRooms = roomsState.playerPicks.values.toSet()
             if (uniqueRooms.size == 1) {
                 roomsState.allSafe = true
@@ -221,28 +227,29 @@ fun Application.configureRoomsMinigameRouting() {
                 return@post
             }
 
-            // find room w/ most players - ramdom pick if tie
+            // Find room with most players - makes a random pick if its a tie
             val maxCount = roomCounts.values.maxOrNull() ?: 0
             val busyRooms = roomCounts.filter { it.value == maxCount }.keys.toList()
             roomsState.ghostRoom = busyRooms.random()
 
-            // determine players in ghost roomm
+            // Determine players in the picked room (ghost room)
             roomsState.newGhosts =
                 roomsState.playerPicks
                     .filter { it.value == roomsState.ghostRoom }
                     .map { it.key }
 
-            // add new ghosts to list
+            // Add new ghosts to list
             gameSession.ghostPlayers.addAll(roomsState.newGhosts)
 
             roomsState.isFinished = true
 
-            // send all clients to results page
+            // Send all clients to results page
             gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/rooms-result/$gameId\"}")) }
 
             call.respond(HttpStatusCode.OK)
         }
 
+        // Serves rooms minigame outcome screen to client. If they are all safe, serve all safe screen, else serve ghost outcome screen
         get("/rooms-end-host/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -291,6 +298,7 @@ fun Application.configureRoomsMinigameRouting() {
             }
         }
 
+        // Serve room minigame result to client, telling them if they have become a ghost or not
         get("/rooms-result/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -315,7 +323,7 @@ fun Application.configureRoomsMinigameRouting() {
             if (session.username in roomsState.newGhosts &&
                 session.username in gameSession.lastIncorrectPlayers
             ) {
-                // newly ghosted
+                // Newly ghosted
                 call.respond(
                     PebbleContent(
                         "mini_game_maths_ur_ghost.peb",
@@ -327,7 +335,7 @@ fun Application.configureRoomsMinigameRouting() {
                     ),
                 )
             } else {
-                // safe or existing ghost
+                // Safe or already existing ghost
                 call.respond(
                     PebbleContent(
                         "mini_games_maths_ur_safe.peb",

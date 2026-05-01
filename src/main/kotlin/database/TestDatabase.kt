@@ -87,7 +87,7 @@ object TestDatabase {
                 }
 
             Quiz.findByIdAndUpdate(userOneQuiz.value) {
-                it.num_of_questions += 1
+                it.numOfQuestions += 1
             }
 
             val userOneQuizQ2 =
@@ -97,7 +97,7 @@ object TestDatabase {
                 }
 
             Quiz.findByIdAndUpdate(userOneQuiz.value) {
-                it.num_of_questions += 1
+                it.numOfQuestions += 1
             }
 
             AnswerTable.insert {
@@ -154,7 +154,7 @@ object TestDatabase {
                 }
 
             Quiz.findByIdAndUpdate(userTwoQuiz.value) {
-                it.num_of_questions += 1
+                it.numOfQuestions += 1
             }
 
             AnswerTable.insert {

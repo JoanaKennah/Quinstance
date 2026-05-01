@@ -1,29 +1,31 @@
 package com.example
 
-import com.example.database.objects.*
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.pebble.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.request.get
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.pebble.PebbleContent
+import io.ktor.server.request.receiveParameters
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondRedirect
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
+import io.ktor.server.sessions.get
+import io.ktor.server.sessions.sessions
 import io.ktor.websocket.Frame
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
-// create an HTTP client to reuse every request
-// used to make outgoing request to API using coroutines
+// Create an HTTP client to reuse every request
+// Used to make outgoing request to API using coroutines
 private val httpClient = HttpClient(CIO)
 
 fun Application.configureWordsMinigameRouting() {
+    // Routing for Words minigame
     routing {
-        // Words minigame -
-        // serves start screens to clients and host
+        // Serves start screens to clients and host
         post("/words-begin/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -31,10 +33,20 @@ fun Application.configureWordsMinigameRouting() {
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
             val gameSession =
                 activeSessions[gameId]
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No active session found"),
+                        ),
+                    )
             val wordsState =
                 gameSession.wordsGameState
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No minigame active")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No minigame active"),
+                        ),
+                    )
 
             gameSession.connections.forEach { connection ->
                 connection.send(Frame.Text("{\"redirect\":\"/words-start/$gameId\"}"))
@@ -46,7 +58,7 @@ fun Application.configureWordsMinigameRouting() {
                 PebbleContent(
                     "words_minigame_server_playing.peb",
                     mapOf(
-                        "quizName" to (retrieveQuizFromGameID(gameId)?.quiz_name ?: ""),
+                        "quizName" to (retrieveQuizFromGameID(gameId)?.quizName ?: ""),
                         "gameId" to gameId,
                         "theme" to session.theme,
                         "grid" to wordsState.grid,
@@ -55,7 +67,7 @@ fun Application.configureWordsMinigameRouting() {
             )
         }
 
-        // serves uh-oh or safe screen while host is on intro
+        // Serves uh-oh or safe screen while host is on intro
         get("/words-wait/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -63,9 +75,19 @@ fun Application.configureWordsMinigameRouting() {
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
             val gameSession =
                 activeSessions[gameId]
-                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+                    ?: return@get call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No active session found"),
+                        ),
+                    )
             val game =
-                retrieveGame(gameId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Game not found")))
+                retrieveGame(gameId) ?: return@get call.respond(
+                    PebbleContent(
+                        "error.peb",
+                        mapOf("errorMessage" to "Game not found"),
+                    ),
+                )
             val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
 
             val userScore = retrieveUserScore(game, user)?.score ?: 0
@@ -95,7 +117,7 @@ fun Application.configureWordsMinigameRouting() {
             }
         }
 
-        // serves all clients pick screen - safe players play along
+        // Serves all clients pick screen - safe players play along
         get("/words-start/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -103,11 +125,21 @@ fun Application.configureWordsMinigameRouting() {
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
             val gameSession =
                 activeSessions[gameId]
-                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+                    ?: return@get call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No active session found"),
+                        ),
+                    )
 
             val wordsState =
                 gameSession.wordsGameState
-                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No minigame active")))
+                    ?: return@get call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No minigame active"),
+                        ),
+                    )
 
             call.respond(
                 PebbleContent(
@@ -122,7 +154,7 @@ fun Application.configureWordsMinigameRouting() {
             )
         }
 
-        // get word, validate against grid and dict, redirect if pass
+        // Gets the client's word, validates it against grid and dictionary API, then redirect if it passes
         post("/words-submit/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -130,11 +162,21 @@ fun Application.configureWordsMinigameRouting() {
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
             val gameSession =
                 activeSessions[gameId]
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No active session found"),
+                        ),
+                    )
 
             val wordsState =
                 gameSession.wordsGameState
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No minigame active")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No minigame active"),
+                        ),
+                    )
 
             val parameters = call.receiveParameters()
             val word =
@@ -150,7 +192,7 @@ fun Application.configureWordsMinigameRouting() {
                     ),
                 )
 
-            // check letters in word against letters in grid
+            // Check letters in word against letters in grid
             val gridLetterCounts = wordsState.grid.groupingBy { it }.eachCount()
             val wordLetterCounts = word.map { it.toString() }.groupingBy { it }.eachCount()
             val lettersValid =
@@ -173,7 +215,7 @@ fun Application.configureWordsMinigameRouting() {
                 return@post
             }
 
-            // check word against dict API
+            // Check word against dictionary API
             val response = httpClient.get("https://api.dictionaryapi.dev/api/v2/entries/en/${word.lowercase()}")
             if (response.status != HttpStatusCode.OK) {
                 call.respond(
@@ -190,13 +232,13 @@ fun Application.configureWordsMinigameRouting() {
                 return@post
             }
 
-            // if both checks pass store word and redirect
+            // If both checks pass store word and redirect
             wordsState.playerWords[session.username] = word
 
             call.respondRedirect("/words-selected/$gameId")
         }
 
-        // serves client waiting screen after word submitted
+        // Serves client waiting screen after word submitted
         get("/words-selected/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -204,11 +246,21 @@ fun Application.configureWordsMinigameRouting() {
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
             val gameSession =
                 activeSessions[gameId]
-                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+                    ?: return@get call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No active session found"),
+                        ),
+                    )
 
             val wordsState =
                 gameSession.wordsGameState
-                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No minigame active")))
+                    ?: return@get call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No minigame active"),
+                        ),
+                    )
 
             val word =
                 wordsState.playerWords[session.username]
@@ -226,7 +278,7 @@ fun Application.configureWordsMinigameRouting() {
             )
         }
 
-        // process and calculate results for players
+        // Process and calculate results for players
         post("/words-end/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -234,20 +286,30 @@ fun Application.configureWordsMinigameRouting() {
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
             val gameSession =
                 activeSessions[gameId]
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No active session found"),
+                        ),
+                    )
 
             val wordsState =
                 gameSession.wordsGameState
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No minigame active")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No minigame active"),
+                        ),
+                    )
 
-            // players who submit late given empty string
+            // Players who submit late given empty string
             gameSession.lastIncorrectPlayers.forEach { username ->
                 if (!wordsState.playerWords.containsKey(username)) {
                     wordsState.playerWords[username] = ""
                 }
             }
 
-            // get shortest word length from dangerPlayers
+            // Gets shortest word length from dangerPlayers
             val dangerPlayerWords =
                 gameSession.lastIncorrectPlayers.associateWith { username ->
                     wordsState.playerWords.getOrDefault(username, "")
@@ -255,7 +317,7 @@ fun Application.configureWordsMinigameRouting() {
 
             val minLength = dangerPlayerWords.values.minOfOrNull { it.length } ?: 0
 
-            // add players with shortest word to ghosts
+            // Add players with the shortest word to ghosts list
             wordsState.ghostPlayers =
                 dangerPlayerWords
                     .filter { it.value.length == minLength }
@@ -263,7 +325,7 @@ fun Application.configureWordsMinigameRouting() {
 
             gameSession.ghostPlayers.addAll(wordsState.ghostPlayers)
 
-            // award bonus points for longest words if >3 incorrect players
+            // Award bonus points for longest words if >3 incorrect players
             if (gameSession.lastIncorrectPlayers.size >= 3) {
                 val topScorers =
                     dangerPlayerWords
@@ -292,7 +354,7 @@ fun Application.configureWordsMinigameRouting() {
                 }
             }
 
-            // mark minigame finished and redirect clients
+            // Mark minigame finished and redirect clients
             wordsState.isFinished = true
 
             gameSession.connections.forEach { connection ->
@@ -302,7 +364,7 @@ fun Application.configureWordsMinigameRouting() {
             call.respond(HttpStatusCode.OK)
         }
 
-        // serves list of created words to host screen
+        // Serves list of created words to host screen
         get("/words-end-host/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -310,16 +372,26 @@ fun Application.configureWordsMinigameRouting() {
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
             val gameSession =
                 activeSessions[gameId]
-                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+                    ?: return@get call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No active session found"),
+                        ),
+                    )
             val quiz =
                 retrieveQuizFromGameID(gameId)
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
 
             val wordsState =
                 gameSession.wordsGameState
-                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No minigame active")))
+                    ?: return@get call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No minigame active"),
+                        ),
+                    )
 
-            // build list of username-word pairs for template
+            // Build list of username-word pairs for template
             val playerWords =
                 wordsState.playerWords.map { (username, word) ->
                     mapOf("username" to username, "word" to word.ifEmpty { "(no submission)" })
@@ -329,7 +401,7 @@ fun Application.configureWordsMinigameRouting() {
                 PebbleContent(
                     "words_minigame_server_words.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "gameId" to gameId,
                         "theme" to session.theme,
                         "playerWords" to playerWords,
@@ -338,7 +410,7 @@ fun Application.configureWordsMinigameRouting() {
             )
         }
 
-        // serves shortest words and new ghosts for host screen
+        // Serves shortest words and new ghosts for host screen
         post("/words-reveal/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -346,16 +418,26 @@ fun Application.configureWordsMinigameRouting() {
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
             val gameSession =
                 activeSessions[gameId]
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No active session found"),
+                        ),
+                    )
             val quiz =
                 retrieveQuizFromGameID(gameId)
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
 
             val wordsState =
                 gameSession.wordsGameState
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No minigame active")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No minigame active"),
+                        ),
+                    )
 
-            // get shortest words to display
+            // Gets the shortest words to display
             val shortestWords =
                 wordsState.ghostPlayers.map { username ->
                     wordsState.playerWords.getOrDefault(username, "(no submission)")
@@ -365,7 +447,7 @@ fun Application.configureWordsMinigameRouting() {
                 PebbleContent(
                     "words_minigame_server_outcome_ghost.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "gameId" to gameId,
                         "theme" to session.theme,
                         "shortestWords" to shortestWords,
@@ -375,7 +457,7 @@ fun Application.configureWordsMinigameRouting() {
             )
         }
 
-        // sends clients to respective results screens
+        // Sends clients to respective results screens
         get("/words-result/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -383,14 +465,29 @@ fun Application.configureWordsMinigameRouting() {
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
             val gameSession =
                 activeSessions[gameId]
-                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+                    ?: return@get call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No active session found"),
+                        ),
+                    )
             val game =
-                retrieveGame(gameId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Game not found")))
+                retrieveGame(gameId) ?: return@get call.respond(
+                    PebbleContent(
+                        "error.peb",
+                        mapOf("errorMessage" to "Game not found"),
+                    ),
+                )
             val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
 
             val wordsState =
                 gameSession.wordsGameState
-                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No minigame active")))
+                    ?: return@get call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "No minigame active"),
+                        ),
+                    )
 
             val userScore = retrieveUserScore(game, user)?.score ?: 0
             val isExistingGhost =

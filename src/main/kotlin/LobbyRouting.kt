@@ -59,7 +59,7 @@ fun Application.configureLobbyRouting() {
                 }
 
             val keyStageDisplay =
-                when (quiz.key_stage) {
+                when (quiz.keyStage) {
                     "KS1" -> "Key Stage 1"
                     "KS2" -> "Key Stage 2"
                     "KS3" -> "Key Stage 3"
@@ -67,7 +67,7 @@ fun Application.configureLobbyRouting() {
                     "KS5" -> "Key Stage 5"
                     "furthereducation" -> "Further Education"
                     "nonapplicable" -> "N/A"
-                    else -> quiz.key_stage
+                    else -> quiz.keyStage
                 }
 
             call.respond(
@@ -75,8 +75,8 @@ fun Application.configureLobbyRouting() {
                     "create_lobby.peb",
                     mapOf(
                         "quizId" to quizId,
-                        "quizName" to quiz.quiz_name,
-                        "numQuestions" to quiz.num_of_questions,
+                        "quizName" to quiz.quizName,
+                        "numQuestions" to quiz.numOfQuestions,
                         "category" to categoryDisplay,
                         "keyStage" to keyStageDisplay,
                     ),
@@ -150,7 +150,7 @@ fun Application.configureLobbyRouting() {
                 PebbleContent(
                     "lobby_server_view.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "roomCode" to roomCode,
                         "players" to players,
                         "gameId" to gameId,
@@ -303,7 +303,7 @@ fun Application.configureLobbyRouting() {
                 PebbleContent(
                     "lobby_client_view.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "roomCode" to roomCode,
                         "gameId" to gameId,
                         "theme" to session.theme,
@@ -430,7 +430,7 @@ fun Application.configureLobbyRouting() {
                     "manage_participants.peb",
                     mapOf(
                         "gameId" to gameId,
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "players" to players,
                         "theme" to session.theme,
                     ),

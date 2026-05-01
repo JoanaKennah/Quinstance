@@ -22,7 +22,7 @@ import kotlin.math.roundToInt
 
 fun Application.configureGameRouting() {
     routing {
-        // serves question page client-side, websocket connects here during game
+        // Serves question page client-side and websocket connects here during the game
         get("/game/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -38,7 +38,7 @@ fun Application.configureGameRouting() {
                     "playing_question_client.peb",
                     mapOf(
                         "username" to session.username,
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "gameId" to gameId,
                         "theme" to session.theme,
                         "timeLimit" to (activeSessions[gameId]?.timeLimit ?: 30),
@@ -47,7 +47,7 @@ fun Application.configureGameRouting() {
             )
         }
 
-        // set isStarted flag, sends redirect to clients, broadcasts Question 1 to host
+        // Set isStarted flag, sends redirect to clients and broadcasts Question 1 to host
         post("/start-game/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -69,7 +69,7 @@ fun Application.configureGameRouting() {
 
             gameSession.isStarted = true
 
-            // redirect all connected players to game page
+            // Redirect all connected players to game page
             gameSession.connections.forEach { connection -> connection.send(Frame.Text("{\"redirect\":\"/game/$gameId\"}")) }
 
             // Small delay allows clients to connect to new WebSocket
@@ -82,7 +82,7 @@ fun Application.configureGameRouting() {
                 PebbleContent(
                     "playing_question_server.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "questionNumber" to 1,
                         "questionText" to questions[0].question,
                         "gameId" to gameId,
@@ -93,7 +93,7 @@ fun Application.configureGameRouting() {
             )
         }
 
-        // increments question index, broadcast next Q or ends game after last Q
+        // Increments question index, broadcast next Question or ends game after the last Question
         post("/next-question/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
 
@@ -110,7 +110,7 @@ fun Application.configureGameRouting() {
                 activeSessions[gameId]
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
 
-            // clear maths game &autoghost state ready for next question
+            // Clear maths game and auto-ghost state ready for next question
             gameSession.mathsGameState = null
             gameSession.potionsGameState = null
             gameSession.roomsGameState = null
@@ -124,7 +124,8 @@ fun Application.configureGameRouting() {
             }
             gameSession.isAdvanced = true
 
-            gameSession.currentQuestionIndex++ // advance quiz to next Q
+            // Advance Quiz to next Question
+            gameSession.currentQuestionIndex++
 
             if (gameSession.currentQuestionIndex >= gameSession.questions.size) {
                 gameSession.isFinished = true
@@ -137,12 +138,14 @@ fun Application.configureGameRouting() {
                         }
                     }
                 }
-                activeSessions.remove(gameId) // cut game and go to leaderboard
+                // Cut game and go to leaderboard
+                activeSessions.remove(gameId)
                 deleteInUseCode(game)
                 call.respondRedirect("/leaderboard/$gameId")
             } else {
-                gameSession.isAdvanced = false // reset flag for next Q
-                // added missing websocket redirect since broadcastQuestion doesn't redirect, only sends Q data
+                // Reset flag for next Question
+                gameSession.isAdvanced = false
+                // Added missing websocket redirect since broadcastQuestion doesn't redirect, only sends Question data
                 gameSession.connections.forEach { connection ->
                     connection.send(Frame.Text("{\"redirect\":\"/game/$gameId\"}"))
                 }
@@ -154,7 +157,7 @@ fun Application.configureGameRouting() {
                     PebbleContent(
                         "playing_question_server.peb",
                         mapOf(
-                            "quizName" to quiz.quiz_name,
+                            "quizName" to quiz.quizName,
                             "questionNumber" to gameSession.currentQuestionIndex + 1,
                             "questionText" to nextQuestion.question,
                             "gameId" to gameId,
@@ -178,7 +181,7 @@ fun Application.configureGameRouting() {
                 retrieveQuizFromGameID(gameId)
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
 
-            // Retrieve player scores, sort by highest
+            // Retrieve player scores and sort by highest
             val allUserScores = retrieveAllUserScoresDescending(game)
             val players =
                 allUserScores.map {
@@ -189,7 +192,7 @@ fun Application.configureGameRouting() {
                 PebbleContent(
                     "end_leaderboard.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "players" to players,
                         "gameId" to gameId,
                         "quizId" to quiz.id,
@@ -212,7 +215,7 @@ fun Application.configureGameRouting() {
             call.respondRedirect(returnURL)
         }
 
-        // serves selected answer template
+        // Serves selected answer template to client
         get("/selected-answer/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -229,7 +232,7 @@ fun Application.configureGameRouting() {
                 PebbleContent(
                     "client_selected_ans.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "gameId" to gameId,
                         "selectedAnswer" to selectedAnswer,
                         "theme" to session.theme,
@@ -238,7 +241,7 @@ fun Application.configureGameRouting() {
             )
         }
 
-        // scores answers, clears UserAnswers, serves correct ans pages for clients and host
+        // Scores answers, clears UserAnswers and serves correct answer pages for clients and host
         post("/show-correct-answer/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -254,10 +257,10 @@ fun Application.configureGameRouting() {
                 activeSessions[gameId]
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
 
-            // Get current Q and correct ans
+            // Get current Question and correct answer
             val currentQuestion = gameSession.questions[gameSession.currentQuestionIndex]
             val correctAnswer =
-                retrieveQuestionAnswer(currentQuestion)?.correct_answer
+                retrieveQuestionAnswer(currentQuestion)?.correctAnswer
                     ?: return@post call.respond(
                         PebbleContent(
                             "error.peb",
@@ -276,7 +279,7 @@ fun Application.configureGameRouting() {
                     if (answerData.chosenAnswer == correctAnswer) {
                         val user = retrieveUser(answerData.username)
                         if (user != null) {
-                            // check if player isghost
+                            // Check if player is a ghost
                             if (answerData.username in gameSession.ghostPlayers) {
                                 gameSession.ghostPlayers.remove(answerData.username)
                                 gameSession.revivedPlayers.add(answerData.username)
@@ -298,7 +301,7 @@ fun Application.configureGameRouting() {
                 }
             }
 
-            // store (in)correct answering players before clearing answers
+            // Store players who answered incorrectly before clearing answers
             val dangerPlayers =
                 answers
                     .filter { it.chosenAnswer != correctAnswer }
@@ -315,17 +318,17 @@ fun Application.configureGameRouting() {
             // Clear answers ready for next question
             UserAnswers.clearAnswers()
 
-            // Send clients to correct ans page
+            // Send clients to correct answer page
             gameSession.connections.forEach { connection ->
                 connection.send(Frame.Text("{\"redirect\":\"/show-correct-answer-client/$gameId\"}"))
             }
 
-            // send host to correct ans view w/ next button
+            // Send host to correct answer view with next button
             call.respond(
                 PebbleContent(
                     "question_with_correct_ans.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "questionNumber" to gameSession.currentQuestionIndex + 1,
                         "questionText" to currentQuestion.question,
                         "correctAnswer" to correctAnswer,
@@ -337,7 +340,7 @@ fun Application.configureGameRouting() {
             )
         }
 
-        // serves correct ans for clients, Websocket waits for host to advance
+        // Serves correct answer for clients and Websocket waits for host to advance
         get("/show-correct-answer-client/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -355,7 +358,7 @@ fun Application.configureGameRouting() {
 
             val currentQuestion = gameSession.questions[gameSession.currentQuestionIndex]
             val correctAnswer =
-                retrieveQuestionAnswer(currentQuestion)?.correct_answer
+                retrieveQuestionAnswer(currentQuestion)?.correctAnswer
                     ?: return@get call.respond(
                         PebbleContent(
                             "error.peb",
@@ -365,7 +368,7 @@ fun Application.configureGameRouting() {
                         ),
                     )
 
-            // check if player was revived
+            // Check if player was revived
             if (session.username in gameSession.revivedPlayers) {
                 val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
                 val userScore = retrieveUserScore(game, user)?.score ?: 0
@@ -387,7 +390,7 @@ fun Application.configureGameRouting() {
                 PebbleContent(
                     "question_with_correct_ans.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "questionNumber" to gameSession.currentQuestionIndex + 1,
                         "questionText" to currentQuestion.question,
                         "correctAnswer" to correctAnswer,
@@ -399,7 +402,7 @@ fun Application.configureGameRouting() {
             )
         }
 
-        // serves correct ans page to host after timer expires
+        // Serves correct answer page to host after timer expires
         get("/show-correct-answer/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -414,10 +417,10 @@ fun Application.configureGameRouting() {
                 activeSessions[gameId]
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
 
-            // get current Q plus correct ans
+            // Get current Question plus correct answer
             val currentQuestion = gameSession.questions[gameSession.currentQuestionIndex]
             val correctAnswer =
-                retrieveQuestionAnswer(currentQuestion)?.correct_answer
+                retrieveQuestionAnswer(currentQuestion)?.correctAnswer
                     ?: return@get call.respond(
                         PebbleContent(
                             "error.peb",
@@ -431,7 +434,7 @@ fun Application.configureGameRouting() {
                 PebbleContent(
                     "question_with_correct_ans.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "questionNumber" to gameSession.currentQuestionIndex + 1,
                         "questionText" to currentQuestion.question,
                         "correctAnswer" to correctAnswer,
@@ -473,14 +476,14 @@ fun Application.configureGameRouting() {
                         }
                 }
 
-            val testRandomValue = (0..1).random()
+            val randomValue = (0..1).random()
             when {
                 gameSession.miniGamesEnabled && gameSession.lastIncorrectPlayers.size == 1 -> {
                     val autoGhostedPlayer = gameSession.lastIncorrectPlayers[0]
                     gameSession.ghostPlayers.add(autoGhostedPlayer)
                     gameSession.autoGhostedPlayer = autoGhostedPlayer
 
-                    // recalculate scores after adding ghost so isGhost reflects correctly
+                    // Recalculate scores after adding ghost so isGhost reflects correctly
                     val updatedScores =
                         transaction(TransactionManager.defaultDatabase) {
                             UserScore
@@ -505,7 +508,7 @@ fun Application.configureGameRouting() {
                         PebbleContent(
                             "leaderboard.peb",
                             mapOf(
-                                "quizName" to quiz.quiz_name,
+                                "quizName" to quiz.quizName,
                                 "players" to updatedScores,
                                 "gameId" to gameId,
                                 "quizId" to quiz.id,
@@ -520,14 +523,15 @@ fun Application.configureGameRouting() {
                     gameSession.lastIncorrectPlayers.size >= 2 &&
                     gameSession.activeMinigames.isNotEmpty() &&
                     !gameSession.minigameJustPlayed &&
-                    testRandomValue == 1 -> {
+                    randomValue == 1 -> {
                     gameSession.minigameJustPlayed = true
                     val selectedMinigame = gameSession.activeMinigames.random()
 
                     println(
-                        "miniGamesEnabled: ${gameSession.miniGamesEnabled}, incorrectPlayers: ${gameSession.lastIncorrectPlayers.size}, activeMinigames: ${gameSession.activeMinigames}, minigameJustPlayed: ${gameSession.minigameJustPlayed}, random: $testRandomValue",
+                        "miniGamesEnabled: ${gameSession.miniGamesEnabled}, incorrectPlayers: ${gameSession.lastIncorrectPlayers.size}, activeMinigames: ${gameSession.activeMinigames}, minigameJustPlayed: ${gameSession.minigameJustPlayed}, random: $randomValue",
                     )
 
+                    // Set up and serve selected minigame pages to the host
                     when (selectedMinigame) {
                         "maths" -> {
                             gameSession.mathsGameState = MathsGameState()
@@ -542,7 +546,7 @@ fun Application.configureGameRouting() {
                                 PebbleContent(
                                     "minigame_server_intro.peb",
                                     mapOf(
-                                        "quizName" to quiz.quiz_name,
+                                        "quizName" to quiz.quizName,
                                         "gameId" to gameId,
                                         "theme" to session.theme,
                                         "minigameName" to "Maths",
@@ -566,7 +570,7 @@ fun Application.configureGameRouting() {
                                 PebbleContent(
                                     "minigame_server_intro.peb",
                                     mapOf(
-                                        "quizName" to quiz.quiz_name,
+                                        "quizName" to quiz.quizName,
                                         "gameId" to gameId,
                                         "theme" to session.theme,
                                         "minigameName" to "Potions",
@@ -590,7 +594,7 @@ fun Application.configureGameRouting() {
                                 PebbleContent(
                                     "minigame_server_intro.peb",
                                     mapOf(
-                                        "quizName" to quiz.quiz_name,
+                                        "quizName" to quiz.quizName,
                                         "gameId" to gameId,
                                         "theme" to session.theme,
                                         "minigameName" to "Rooms",
@@ -611,7 +615,7 @@ fun Application.configureGameRouting() {
                                 PebbleContent(
                                     "minigame_server_intro.peb",
                                     mapOf(
-                                        "quizName" to quiz.quiz_name,
+                                        "quizName" to quiz.quizName,
                                         "gameId" to gameId,
                                         "theme" to session.theme,
                                         "minigameName" to "Words",
@@ -630,7 +634,7 @@ fun Application.configureGameRouting() {
                                 PebbleContent(
                                     "leaderboard.peb",
                                     mapOf(
-                                        "quizName" to quiz.quiz_name,
+                                        "quizName" to quiz.quizName,
                                         "players" to scores,
                                         "gameId" to gameId,
                                         "quizId" to quiz.id,
@@ -651,7 +655,7 @@ fun Application.configureGameRouting() {
                         PebbleContent(
                             "leaderboard.peb",
                             mapOf(
-                                "quizName" to quiz.quiz_name,
+                                "quizName" to quiz.quizName,
                                 "players" to scores,
                                 "gameId" to gameId,
                                 "quizId" to quiz.id,
@@ -663,7 +667,7 @@ fun Application.configureGameRouting() {
             }
         }
 
-        // Serves personal position and score to each player, personalised
+        // Serves personal position and score to each player. This is personalised
         get("/client-position/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -690,7 +694,7 @@ fun Application.configureGameRouting() {
                 PebbleContent(
                     "client_current_pos.peb",
                     mapOf<String, Any>(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "gameId" to gameId,
                         "position" to position,
                         "score" to score,
@@ -728,7 +732,7 @@ fun Application.configureGameRouting() {
                 PebbleContent(
                     "end_game_client.peb",
                     mapOf<String, Any>(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "gameId" to gameId,
                         "position" to position,
                         "score" to score,
@@ -739,6 +743,7 @@ fun Application.configureGameRouting() {
             )
         }
 
+        // Serves client with the auto-ghost page if they lost a minigame or get a question wrong and there's not enough players for a minigame
         get("/auto-ghost-result/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -778,7 +783,7 @@ fun Application.configureGameRouting() {
                     PebbleContent(
                         "client_current_pos.peb",
                         mapOf<String, Any>(
-                            "quizName" to quiz.quiz_name,
+                            "quizName" to quiz.quizName,
                             "gameId" to gameId,
                             "position" to position,
                             "score" to score,
@@ -791,6 +796,7 @@ fun Application.configureGameRouting() {
             }
         }
 
+        // Serve leaderboard page for a host when they return from a game
         get("/leaderboard-return/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -805,26 +811,18 @@ fun Application.configureGameRouting() {
                 activeSessions[gameId]
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
 
-            val scores =
-                transaction(TransactionManager.defaultDatabase) {
-                    UserScore
-                        .find { UserScoreTable.game eq game.id }
-                        .sortedByDescending { it.score }
-                        .map { userScore ->
-                            mapOf<String, Any>(
-                                "username" to userScore.user.username,
-                                "score" to userScore.score,
-                                "isGhost" to (userScore.user.username in gameSession.ghostPlayers),
-                            )
-                        }
+            val allUserScores = retrieveAllUserScoresDescending(game)
+            val players =
+                allUserScores.map {
+                    mapOf<String, Any>("username" to it.username, "score" to it.score, "isGhost" to it.isGhost)
                 }
 
             call.respond(
                 PebbleContent(
                     "leaderboard.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
-                        "players" to scores,
+                        "quizName" to quiz.quizName,
+                        "players" to players,
                         "gameId" to gameId,
                         "quizId" to quiz.id,
                         "theme" to session.theme,
@@ -833,7 +831,7 @@ fun Application.configureGameRouting() {
             )
         }
 
-        // polling endpoint, returns if game has started, used by lobby client view
+        // Polling endpoint - returns if game has started and is used by lobby client view
         get("/game-started/{gameId}") {
             val gameId =
                 call.parameters["gameId"]?.toIntOrNull()
@@ -842,7 +840,7 @@ fun Application.configureGameRouting() {
             call.respondText("{\"started\":$started}", ContentType.Application.Json)
         }
 
-        // polling endpoint, returns current Q index and finished flag, used by client pos page
+        // Polling endpoint - returns current Question index and finished flag, and is used by client position page
         get("/question-index/{gameId}") {
             val gameId =
                 call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("{\"index\":0}", ContentType.Application.Json)
@@ -853,7 +851,7 @@ fun Application.configureGameRouting() {
             call.respondText("{\"index\":$index,\"finished\":$finished}", ContentType.Application.Json)
         }
 
-        // polling endpoint - returns minigame state
+        // Polling endpoint - returns minigame state
         get("/minigame-active/{gameId}") {
             val gameId =
                 call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("{\"active\":false}", ContentType.Application.Json)
@@ -869,7 +867,7 @@ fun Application.configureGameRouting() {
             call.respondText("{\"active\":$active}", ContentType.Application.Json)
         }
 
-        // polling endpoint - redirects when a minigame is active
+        // Polling endpoint - redirects when a minigame is active
         get("/minigame-redirect/{gameId}") {
             val gameId =
                 call.parameters["gameId"]?.toIntOrNull() ?: return@get call.respondText("{\"redirect\":null}", ContentType.Application.Json)

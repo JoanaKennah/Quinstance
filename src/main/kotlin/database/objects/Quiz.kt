@@ -11,11 +11,11 @@ class Quiz(
     companion object : IntEntityClass<Quiz>(QuizTable)
 
     var user by User referencedOn QuizTable.user // NEW FIX
-    var quiz_name by QuizTable.quiz_name
-    var num_of_questions by QuizTable.num_of_questions
+    var quizName by QuizTable.quiz_name
+    var numOfQuestions by QuizTable.num_of_questions
     var description by QuizTable.description
     var category by QuizTable.category
-    var key_stage by QuizTable.key_stage
+    var keyStage by QuizTable.key_stage
 
-    override fun toString() = quiz_name
+    override fun toString() = quizName
 }

@@ -1,16 +1,25 @@
 package com.example
 
-import com.example.database.objects.*
-import com.example.database.tables.*
-import io.ktor.http.*
+import com.example.database.objects.Question
+import com.example.database.objects.Quinstance
+import com.example.database.objects.Quiz
+import com.example.database.tables.QuestionTable
+import com.example.database.tables.QuinstanceTable
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
-import io.ktor.server.application.*
-import io.ktor.server.pebble.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
+import io.ktor.server.application.Application
+import io.ktor.server.pebble.PebbleContent
+import io.ktor.server.request.receiveMultipart
+import io.ktor.server.request.receiveParameters
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondFile
+import io.ktor.server.response.respondRedirect
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
+import io.ktor.server.sessions.get
+import io.ktor.server.sessions.sessions
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
@@ -39,14 +48,29 @@ fun Application.configureQuizRouting() {
 
             val parameters = call.receiveParameters()
             val quizName =
-                parameters["quizName"] ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing input(s)")))
+                parameters["quizName"] ?: return@post call.respond(
+                    PebbleContent(
+                        "error.peb",
+                        mapOf("errorMessage" to "Missing input(s)"),
+                    ),
+                )
             val description =
                 parameters["description"]
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing input(s)")))
             val keystage =
-                parameters["keystage"] ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing input(s)")))
+                parameters["keystage"] ?: return@post call.respond(
+                    PebbleContent(
+                        "error.peb",
+                        mapOf("errorMessage" to "Missing input(s)"),
+                    ),
+                )
             val category =
-                parameters["category"] ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing input(s)")))
+                parameters["category"] ?: return@post call.respond(
+                    PebbleContent(
+                        "error.peb",
+                        mapOf("errorMessage" to "Missing input(s)"),
+                    ),
+                )
             val minigamesEnabled = parameters["miniGames"] == "true"
 
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
@@ -63,14 +87,19 @@ fun Application.configureQuizRouting() {
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid quizID")))
 
             val quiz =
-                retrieveQuiz(quizId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
+                retrieveQuiz(quizId) ?: return@get call.respond(
+                    PebbleContent(
+                        "error.peb",
+                        mapOf("errorMessage" to "Quiz not found"),
+                    ),
+                )
             val questions = retrieveQuizQuestions(quiz)
 
             call.respond(
                 PebbleContent(
                     "view_quiz_questions.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "questions" to questions,
                         "quizId" to quizId,
                         "returnURL" to "/view-quizzes",
@@ -116,9 +145,21 @@ fun Application.configureQuizRouting() {
             if (data != null) {
                 // If readCsv returns an empty list of data.
                 if (data!!.isEmpty()) csvReadError = "empty"
-                if (quizId == null) return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid quizID")))
+                if (quizId == null) {
+                    return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "Invalid quizID"),
+                        ),
+                    )
+                }
                 quiz =
-                    retrieveQuiz(quizId) ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
+                    retrieveQuiz(quizId) ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "Quiz not found"),
+                        ),
+                    )
 
                 // Delete all questions from the given quiz if the user imports a .csv file over it.
                 if (deleteQuestions != null && deleteQuestions) {
@@ -182,7 +223,7 @@ fun Application.configureQuizRouting() {
                     PebbleContent(
                         "view_quiz_questions.peb",
                         mapOf(
-                            "quizName" to quiz.quiz_name,
+                            "quizName" to quiz.quizName,
                             "questions" to questions,
                             "quizId" to quiz.id,
                             "error" to csvReadError,
@@ -244,13 +285,18 @@ fun Application.configureQuizRouting() {
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid quizID")))
 
             val quiz =
-                retrieveQuiz(quizId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
+                retrieveQuiz(quizId) ?: return@get call.respond(
+                    PebbleContent(
+                        "error.peb",
+                        mapOf("errorMessage" to "Quiz not found"),
+                    ),
+                )
 
             call.respond(
                 PebbleContent(
                     "add_question.peb",
                     mapOf<String, Any>(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "quizId" to quizId,
                         "questionId" to "",
                         "isEdit" to false,
@@ -267,7 +313,12 @@ fun Application.configureQuizRouting() {
         get("/edit-question/{questionId}") {
             val questionId =
                 call.parameters["questionId"]?.toIntOrNull()
-                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid questionID")))
+                    ?: return@get call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "Invalid questionID"),
+                        ),
+                    )
 
             val quiz =
                 transaction {
@@ -302,12 +353,12 @@ fun Application.configureQuizRouting() {
                 PebbleContent(
                     "add_question.peb",
                     mapOf(
-                        "quizName" to quiz.quiz_name,
+                        "quizName" to quiz.quizName,
                         "quizId" to quiz.id,
                         "questionId" to question.id,
                         "isEdit" to true,
                         "previousQuestionText" to question.question,
-                        "previousCorrectAnswer" to answer.correct_answer,
+                        "previousCorrectAnswer" to answer.correctAnswer,
                         "previousOption2" to answer.option2,
                         "previousOption3" to option3,
                         "previousOption4" to option4,
@@ -324,7 +375,12 @@ fun Application.configureQuizRouting() {
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid quizID")))
 
             val quiz =
-                retrieveQuiz(quizId) ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
+                retrieveQuiz(quizId) ?: return@post call.respond(
+                    PebbleContent(
+                        "error.peb",
+                        mapOf("errorMessage" to "Quiz not found"),
+                    ),
+                )
 
             val parameters = call.receiveParameters()
             val questionText =
@@ -333,19 +389,39 @@ fun Application.configureQuizRouting() {
 
             val answers =
                 parameters.getAll("answers[]")
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing answer input(s)")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "Missing answer input(s)"),
+                        ),
+                    )
 
             // Stores index of correct answer (checkbox)
             val correctIndex =
                 parameters["correct"]?.toIntOrNull()
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Select a correct answer")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "Select a correct answer"),
+                        ),
+                    )
 
             val option1 =
                 answers.getOrNull(0)
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing answer input(s)")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "Missing answer input(s)"),
+                        ),
+                    )
             val option2 =
                 answers.getOrNull(1)
-                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing answer input(s)")))
+                    ?: return@post call.respond(
+                        PebbleContent(
+                            "error.peb",
+                            mapOf("errorMessage" to "Missing answer input(s)"),
+                        ),
+                    )
             val option3 = answers.getOrNull(2)
             val option4 = answers.getOrNull(3)
 
@@ -353,18 +429,23 @@ fun Application.configureQuizRouting() {
 
             if (!isEditQuestion) {
                 // Correct index here indicates correct answer for Database
-                val question = addQuestion(quiz, questionText, quiz.key_stage)
+                val question = addQuestion(quiz, questionText, quiz.keyStage)
                 addAnswer(question, option1, option2, option3, option4, correctIndex)
             } else {
                 // Different to addAnswer so a new record isn't made.
                 val questionId =
                     parameters["questionId"]?.toIntOrNull()
-                        ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid question ID")))
+                        ?: return@post call.respond(
+                            PebbleContent(
+                                "error.peb",
+                                mapOf("errorMessage" to "Invalid question ID"),
+                            ),
+                        )
 
                 val questionData =
                     mapOf(
                         "question" to questionText,
-                        "keyStage" to quiz.key_stage,
+                        "keyStage" to quiz.keyStage,
                     )
 
                 val mappedOption2 =
@@ -390,11 +471,21 @@ fun Application.configureQuizRouting() {
 
                 val question =
                     transaction(TransactionManager.defaultDatabase) { Question.findById(questionId) }
-                        ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Question doesn't exist")))
+                        ?: return@post call.respond(
+                            PebbleContent(
+                                "error.peb",
+                                mapOf("errorMessage" to "Question doesn't exist"),
+                            ),
+                        )
 
                 val answer =
                     retrieveQuestionAnswer(question)
-                        ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Answer doesn't exist")))
+                        ?: return@post call.respond(
+                            PebbleContent(
+                                "error.peb",
+                                mapOf("errorMessage" to "Answer doesn't exist"),
+                            ),
+                        )
 
                 editQuestion(question, questionData, answer, answerData)
             }
@@ -480,7 +571,12 @@ fun Application.configureQuizRouting() {
                 call.parameters["quizId"]?.toIntOrNull()
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid quizID")))
             val quiz =
-                retrieveQuiz(quizId) ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
+                retrieveQuiz(quizId) ?: return@get call.respond(
+                    PebbleContent(
+                        "error.peb",
+                        mapOf("errorMessage" to "Quiz not found"),
+                    ),
+                )
 
             val categoryDisplay =
                 when (quiz.category) {
@@ -510,7 +606,7 @@ fun Application.configureQuizRouting() {
                 }
 
             val keyStageDisplay =
-                when (quiz.key_stage) {
+                when (quiz.keyStage) {
                     "KS1" -> "Key Stage 1"
                     "KS2" -> "Key Stage 2"
                     "KS3" -> "Key Stage 3"
@@ -518,7 +614,7 @@ fun Application.configureQuizRouting() {
                     "KS5" -> "Key Stage 5"
                     "furthereducation" -> "Further Education"
                     "nonapplicable" -> "N/A"
-                    else -> quiz.key_stage
+                    else -> quiz.keyStage
                 }
 
             call.respond(

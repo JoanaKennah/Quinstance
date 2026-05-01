@@ -141,7 +141,7 @@ fun addUser(
                 this.password = hash.result
                 this.name = name
                 this.email = email
-                this.key_stage = keyStage
+                this.keyStage = keyStage
                 this.role = role
             }
         }
@@ -162,7 +162,7 @@ fun deleteUser(user: User) {
 }
 
 /**
- * Creates and adds a new Question to QuestionTable. Increments given Quiz num_of_questions by 1
+ * Creates and adds a new Question to QuestionTable. Increments given Quiz numOfQuestions by 1
  * @param quiz Quiz object that will be associated with the new question
  * @param question question text
  * @param keyStage Key stage for the Question, e.g. Key Stage 1 or Further Education
@@ -183,14 +183,14 @@ fun addQuestion(
             val question =
                 Question.new {
                     this.question = question
-                    this.key_stage = keyStage
+                    this.keyStage = keyStage
                 }
             // Creates Quinstance so we know which Quiz is associated with what Question
             Quinstance.new {
                 this.quiz = quiz
                 this.question = question
             }
-            quiz.num_of_questions += 1
+            quiz.numOfQuestions += 1
 
             return@transaction question
         }
@@ -293,7 +293,7 @@ fun editQuestion(
             questionData.forEach {
                 when (it.key) {
                     "question" -> question.question = it.value
-                    "keyStage" -> question.key_stage = it.value
+                    "keyStage" -> question.keyStage = it.value
                 }
             }
         }
@@ -310,7 +310,7 @@ fun editQuestion(
 
             answerData.forEach {
                 when (it.key) {
-                    "correctIndex" -> answer.correct_answer = answerOptions[0]!!
+                    "correctIndex" -> answer.correctAnswer = answerOptions[0]!!
                     "option2" -> answer.option2 = answerOptions[1]!!
                     "option3" -> answer.option3 = answerOptions[2]
                     "option4" -> answer.option4 = answerOptions[3]
@@ -337,8 +337,8 @@ fun deleteQuestion(question: Question): Boolean {
         quinstance?.delete()
         foundQuestion.delete()
 
-        if (quiz != null && quiz.num_of_questions > 0) {
-            quiz.num_of_questions -= 1
+        if (quiz != null && quiz.numOfQuestions > 0) {
+            quiz.numOfQuestions -= 1
         }
 
         true
@@ -403,11 +403,11 @@ fun addQuiz(
     return transaction(TransactionManager.defaultDatabase) {
         Quiz.new {
             this.user = user
-            this.quiz_name = quizName
+            this.quizName = quizName
             this.description = description
             this.category = category
-            this.key_stage = keyStage
-            this.num_of_questions = numOfQuestions
+            this.keyStage = keyStage
+            this.numOfQuestions = numOfQuestions
         }
     }
 }
@@ -522,7 +522,7 @@ fun addAnswer(
         val newAnswer =
             Answer.new {
                 this.question = question
-                this.correct_answer = answers[0]!!
+                this.correctAnswer = answers[0]!!
                 this.option2 = answers[1]!!
                 this.option3 = answers[2]
                 this.option4 = answers[3]
@@ -648,7 +648,7 @@ fun addInUseCode(
 
     return transaction(TransactionManager.defaultDatabase) {
         InUseCode.new {
-            this.room_code = roomCode
+            this.roomCode = roomCode
             this.game = game
         }
     }
@@ -666,7 +666,7 @@ fun retrieveRoomCode(game: Game): String? {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
 
     return transaction(TransactionManager.defaultDatabase) {
-        InUseCode.find { InUseTable.game eq game.id }.firstOrNull()?.room_code
+        InUseCode.find { InUseTable.game eq game.id }.firstOrNull()?.roomCode
     }
 }
 
@@ -700,7 +700,7 @@ fun retrieveInUseCode(roomCode: String): InUseCode? {
  * @throws IllegalArgumentException if inUseCode doesn't exist
  */
 fun retrieveInUseCodeGame(inUseCode: InUseCode): Game? {
-    require(retrieveInUseCode(inUseCode.room_code) != null) { "InUseCode must exist" }
+    require(retrieveInUseCode(inUseCode.roomCode) != null) { "InUseCode must exist" }
     return transaction(TransactionManager.defaultDatabase) {
         Game.find { GameTable.id eq inUseCode.game.id }.firstOrNull()
     }
@@ -776,6 +776,7 @@ fun retrieveUserScore(
  * @param game Game object needed to retrieve all associated UserScore objects
  * @return List of PlayerScoreInfo objects (can be empty)
  * @throws IllegalArgumentException If given Game does not exist
+ * @see PlayerScoreInfo
  */
 fun retrieveAllUserScoresDescending(game: Game): List<PlayerScoreInfo> {
     require(retrieveGame(game.id.value) != null) { "Game must exist" }
@@ -846,7 +847,7 @@ fun retrieveUserQuizAttempts(user: User): List<UserQuizAttempt> {
             .find { UserScoreTable.user eq user.id }
             .map {
                 UserQuizAttempt(
-                    quizName = it.game.quiz.quiz_name,
+                    quizName = it.game.quiz.quizName,
                     score = it.score,
                 )
             }

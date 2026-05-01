@@ -11,7 +11,7 @@ class Question(
     companion object : IntEntityClass<Question>(QuestionTable)
 
     var question by QuestionTable.question
-    var key_stage by QuestionTable.key_stage
+    var keyStage by QuestionTable.key_stage
 
     override fun toString() = question
 }
