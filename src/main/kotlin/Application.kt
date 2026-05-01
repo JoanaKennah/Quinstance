@@ -17,8 +17,16 @@ fun Application.module() {
     configureSessions()
     configureDatabase()
     configureTemplating()
-    configureRouting()
     configureSockets()
+    configureAuthRouting()
+    configureDashboardRouting()
+    configureQuizRouting()
+    configureLobbyRouting()
+    configureGameRouting()
+    configureMathsMinigameRouting()
+    configurePotionsMinigameRouting()
+    configureRoomsMinigameRouting()
+    configureWordsMinigameRouting()
 }
 
 fun Application.configureSessions() {
@@ -44,5 +52,13 @@ fun Application.testModule() {
     TransactionManager.defaultDatabase = TestDatabase.db
     configureSessions()
     configureTemplating()
-    configureRouting()
+    configureAuthRouting()
+    configureDashboardRouting()
+    configureQuizRouting()
+    configureLobbyRouting()
+    configureGameRouting()
+    configureMathsMinigameRouting()
+    configurePotionsMinigameRouting()
+    configureRoomsMinigameRouting()
+    configureWordsMinigameRouting()
 }

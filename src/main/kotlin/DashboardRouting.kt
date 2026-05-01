@@ -1,0 +1,64 @@
+package com.example
+
+import io.ktor.server.application.*
+import io.ktor.server.pebble.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
+import com.example.database.objects.*
+
+fun Application.configureDashboardRouting() {
+    routing {
+
+        //serves teacher dash
+        get("/teacher-dashboard") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+
+            if (session.role != "teacher" && session.role != "admin") {
+                return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "You do not have permission to access the teacher dashboard")))
+            }
+
+            call.respond(
+                PebbleContent(
+                    "teacher_dashboard.peb",
+                    mapOf("username" to session.username)
+                )
+            )
+        }
+
+        //serves student dash
+        get("/student-dashboard") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+
+            if (session.role != "student") {
+                return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "You do not have permission to access the student dashboard")))
+            }
+
+            call.respond(
+                PebbleContent(
+                    "student_dashboard.peb",
+                    mapOf("username" to session.username)
+                )
+            )
+        }
+
+        get("/user-stats") {
+            val session = call.sessions.get<UserSession>()
+                ?: return@get call.respondRedirect("/login")
+
+            val user = retrieveUser(session.username)
+                ?: return@get call.respondRedirect("/login")
+
+            val attempts = retrieveUserAttempts(user)
+            val returnURL = when(session.role) {
+                "teacher" -> "/teacher-dashboard"
+                "student" -> "/student-dashboard"
+                else -> return@get call.respondRedirect("/login")
+            }
+
+            call.respond(
+                PebbleContent("user_view_stats.peb", mapOf("attempts" to attempts, "returnURL" to returnURL))
+            )
+        }
+    }
+}

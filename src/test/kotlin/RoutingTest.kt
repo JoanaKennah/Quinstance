@@ -1,3 +1,6 @@
+/*
+//Legacy file - code is now all refactored into modular RoutingTest files
+
 package com.example
 
 import io.kotest.core.spec.style.StringSpec
@@ -3324,3 +3327,5 @@ suspend fun preLogin(client: HttpClient, username: String, password: String) {
         }))
     }
 }
+
+*/
