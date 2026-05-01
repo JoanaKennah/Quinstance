@@ -310,7 +310,7 @@
                         <div class="info-container">
                             <button type="button" class="minigame-btn" onclick="toggleMinigame(this, 'maths')">Maths</button>
                             <div class="info-icon" tabindex="0">i</div>
-                            <div class="tooltip">Solve quick maths problems in time pressure to avoid becoming a ghost.</div>
+                            <div class="tooltip">Solve quick maths problems under time pressure to avoid becoming a ghost.</div>
                         </div>
 
                         <div class="info-container">
