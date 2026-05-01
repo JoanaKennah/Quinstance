@@ -374,11 +374,12 @@ fun Application.configureGameRouting() {
                     )))
                 }
 
-                //Need to remember to change this value back to .5
+                //When finished testing, swap out random line
                 gameSession.miniGamesEnabled
                     && gameSession.lastIncorrectPlayers.size >= 2
                     && gameSession.activeMinigames.isNotEmpty()
                     && !gameSession.minigameJustPlayed
+                    //&& (0..1).random() == 0 -> {
                     && testRandomValue == 1 -> {
 
                     gameSession.minigameJustPlayed = true
