@@ -83,7 +83,7 @@
         }
 
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -95,7 +95,7 @@
         }
 
         .box {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             border-radius: 10px;
             padding: 30px;
             display: inline-block;
@@ -118,13 +118,13 @@
             font-weight: bold;
             background-color: white;
             color: black;
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             border-radius: 8px;
             cursor: pointer;
         }
 
         .btn-start:hover, .btn-start:focus {
-            background-color: #e63973;
+            background-color: #b02a57;
             color: white;
         }
 

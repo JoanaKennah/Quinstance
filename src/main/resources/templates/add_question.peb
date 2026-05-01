@@ -15,7 +15,7 @@
         }
 
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -32,7 +32,7 @@
         }
 
         .title-box {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             background-color: white;
             padding: 20px;
             text-align: center;
@@ -49,7 +49,7 @@
         }
 
         .question-row label {
-            color: #e63973;
+            color: #d33469;
             font-weight: bold;
             margin-right: 10px;
         }
@@ -71,7 +71,7 @@
         }
 
         .answer-box {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             padding: 10px;
             margin-bottom: 15px;
             border-radius: 8px;
@@ -95,7 +95,7 @@
             background: none;
             border: none;
             cursor: pointer;
-            color: #e63973;
+            color: #d33469;
             font-weight: bold;
             font-size: 16px;
             padding: 0;
@@ -125,7 +125,7 @@
 
         button {
             padding: 10px 20px;
-            background-color: #e63973;
+            background-color: #d33469;
             color: white;
             border: none;
             cursor: pointer;

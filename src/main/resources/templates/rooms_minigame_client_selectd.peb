@@ -73,7 +73,7 @@
         }
 
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -101,7 +101,7 @@
         }
 
         .card {
-            border: 3px solid #e63973;
+            border: 3px solid #d33469;
             border-radius: 20px;
             padding: 50px 80px;
             text-align: center;
@@ -116,7 +116,7 @@
         }
 
         .selected {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             border-radius: 8px;
             padding: 20px;
             font-size: 22px;

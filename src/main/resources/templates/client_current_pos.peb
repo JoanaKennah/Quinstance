@@ -61,7 +61,7 @@
         }
       
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -92,7 +92,7 @@
         }
 
         .out-of {
-            color: #e63973;
+            color: #d33469;
             font-size: 18px;
             margin-bottom: 30px;
         }
@@ -112,7 +112,7 @@
         .timer {
             margin-top: 30px;
             font-size: 18px;
-            color: #e63973;
+            color: #d33469;
         }
     </style>
     {% endif %}

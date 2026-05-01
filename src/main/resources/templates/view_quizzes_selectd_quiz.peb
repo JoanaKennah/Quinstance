@@ -11,7 +11,7 @@
         }
       
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -48,7 +48,7 @@
         }
 
         .subtitle {
-            color: #e63973;
+            color: #d33469;
             font-weight: bold;
             margin-top: 20px;
         }
@@ -86,13 +86,13 @@
             font-size: 16px;
             background-color: white;
             color: black;
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             cursor: pointer;
             border-radius: 6px;
         }
 
         .btn:hover {
-            background-color: #e63973;
+            background-color: #b02a57;
             color: white;
         }
 
