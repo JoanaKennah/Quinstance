@@ -162,7 +162,7 @@
             }
 
             function goToNext() {
-                fetch("/next-question/{{ gameId }}", { method: "POST" })
+                fetch("/show-correct-answer/{{ gameId }}", { method: "POST" })
                     .then(response => response.text())
                     .then(html => {
                         document.open();

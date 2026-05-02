@@ -138,8 +138,13 @@ fun Application.configureGameRouting() {
                         }
                     }
                 }
-                // Cut game and go to leaderboard
-                activeSessions.remove(gameId)
+
+                // send clients to end game screen before session ends
+                gameSession.connections.forEach { connection ->
+                    connection.send(Frame.Text("{\"redirect\":\"/end-game/$gameId\"}"))
+                }
+
+                activeSessions.remove(gameId)           //cut game and go to leaderboard
                 deleteInUseCode(game)
                 call.respondRedirect("/leaderboard/$gameId")
             } else {
@@ -518,12 +523,14 @@ fun Application.configureGameRouting() {
                     )
                 }
 
-                // Need to remember to change this value back to .5
-                gameSession.miniGamesEnabled &&
-                    gameSession.lastIncorrectPlayers.size >= 2 &&
-                    gameSession.activeMinigames.isNotEmpty() &&
-                    !gameSession.minigameJustPlayed &&
-                    randomValue == 1 -> {
+                //When finished testing, swap out random line
+                gameSession.miniGamesEnabled
+                    && gameSession.lastIncorrectPlayers.size >= 2
+                    && gameSession.activeMinigames.isNotEmpty()
+                    && !gameSession.minigameJustPlayed
+                    //&& (0..1).random() == 0 -> {
+                    && testRandomValue == 1 -> {
+
                     gameSession.minigameJustPlayed = true
                     val selectedMinigame = gameSession.activeMinigames.random()
 
