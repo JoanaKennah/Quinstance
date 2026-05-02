@@ -176,7 +176,7 @@
 
         <a class="cancel" href={{ returnURL }}>Cancel</a>
 
-        <button type="submit">Next</button>
+        <button type="submit">{% if isEdit %}Save{% else %}Next{% endif %}</button>
 
     </div>
 
