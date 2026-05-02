@@ -148,8 +148,12 @@
                 <button class="btn">Create a Lobby</button>
             </form>
 
-            <form action="/view-quiz-questions/{{ quizId }}">
+            <form action="/edit-quiz/{{ quizId }}">
                 <button class="btn">Edit Quiz</button>
+            </form>
+
+            <form action="/view-quiz-questions/{{ quizId }}">
+                <button class="btn">Edit Questions</button>
             </form>
 
             <form action="/delete-quiz/{{ quiz.id }}" method="post" style="margin: 0;">
