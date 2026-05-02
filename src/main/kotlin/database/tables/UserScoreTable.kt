@@ -1,7 +1,7 @@
 package com.example.database.tables
 
-import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 import org.jetbrains.exposed.v1.core.ReferenceOption
+import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 
 object UserScoreTable : IntIdTable() {
     val game = reference("game", GameTable, ReferenceOption.CASCADE)

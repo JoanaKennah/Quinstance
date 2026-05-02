@@ -71,7 +71,7 @@ class DatabaseTest :
                     Password.check("password123", it?.password).withScrypt() shouldBe true
                     it?.name shouldBe "Ethan Harris"
                     it?.email shouldBe "ethan@gmail.com"
-                    it?.key_stage shouldBe "furthereducation"
+                    it?.keyStage shouldBe "furthereducation"
                     it?.role shouldBe "student"
                 }
             }
@@ -87,7 +87,7 @@ class DatabaseTest :
                     Password.check("password456", it?.password).withScrypt() shouldBe true
                     it?.name shouldBe "Joana Kennah"
                     it?.email shouldBe "joanakennah@gmail.com"
-                    it?.key_stage shouldBe "furthereducation"
+                    it?.keyStage shouldBe "furthereducation"
                     it?.role shouldBe "teacher"
                 }
             }
@@ -103,7 +103,7 @@ class DatabaseTest :
                     Password.check("password789", it?.password).withScrypt() shouldBe true
                     it?.name shouldBe "Minghao Le"
                     it?.email shouldBe "tgqj4326@leeds.ac.uk"
-                    it?.key_stage shouldBe "furthereducation"
+                    it?.keyStage shouldBe "furthereducation"
                     it?.role shouldBe "teacher"
                 }
             }
@@ -334,8 +334,8 @@ class DatabaseTest :
                 foundQuizzes!! shouldHaveSize 2
 
                 for (i in 0..1) {
-                    foundQuizzes[i].quiz_name shouldBe quizzesData[i][0]
-                    foundQuizzes[i].num_of_questions shouldBe quizzesData[i][1]
+                    foundQuizzes[i].quizName shouldBe quizzesData[i][0]
+                    foundQuizzes[i].numOfQuestions shouldBe quizzesData[i][1]
                     foundQuizzes[i].description shouldBe quizzesData[i][2]
                     foundQuizzes[i].category shouldBe quizzesData[i][3]
                 }
@@ -350,8 +350,8 @@ class DatabaseTest :
                 foundQuizzes shouldNotBe null
                 foundQuizzes!! shouldHaveSize 1
 
-                foundQuizzes[0].quiz_name shouldBe "COMP2870 Quiz"
-                foundQuizzes[0].num_of_questions shouldBe 1
+                foundQuizzes[0].quizName shouldBe "COMP2870 Quiz"
+                foundQuizzes[0].numOfQuestions shouldBe 1
                 foundQuizzes[0].description shouldBe "University of Leeds COMP2870 Quiz for Revision :)"
                 foundQuizzes[0].category shouldBe "computerscience"
             }
@@ -504,7 +504,7 @@ class DatabaseTest :
                         "This is a test quiz",
                         "other",
                         "furthereducation",
-                        num_of_questions = -1,
+                        numOfQuestions = -1,
                     )
                 }
             }
@@ -518,7 +518,7 @@ class DatabaseTest :
                 val quiz = retrieveQuiz(quizId)
                 quiz shouldNotBe null
 
-                quiz!!.quiz_name shouldBe "COMP2860 Quiz"
+                quiz!!.quizName shouldBe "COMP2860 Quiz"
             }
         }
 
@@ -530,7 +530,7 @@ class DatabaseTest :
                 val quiz = retrieveQuiz(quizId)
                 quiz shouldNotBe null
 
-                quiz!!.quiz_name shouldBe "COMP2870 Quiz"
+                quiz!!.quizName shouldBe "COMP2870 Quiz"
             }
         }
 
@@ -578,7 +578,7 @@ class DatabaseTest :
                     }
 
                 quiz shouldNotBe null
-                quiz!!.num_of_questions shouldBe 1
+                quiz!!.numOfQuestions shouldBe 1
 
                 val question =
                     addQuestion(
@@ -587,7 +587,7 @@ class DatabaseTest :
                         "furthereducation",
                     )
                 question shouldNotBe null
-                quiz.num_of_questions shouldBe 2
+                quiz.numOfQuestions shouldBe 2
             }
         }
 
@@ -602,7 +602,7 @@ class DatabaseTest :
                         Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                     }
                 quiz shouldNotBe null
-                quiz!!.num_of_questions shouldBe 1
+                quiz!!.numOfQuestions shouldBe 1
 
                 val question =
                     addQuestion(
@@ -612,7 +612,7 @@ class DatabaseTest :
                     )
                 question shouldNotBe null
                 question.question shouldHaveLength 256
-                quiz.num_of_questions shouldBe 2
+                quiz.numOfQuestions shouldBe 2
             }
         }
 
@@ -684,7 +684,7 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         Question.new {
                             this.question = "This is a test question"
-                            this.key_stage = "keystagefour"
+                            this.keyStage = "keystagefour"
                         }
                     }
                 question shouldNotBe null
@@ -702,7 +702,7 @@ class DatabaseTest :
                 val quiz = retrieveQuizFromGameID(gameId)
 
                 quiz shouldNotBe null
-                quiz!!.quiz_name shouldBe "COMP2860 Quiz"
+                quiz!!.quizName shouldBe "COMP2860 Quiz"
                 transaction(TestDatabase.db) { quiz.user.username shouldBe "linguin0" }
             }
         }
@@ -715,7 +715,7 @@ class DatabaseTest :
                 val quiz = retrieveQuizFromGameID(gameId)
 
                 quiz shouldNotBe null
-                quiz!!.quiz_name shouldBe "COMP2870 Quiz"
+                quiz!!.quizName shouldBe "COMP2870 Quiz"
                 transaction(TestDatabase.db) { quiz.user.username shouldBe "JoanaKennah" }
             }
         }
@@ -769,7 +769,7 @@ class DatabaseTest :
                         Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                     }
                 quiz shouldNotBe null
-                quiz!!.quiz_name shouldBe "COMP2860 Quiz"
+                quiz!!.quizName shouldBe "COMP2860 Quiz"
 
                 val quizQuestions = retrieveQuizQuestions(quiz)
                 quizQuestions shouldNotBe null
@@ -778,7 +778,7 @@ class DatabaseTest :
                 for (i in 0..1) {
                     quizQuestions[i] shouldNotBe null
                     quizQuestions[i].question shouldBe questionData[i][0]
-                    quizQuestions[i].key_stage shouldBe questionData[i][1]
+                    quizQuestions[i].keyStage shouldBe questionData[i][1]
                 }
             }
         }
@@ -794,14 +794,14 @@ class DatabaseTest :
                         Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                     }
                 quiz shouldNotBe null
-                quiz!!.quiz_name shouldBe "COMP2870 Quiz"
+                quiz!!.quizName shouldBe "COMP2870 Quiz"
 
                 val quizQuestions = retrieveQuizQuestions(quiz)
                 quizQuestions shouldNotBe null
                 quizQuestions.size shouldBe 1
 
                 quizQuestions[0].question shouldBe "What is a finite state automation?"
-                quizQuestions[0].key_stage shouldBe "furthereducation"
+                quizQuestions[0].keyStage shouldBe "furthereducation"
             }
         }
 
@@ -816,10 +816,10 @@ class DatabaseTest :
 
                         Quiz.new {
                             this.user = user!!
-                            this.quiz_name = "Test Quiz"
+                            this.quizName = "Test Quiz"
                             this.description = "This is a test quiz"
                             this.category = "other"
-                            this.key_stage = "furthereducation"
+                            this.keyStage = "furthereducation"
                         }
                         return@transaction Quiz.find { QuizTable.user eq user!!.id }.toList()
                     }
@@ -842,10 +842,10 @@ class DatabaseTest :
 
                         Quiz.new {
                             this.user = user!!
-                            this.quiz_name = "Test Quiz"
+                            this.quizName = "Test Quiz"
                             this.description = "This is a test quiz"
                             this.category = "other"
-                            this.key_stage = "furthereducation"
+                            this.keyStage = "furthereducation"
                         }
                     }
                 newQuiz shouldNotBe null
@@ -881,7 +881,7 @@ class DatabaseTest :
                         val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                         quiz shouldNotBe null
 
-                        quiz!!.quiz_name shouldBe "COMP2860 Quiz"
+                        quiz!!.quizName shouldBe "COMP2860 Quiz"
                         val quinstances = Quinstance.find { QuinstanceTable.quiz eq quiz.id }.toList()
                         return@transaction buildList { for (q in quinstances) add(q.question) }
                     }
@@ -892,7 +892,7 @@ class DatabaseTest :
                     val answer = retrieveQuestionAnswer(questions[i])
                     answer shouldNotBe null
 
-                    answer!!.correct_answer shouldBe questionAnswerData[i][0]
+                    answer!!.correctAnswer shouldBe questionAnswerData[i][0]
                     answer.option2 shouldBe questionAnswerData[i][1]
                     answer.option3 shouldBe questionAnswerData[i][2]
                     answer.option4 shouldBe questionAnswerData[i][3]
@@ -921,7 +921,7 @@ class DatabaseTest :
 
                 val answer = retrieveQuestionAnswer(question)
                 answer shouldNotBe null
-                answer!!.correct_answer shouldBe "A model of computation with an extremely limited amount of memory"
+                answer!!.correctAnswer shouldBe "A model of computation with an extremely limited amount of memory"
                 answer.option2 shouldBe "A machine that only runs a finite amount of times"
                 answer.option3 shouldBe "I have ran out of fake answers"
                 answer.option4 shouldBe null
@@ -939,15 +939,15 @@ class DatabaseTest :
 
                         Quiz.new {
                             this.user = user!!
-                            this.quiz_name = "Test Quiz"
+                            this.quizName = "Test Quiz"
                             this.description = "This is a test quiz"
                             this.category = "other"
-                            this.key_stage = "furthereducation"
+                            this.keyStage = "furthereducation"
                         }
 
                         return@transaction Question.new {
                             this.question = "Test question"
-                            this.key_stage = "keystage1"
+                            this.keyStage = "keystage1"
                         }
                     }
                 question shouldNotBe null
@@ -968,15 +968,15 @@ class DatabaseTest :
 
                         Quiz.new {
                             this.user = user!!
-                            this.quiz_name = "Test Quiz"
+                            this.quizName = "Test Quiz"
                             this.description = "This is a test quiz"
                             this.category = "other"
-                            this.key_stage = "furthereducation"
+                            this.keyStage = "furthereducation"
                         }
 
                         return@transaction Question.new {
                             this.question = "Test question"
-                            this.key_stage = "keystage1"
+                            this.keyStage = "keystage1"
                         }
                     }
                 question shouldNotBe null
@@ -991,7 +991,7 @@ class DatabaseTest :
                         0,
                     )
                 answer shouldNotBe null
-                answer!!.correct_answer shouldBe "Option 1"
+                answer!!.correctAnswer shouldBe "Option 1"
                 answer.option2 shouldBe "Option 2"
                 answer.option3 shouldBe "Option 3"
                 answer.option4 shouldBe "Option 4"
@@ -1009,15 +1009,15 @@ class DatabaseTest :
 
                         Quiz.new {
                             this.user = user!!
-                            this.quiz_name = "Test Quiz"
+                            this.quizName = "Test Quiz"
                             this.description = "This is a test quiz"
                             this.category = "other"
-                            this.key_stage = "furthereducation"
+                            this.keyStage = "furthereducation"
                         }
 
                         return@transaction Question.new {
                             this.question = "Test question"
-                            this.key_stage = "keystage1"
+                            this.keyStage = "keystage1"
                         }
                     }
                 question shouldNotBe null
@@ -1032,7 +1032,7 @@ class DatabaseTest :
                         1,
                     )
                 answer shouldNotBe null
-                answer!!.correct_answer shouldBe "Option 2"
+                answer!!.correctAnswer shouldBe "Option 2"
                 answer.option2 shouldBe "Option 1"
                 answer.option3 shouldBe "Option 3"
                 answer.option4 shouldBe "Option 4"
@@ -1050,15 +1050,15 @@ class DatabaseTest :
 
                         Quiz.new {
                             this.user = user!!
-                            this.quiz_name = "Test Quiz"
+                            this.quizName = "Test Quiz"
                             this.description = "This is a test quiz"
                             this.category = "other"
-                            this.key_stage = "furthereducation"
+                            this.keyStage = "furthereducation"
                         }
 
                         return@transaction Question.new {
                             this.question = "Test question"
-                            this.key_stage = "keystage1"
+                            this.keyStage = "keystage1"
                         }
                     }
                 question shouldNotBe null
@@ -1073,7 +1073,7 @@ class DatabaseTest :
                         2,
                     )
                 answer shouldNotBe null
-                answer!!.correct_answer shouldBe "Option 3"
+                answer!!.correctAnswer shouldBe "Option 3"
                 answer.option2 shouldBe "Option 1"
                 answer.option3 shouldBe "Option 2"
                 answer.option4 shouldBe "Option 4"
@@ -1088,7 +1088,7 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         Question.new {
                             this.question = "Test question"
-                            this.key_stage = "keystage1"
+                            this.keyStage = "keystage1"
                         }
                     }
                 question shouldNotBe null
@@ -1103,7 +1103,7 @@ class DatabaseTest :
                         3,
                     )
                 answer shouldNotBe null
-                answer!!.correct_answer shouldBe "Option 4"
+                answer!!.correctAnswer shouldBe "Option 4"
                 answer.option2 shouldBe "Option 1"
                 answer.option3 shouldBe "Option 2"
                 answer.option4 shouldBe "Option 3"
@@ -1122,16 +1122,16 @@ class DatabaseTest :
                         val quiz =
                             Quiz.new {
                                 this.user = user!!
-                                this.quiz_name = "Test Quiz"
+                                this.quizName = "Test Quiz"
                                 this.description = "This is a test quiz"
                                 this.category = "other"
-                                this.key_stage = "furthereducation"
+                                this.keyStage = "furthereducation"
                             }
                         quiz shouldNotBe null
 
                         return@transaction Question.new {
                             this.question = "Test question"
-                            this.key_stage = "keystage1"
+                            this.keyStage = "keystage1"
                         }
                     }
 
@@ -1147,7 +1147,7 @@ class DatabaseTest :
                         0,
                     )
                 answer shouldNotBe null
-                answer!!.correct_answer shouldBe "Option 1"
+                answer!!.correctAnswer shouldBe "Option 1"
                 answer.option2 shouldBe "Option 2"
                 answer.option3 shouldBe null
                 answer.option4 shouldBe "Option 4"
@@ -1166,16 +1166,16 @@ class DatabaseTest :
                         val quiz =
                             Quiz.new {
                                 this.user = user!!
-                                this.quiz_name = "Test Quiz"
+                                this.quizName = "Test Quiz"
                                 this.description = "This is a test quiz"
                                 this.category = "other"
-                                this.key_stage = "furthereducation"
+                                this.keyStage = "furthereducation"
                             }
                         quiz shouldNotBe null
 
                         return@transaction Question.new {
                             this.question = "Test question"
-                            this.key_stage = "keystage1"
+                            this.keyStage = "keystage1"
                         }
                     }
                 question shouldNotBe null
@@ -1190,7 +1190,7 @@ class DatabaseTest :
                         0,
                     )
                 answer shouldNotBe null
-                answer!!.correct_answer shouldBe "Option 1"
+                answer!!.correctAnswer shouldBe "Option 1"
                 answer.option2 shouldBe "Option 2"
                 answer.option3 shouldBe "Option 3"
                 answer.option4 shouldBe null
@@ -1247,16 +1247,16 @@ class DatabaseTest :
                         val quiz =
                             Quiz.new {
                                 this.user = user!!
-                                this.quiz_name = "Test Quiz"
+                                this.quizName = "Test Quiz"
                                 this.description = "This is a test quiz"
                                 this.category = "other"
-                                this.key_stage = "furthereducation"
+                                this.keyStage = "furthereducation"
                             }
                         quiz shouldNotBe null
 
                         Question.new {
                             this.question = "Test question"
-                            this.key_stage = "keystage1"
+                            this.keyStage = "keystage1"
                         }
                     }
                 question shouldNotBe null
@@ -1369,7 +1369,7 @@ class DatabaseTest :
 
                 game shouldNotBe null
                 transaction(TestDatabase.db) {
-                    game!!.quiz.quiz_name shouldBe "COMP2860 Quiz"
+                    game!!.quiz.quizName shouldBe "COMP2860 Quiz"
                 }
             }
         }
@@ -1383,7 +1383,7 @@ class DatabaseTest :
 
                 game shouldNotBe null
                 transaction(TestDatabase.db) {
-                    game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                    game!!.quiz.quizName shouldBe "COMP2870 Quiz"
                 }
             }
         }
@@ -1480,10 +1480,10 @@ class DatabaseTest :
 
                         Quiz.new {
                             this.user = user!!
-                            this.quiz_name = "Test Quiz"
+                            this.quizName = "Test Quiz"
                             this.description = "This is a test quiz"
                             this.category = "other"
-                            this.key_stage = "furthereducation"
+                            this.keyStage = "furthereducation"
                         }
                     }
                 quiz shouldNotBe null
@@ -1567,7 +1567,7 @@ class DatabaseTest :
 
                 transaction(TestDatabase.db) {
                     inUseCode!!.game.id.toString() shouldBe "1"
-                    inUseCode.game.quiz.quiz_name shouldBe "COMP2860 Quiz"
+                    inUseCode.game.quiz.quizName shouldBe "COMP2860 Quiz"
                 }
             }
         }
@@ -1582,7 +1582,7 @@ class DatabaseTest :
 
                 transaction(TestDatabase.db) {
                     inUseCode!!.game.id.toString() shouldBe "2"
-                    inUseCode.game.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                    inUseCode.game.quiz.quizName shouldBe "COMP2870 Quiz"
                 }
             }
         }
@@ -1706,11 +1706,10 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         val game = Game.findById(1)
                         game shouldNotBe null
-                        game!!.quiz.quiz_name shouldBe "COMP2860 Quiz"
+                        game!!.quiz.quizName shouldBe "COMP2860 Quiz"
                         return@transaction game
                     }
 
-                // Room code is generated using GenerateRoomCode, for tests I will be using placeholders.
                 val inUseCode = addInUseCode("HIJK1010", game)
                 inUseCode shouldNotBe null
             }
@@ -1724,7 +1723,7 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         val game = Game.findById(2)
                         game shouldNotBe null
-                        game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                        game!!.quiz.quizName shouldBe "COMP2870 Quiz"
                         return@transaction game
                     }
 
@@ -1741,7 +1740,7 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         val game = Game.findById(2)
                         game shouldNotBe null
-                        game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                        game!!.quiz.quizName shouldBe "COMP2870 Quiz"
                         return@transaction game
                     }
 
@@ -1759,7 +1758,7 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         val game = Game.findById(2)
                         game shouldNotBe null
-                        game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                        game!!.quiz.quizName shouldBe "COMP2870 Quiz"
                         return@transaction game
                     }
 
@@ -1776,10 +1775,10 @@ class DatabaseTest :
                 transaction(TestDatabase.db) {
                     val game = Game.findById(1)
                     game shouldNotBe null
-                    game!!.quiz.quiz_name shouldBe "COMP2860 Quiz"
+                    game!!.quiz.quizName shouldBe "COMP2860 Quiz"
 
                     InUseCode.new {
-                        this.room_code = "DCBA9876"
+                        this.roomCode = "DCBA9876"
                         this.game = game
                     }
                 }
@@ -1787,7 +1786,7 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         val game = Game.findById(2)
                         game shouldNotBe null
-                        game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                        game!!.quiz.quizName shouldBe "COMP2870 Quiz"
                         return@transaction game
                     }
 
@@ -1837,13 +1836,13 @@ class DatabaseTest :
                         InUseCode.find { InUseTable.room_code eq roomCode }.firstOrNull()
                     }
                 inUseCode shouldNotBe null
-                inUseCode!!.room_code shouldBe roomCode
+                inUseCode!!.roomCode shouldBe roomCode
 
                 val game = retrieveInUseCodeGame(inUseCode)
                 game shouldNotBe null
 
                 transaction(TestDatabase.db) {
-                    game!!.quiz.quiz_name shouldBe "COMP2860 Quiz"
+                    game!!.quiz.quizName shouldBe "COMP2860 Quiz"
                 }
             }
         }
@@ -1858,13 +1857,13 @@ class DatabaseTest :
                         InUseCode.find { InUseTable.room_code eq roomCode }.firstOrNull()
                     }
                 inUseCode shouldNotBe null
-                inUseCode!!.room_code shouldBe roomCode
+                inUseCode!!.roomCode shouldBe roomCode
 
                 val game = retrieveInUseCodeGame(inUseCode)
                 game shouldNotBe null
 
                 transaction(TestDatabase.db) {
-                    game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                    game!!.quiz.quizName shouldBe "COMP2870 Quiz"
                 }
             }
         }
@@ -1877,10 +1876,10 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         val game = Game.findById(2)
                         game shouldNotBe null
-                        game!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                        game!!.quiz.quizName shouldBe "COMP2870 Quiz"
 
                         InUseCode.new {
-                            this.room_code = "TEST1234"
+                            this.roomCode = "TEST1234"
                             this.game = game
                         }
                     }
@@ -1901,7 +1900,7 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         val foundGame = Game.findById(1)
                         foundGame shouldNotBe null
-                        foundGame!!.quiz.quiz_name shouldBe "COMP2860 Quiz"
+                        foundGame!!.quiz.quizName shouldBe "COMP2860 Quiz"
                         return@transaction foundGame
                     }
 
@@ -1922,7 +1921,7 @@ class DatabaseTest :
                     transaction(TestDatabase.db) {
                         val foundGame = Game.findById(2)
                         foundGame shouldNotBe null
-                        foundGame!!.quiz.quiz_name shouldBe "COMP2870 Quiz"
+                        foundGame!!.quiz.quizName shouldBe "COMP2870 Quiz"
                         return@transaction foundGame
                     }
 
@@ -1959,7 +1958,7 @@ class DatabaseTest :
 
                         InUseCode.new {
                             this.game = game
-                            this.room_code = "TEST1234"
+                            this.roomCode = "TEST1234"
                         }
                         return@transaction game
                     }
@@ -2061,7 +2060,7 @@ class DatabaseTest :
                             this.password = hashedPass.result
                             this.name = "Test Test"
                             this.email = "test@gmail.com"
-                            this.key_stage = "furthereducation"
+                            this.keyStage = "furthereducation"
                             this.role = "student"
                         }
                     }
@@ -2238,7 +2237,7 @@ class DatabaseTest :
                     }
                 user shouldNotBe null
 
-                val userAttempt = retrieveUserAttempts(user!!)
+                val userAttempt = retrieveUserQuizAttempts(user!!)
                 userAttempt shouldNotBe null
                 userAttempt shouldHaveSize 1
 
@@ -2266,7 +2265,7 @@ class DatabaseTest :
                     }
                 user shouldNotBe null
 
-                val userAttempts = retrieveUserAttempts(user!!)
+                val userAttempts = retrieveUserQuizAttempts(user!!)
                 userAttempts shouldNotBe null
                 userAttempts shouldHaveSize 2
 
@@ -2287,7 +2286,7 @@ class DatabaseTest :
                     }
                 user shouldNotBe null
 
-                val userAttempt = retrieveUserAttempts(user!!)
+                val userAttempt = retrieveUserQuizAttempts(user!!)
                 userAttempt shouldHaveSize 0
             }
         }
@@ -2304,7 +2303,7 @@ class DatabaseTest :
                             this.password = hashedPass.result
                             this.name = "Test Test"
                             this.email = "test@gmail.com"
-                            this.key_stage = "furthereducation"
+                            this.keyStage = "furthereducation"
                             this.role = "student"
                         }
                     }
@@ -2312,8 +2311,8 @@ class DatabaseTest :
 
                 transaction(TestDatabase.db) { user.delete() }
 
-                shouldThrow<IllegalArgumentException> {
-                    retrieveUserAttempts(user)
+                shouldThrow<IllegalArgumentException> { 
+                    retrieveUserQuizAttempts(user) 
                 }
             }
         }

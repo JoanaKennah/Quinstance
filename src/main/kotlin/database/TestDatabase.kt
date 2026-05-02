@@ -1,15 +1,14 @@
 package com.example.database
 
-import com.example.database.objects.InUseCode
 import com.example.database.objects.Quiz
-import com.example.database.tables.UserTable
-import com.example.database.tables.QuizTable
-import com.example.database.tables.QuestionTable
-import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.AnswerTable
 import com.example.database.tables.GameTable
-import com.example.database.tables.UserScoreTable
 import com.example.database.tables.InUseTable
+import com.example.database.tables.QuestionTable
+import com.example.database.tables.QuinstanceTable
+import com.example.database.tables.QuizTable
+import com.example.database.tables.UserScoreTable
+import com.example.database.tables.UserTable
 import com.password4j.Password
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -38,61 +37,67 @@ object TestDatabase {
 
             // Doesn't use functions I developed to potentially avoid bugs
             val hashedPasswordOne = Password.hash("password123").addRandomSalt(8).withScrypt()
-            val userOne = UserTable.insertAndGetId {
-                it[username] = "linguin0"
-                it[password] = hashedPasswordOne.result
-                it[name] = "Ethan Harris"
-                it[email] = "ethan@gmail.com"
-                it[key_stage] = "furthereducation"
-                it[role] = "student"
-            }
+            val userOne =
+                UserTable.insertAndGetId {
+                    it[username] = "linguin0"
+                    it[password] = hashedPasswordOne.result
+                    it[name] = "Ethan Harris"
+                    it[email] = "ethan@gmail.com"
+                    it[key_stage] = "furthereducation"
+                    it[role] = "student"
+                }
 
             val hashedPasswordTwo = Password.hash("password456").addRandomSalt(8).withScrypt()
-            val userTwo = UserTable.insertAndGetId {
-                it[username] = "JoanaKennah"
-                it[password] = hashedPasswordTwo.result
-                it[name] = "Joana Kennah"
-                it[email] = "joanakennah@gmail.com"
-                it[key_stage] = "furthereducation"
-                it[role] = "teacher"
-            }
+            val userTwo =
+                UserTable.insertAndGetId {
+                    it[username] = "JoanaKennah"
+                    it[password] = hashedPasswordTwo.result
+                    it[name] = "Joana Kennah"
+                    it[email] = "joanakennah@gmail.com"
+                    it[key_stage] = "furthereducation"
+                    it[role] = "teacher"
+                }
 
             val hashedPasswordThree = Password.hash("password789").addRandomSalt(8).withScrypt()
-            val userThree = UserTable.insertAndGetId {
-                it[username] = "MinghaoLe123"
-                it[password] = hashedPasswordThree.result
-                it[name] = "Minghao Le"
-                it[email] = "tgqj4326@leeds.ac.uk"
-                it[key_stage] = "furthereducation"
-                it[role] = "teacher"
-            }
+            val userThree =
+                UserTable.insertAndGetId {
+                    it[username] = "MinghaoLe123"
+                    it[password] = hashedPasswordThree.result
+                    it[name] = "Minghao Le"
+                    it[email] = "tgqj4326@leeds.ac.uk"
+                    it[key_stage] = "furthereducation"
+                    it[role] = "teacher"
+                }
 
             // Quiz #1 for linguin0 (2 questions with answers)
-            val userOneQuiz = QuizTable.insertAndGetId {
-                it[user] = userOne
-                it[quiz_name] = "COMP2860 Quiz"
-                it[num_of_questions] = 0
-                it[description] = "Quiz to test my limited knowledge on COMP2860"
-                it[category] = "computerscience"
-                it[key_stage] = "furthereducation"
-            }
+            val userOneQuiz =
+                QuizTable.insertAndGetId {
+                    it[user] = userOne
+                    it[quiz_name] = "COMP2860 Quiz"
+                    it[num_of_questions] = 0
+                    it[description] = "Quiz to test my limited knowledge on COMP2860"
+                    it[category] = "computerscience"
+                    it[key_stage] = "furthereducation"
+                }
 
-            val userOneQuizQ1 = QuestionTable.insertAndGetId {
-                it[question] = "What is a process?"
-                it[key_stage] = "furthereducation"
-            }
-
-            Quiz.findByIdAndUpdate(userOneQuiz.value) {
-                it.num_of_questions += 1
-            }
-
-            val userOneQuizQ2 = QuestionTable.insertAndGetId {
-                it[question] = "What is a thread?"
-                it[key_stage] = "furthereducation"
-            }
+            val userOneQuizQ1 =
+                QuestionTable.insertAndGetId {
+                    it[question] = "What is a process?"
+                    it[key_stage] = "furthereducation"
+                }
 
             Quiz.findByIdAndUpdate(userOneQuiz.value) {
-                it.num_of_questions += 1
+                it.numOfQuestions += 1
+            }
+
+            val userOneQuizQ2 =
+                QuestionTable.insertAndGetId {
+                    it[question] = "What is a thread?"
+                    it[key_stage] = "furthereducation"
+                }
+
+            Quiz.findByIdAndUpdate(userOneQuiz.value) {
+                it.numOfQuestions += 1
             }
 
             AnswerTable.insert {
@@ -132,22 +137,24 @@ object TestDatabase {
             }
 
             // Quiz #1 for user JoanaKennah (1 question with answers)
-            val userTwoQuiz = QuizTable.insertAndGetId {
-                it[user] = userTwo
-                it[quiz_name] = "COMP2870 Quiz"
-                it[num_of_questions] = 0
-                it[description] = "University of Leeds COMP2870 Quiz for Revision :)"
-                it[category] = "computerscience"
-                it[key_stage] = "furthereducation"
-            }
+            val userTwoQuiz =
+                QuizTable.insertAndGetId {
+                    it[user] = userTwo
+                    it[quiz_name] = "COMP2870 Quiz"
+                    it[num_of_questions] = 0
+                    it[description] = "University of Leeds COMP2870 Quiz for Revision :)"
+                    it[category] = "computerscience"
+                    it[key_stage] = "furthereducation"
+                }
 
-            val userTwoQuizQ1 = QuestionTable.insertAndGetId {
-                it[question] = "What is a finite state automation?"
-                it[key_stage] = "furthereducation"
-            }
+            val userTwoQuizQ1 =
+                QuestionTable.insertAndGetId {
+                    it[question] = "What is a finite state automation?"
+                    it[key_stage] = "furthereducation"
+                }
 
             Quiz.findByIdAndUpdate(userTwoQuiz.value) {
-                it.num_of_questions += 1
+                it.numOfQuestions += 1
             }
 
             AnswerTable.insert {
@@ -167,14 +174,20 @@ object TestDatabase {
             val gameOne =
                 GameTable.insertAndGetId {
                     it[quiz] = userOneQuiz
-                    it[timeStamp] = java.time.LocalDateTime.now().toString()
+                    it[timeStamp] =
+                        java.time.LocalDateTime
+                            .now()
+                            .toString()
                 }
 
             // Game for JoanaKennah hosting Quiz 'COMP2870 Quiz'
             val gameTwo =
                 GameTable.insertAndGetId {
                     it[quiz] = userTwoQuiz
-                    it[timeStamp] = java.time.LocalDateTime.now().toString()
+                    it[timeStamp] =
+                        java.time.LocalDateTime
+                            .now()
+                            .toString()
                 }
 
             InUseTable.insert {

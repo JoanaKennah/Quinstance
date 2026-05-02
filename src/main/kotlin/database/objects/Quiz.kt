@@ -1,20 +1,21 @@
 package com.example.database.objects
 
+import com.example.database.tables.QuizTable
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.IntEntity
 import org.jetbrains.exposed.v1.dao.IntEntityClass
-import org.jetbrains.exposed.v1.core.dao.id.EntityID
-import com.example.database.tables.QuizTable
 
-class Quiz(id: EntityID<Int>) : IntEntity(id) {
+class Quiz(
+    id: EntityID<Int>,
+) : IntEntity(id) {
     companion object : IntEntityClass<Quiz>(QuizTable)
 
     var user by User referencedOn QuizTable.user // NEW FIX
-    var quiz_name by QuizTable.quiz_name
-    var num_of_questions by QuizTable.num_of_questions
+    var quizName by QuizTable.quiz_name
+    var numOfQuestions by QuizTable.num_of_questions
     var description by QuizTable.description
     var category by QuizTable.category
-    var key_stage by QuizTable.key_stage
-    var minigames_enabled by QuizTable.minigames_enabled
+    var keyStage by QuizTable.key_stage
 
-    override fun toString() = quiz_name
+    override fun toString() = quizName
 }
