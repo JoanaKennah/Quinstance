@@ -1,13 +1,9 @@
 package com.example
 
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.*
-import io.ktor.client.plugins.cookies.*
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.testing.*
+import io.ktor.client.plugins.cookies.HttpCookies
+import io.ktor.client.request.get
+import io.ktor.server.testing.testApplication
 
 class DashboardRoutingTest :
     StringSpec({

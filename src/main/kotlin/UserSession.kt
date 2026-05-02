@@ -1,6 +1,5 @@
 package com.example
 
-import io.ktor.server.sessions.*
 import kotlinx.serialization.Serializable
 
 @Serializable

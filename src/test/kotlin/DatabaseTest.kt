@@ -2311,8 +2311,8 @@ class DatabaseTest :
 
                 transaction(TestDatabase.db) { user.delete() }
 
-                shouldThrow<IllegalArgumentException> { 
-                    retrieveUserQuizAttempts(user) 
+                shouldThrow<IllegalArgumentException> {
+                    retrieveUserQuizAttempts(user)
                 }
             }
         }
