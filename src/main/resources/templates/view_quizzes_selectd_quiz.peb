@@ -123,7 +123,7 @@
     <div class="container">
         <div class="left">
             <div class="quiz-name">
-                {{ quiz.quiz_name }}
+                {{ quiz.quizName }}
             </div>
             <div class="description">
                 {{ quiz.description }}
