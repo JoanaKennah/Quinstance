@@ -50,7 +50,7 @@
         }
 
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -74,7 +74,7 @@
         }
 
         .answer-box {
-            border: 4px solid #e63973;
+            border: 4px solid #d33469;
             background-color: white;
             padding: 20px;
             border-radius: 10px;

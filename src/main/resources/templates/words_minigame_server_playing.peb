@@ -99,7 +99,7 @@
         }
 
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -132,7 +132,7 @@
         }
 
         .title-box {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             border-radius: 10px;
             padding: 15px 30px;
             display: inline-block;
@@ -144,7 +144,7 @@
         }
 
         .description {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             border-radius: 10px;
             padding: 15px;
             font-size: 18px;
@@ -155,7 +155,7 @@
         .countdown {
             font-size: 60px;
             font-weight: bold;
-            color: #e63973;
+            color: #d33469;
             margin: 10px 0 30px 0;
         }
 
@@ -169,7 +169,7 @@
         .cell {
             width: 60px;
             height: 60px;
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             border-radius: 8px;
             display: flex;
             align-items: center;

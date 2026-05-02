@@ -10,5 +10,4 @@ object QuizTable : IntIdTable() {
     val description = varchar("description", 256)
     val category = varchar("category", 50)
     val key_stage = varchar("key_stage", 20)
-    val minigames_enabled = bool("minigames_enabled").default(false)
 }

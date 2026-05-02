@@ -7,7 +7,7 @@ data class PotionsGameState(
     val playerPicks: MutableMap<String, Int> = LinkedHashMap(),
     var isStarted: Boolean = false,
     var isFinished: Boolean = false,
-    var newGhosts: List<String> = emptyList()
+    var newGhosts: List<String> = emptyList(),
 )
 
 @Serializable
@@ -16,5 +16,5 @@ data class PotionsPicksResponse(
     val column2: List<String>,
     val column3: List<String>,
     val ghostUsers: List<String>,
-    val isFinished: Boolean
+    val isFinished: Boolean,
 )

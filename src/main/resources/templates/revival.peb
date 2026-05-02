@@ -81,7 +81,7 @@
         }
 
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -103,7 +103,7 @@
         }
 
         .box {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             border-radius: 10px;
             padding: 30px;
             display: inline-block;
@@ -122,7 +122,7 @@
         .score {
             font-size: 40px;
             font-weight: bold;
-            color: #e63973;
+            color: #d33469;
         }
 
         .logout-btn {

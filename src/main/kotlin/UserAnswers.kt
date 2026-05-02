@@ -6,8 +6,11 @@ object UserAnswers {
     fun allUserAnswers(): List<SentAnswerData> = userAnswers
 
     fun addAnswer(data: SentAnswerData) {
-        if (!userAnswers.contains(data)) userAnswers.add(data)
-        else throw IllegalArgumentException("Cannot add duplicate user answers")
+        if (!userAnswers.contains(data)) {
+            userAnswers.add(data)
+        } else {
+            throw IllegalArgumentException("Cannot add duplicate user answers")
+        }
     }
 
     fun clearAnswers() = userAnswers.clear()

@@ -91,7 +91,7 @@
         }
 
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -113,7 +113,7 @@
         }
 
         .title-box {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             border-radius: 10px;
             padding: 20px;
             display: inline-block;
@@ -144,7 +144,7 @@
         .countdown {
             font-size: 60px;
             font-weight: bold;
-            color: #e63973;
+            color: #d33469;
         }
 
         .logout-btn {

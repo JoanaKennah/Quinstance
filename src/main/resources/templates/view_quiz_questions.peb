@@ -10,7 +10,7 @@
         }
 
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -27,7 +27,7 @@
         }
 
         .title-box {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             background-color: white;
             padding: 20px;
             text-align: center;
@@ -48,7 +48,7 @@
         }
 
         .csv-text {
-            color: #e63973;
+            color: #d33469;
             font-size: 18px;
             margin: 0;
             white-space: nowrap;
@@ -89,7 +89,7 @@
         }
 
         .add-btn {
-            background-color: #e63973;
+            background-color: #d33469;
             color: white;
             padding: 10px 15px;
             text-decoration: none;
@@ -103,7 +103,7 @@
 
         .next-btn {
             padding: 10px 20px;
-            background-color: #e63973;
+            background-color: #d33469;
             color: white;
             border: none;
             cursor: pointer;
@@ -126,7 +126,7 @@
         }
 
         .question-box {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             background-color: white;
             padding: 15px;
             border-radius: 8px;
@@ -142,7 +142,7 @@
             padding: 10px 20px;
             background-color: white;
             color: black;
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             cursor: pointer;
             border-radius: 5px;
         }
@@ -151,7 +151,7 @@
             padding: 10px 20px;
             background-color: white;
             color: black;
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             cursor: pointer;
             border-radius: 5px;
             font-size: 15px;
@@ -162,7 +162,7 @@
         }
 
         .btn:hover, .btn-download:hover {
-            background-color: #e63973;
+            background-color: #b02a57;
             color: white;
         }
 
@@ -171,7 +171,7 @@
             padding: 10px 20px;
             background-color: white;
             color: black;
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             cursor: pointer;
             border-radius: 5px;
             font-size: 15px;
@@ -179,7 +179,7 @@
         }
 
         input[type=file]::file-selector-button:hover {
-            background-color: #e63973;
+            background-color: #b02a57;
             color: white;
         }
 
@@ -247,7 +247,9 @@
                         enctype="multipart/form-data"
                         class = "csv-form"
                         onsubmit={% if questions is not empty %}"return deleteQuestions()"{% endif %}>
-                        <label for="fileInput" class="btn-download" style="cursor:pointer;">Choose File</label>
+                        <label for="fileInput" tabindex="0" class="btn-download" style="cursor:pointer;" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); document.getElementById('fileInput').click(); }">
+                            Choose File
+                        </label>
                         <input type="file" id="fileInput" name="filename" style="display:none;">
                         <input type="hidden" name="quizId" value={{ quizId }}>
                         <input type="hidden" name="resetQuestions" id="csvChoice">

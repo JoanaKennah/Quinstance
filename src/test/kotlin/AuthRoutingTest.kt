@@ -3,158 +3,194 @@ package com.example
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.*
 import io.kotest.matchers.string.shouldContain
+import io.ktor.client.plugins.cookies.*
 import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.server.testing.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
-import io.ktor.client.plugins.cookies.*
+import io.ktor.http.*
+import io.ktor.server.testing.*
 
-class AuthRoutingTest : StringSpec({
+class AuthRoutingTest :
+    StringSpec({
 
-    //Public get routes
-    "GET / returns 200 with HTML - root path works" {
-        testApplication {
-            application { testModule() }
-            client.get("/").also { checkForHtml(it) }
-        }
-    }
-
-    "GET /home returns 200 with HTML - homepage loads" {
-        testApplication {
-            application { testModule() }
-            client.get("/home").also { checkForHtml(it) }
-        }
-    }
-
-    "GET /login returns 200 with HTML - login page loads" {
-        testApplication {
-            application { testModule() }
-            client.get("/login").also { checkForHtml(it) }
-        }
-    }
-
-    "GET /signup returns 200 with HTML - signup page loads" {
-        testApplication {
-            application { testModule() }
-            client.get("/signup").also { checkForHtml(it) }
-        }
-    }
-
-    //login post routes
-    "POST /login w/ wrong password returns 200 OK with error message - invalid creds handled" {
-        testApplication {
-            application { testModule() }
-            val response = client.post("/login") {
-                setBody(FormDataContent(Parameters.build {
-                    append("username", "linguin0")
-                    append("password", "wrong")
-                }))
+        // Public get routes
+        "GET / returns 200 with HTML - root path works" {
+            testApplication {
+                application { testModule() }
+                client.get("/").also { checkForHtml(it) }
             }
-            response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Incorrect password"
         }
-    }
 
-    "POST /login w/ missing password returns 200 OK with error message - missing creds handled" {
-        testApplication {
-            application { testModule() }
-            val response = client.post("/login") {
-                setBody(FormDataContent(Parameters.build {
-                    append("username", "linguin0")
-                }))
+        "GET /home returns 200 with HTML - homepage loads" {
+            testApplication {
+                application { testModule() }
+                client.get("/home").also { checkForHtml(it) }
             }
-            response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Missing input"
         }
-    }
 
-    "POST /login w/ valid student creds sends user to /student-dashboard - student login works" {
-        testApplication {
-            application { testModule() }
-            val client = createClient { install(HttpCookies) }
-            val response = client.post("/login") {
-                setBody(FormDataContent(Parameters.build {
-                    append("username", "linguin0")
-                    append("password", "password123")
-                }))
+        "GET /login returns 200 with HTML - login page loads" {
+            testApplication {
+                application { testModule() }
+                client.get("/login").also { checkForHtml(it) }
             }
-            checkForRedirect(response, "/student-dashboard")
         }
-    }
 
-    "POST /login w/ valid teacher creds sends user to /teacher-dashboard - teacher login works" {
-        testApplication {
-            application { testModule() }
-            val client = createClient { install(HttpCookies) }
-            val response = client.post("/login") {
-                setBody(FormDataContent(Parameters.build {
-                    append("username", "JoanaKennah")
-                    append("password", "password456")
-                }))
+        "GET /signup returns 200 with HTML - signup page loads" {
+            testApplication {
+                application { testModule() }
+                client.get("/signup").also { checkForHtml(it) }
             }
-            checkForRedirect(response, "/teacher-dashboard")
         }
-    }
 
-    //signup post routes
-    "POST /signup w/password mismatch returns 200 OK with error message - confirm password mismatch handled" {
-        testApplication {
-            application { testModule() }
-            val response = client.post("/signup") {
-                setBody(FormDataContent(Parameters.build {
-                    append("firstname", "Test")
-                    append("lastname", "User")
-                    append("email", "test@test.com")
-                    append("username", "testuser")
-                    append("password", "password")
-                    append("confirmpassword", "passwordmismatch")
-                    append("role", "student")
-                    append("keystage", "furthereducation")
-                }))
+        // login post routes
+        "POST /login w/ wrong password returns 200 OK with error message - invalid creds handled" {
+            testApplication {
+                application { testModule() }
+                val response =
+                    client.post("/login") {
+                        setBody(
+                            FormDataContent(
+                                Parameters.build {
+                                    append("username", "linguin0")
+                                    append("password", "wrong")
+                                },
+                            ),
+                        )
+                    }
+                response.status shouldBe HttpStatusCode.OK
+                response.bodyAsText() shouldContain "Incorrect password"
             }
-            response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Passwords do not match"
         }
-    }
 
-    "POST /signup w/ dupe username returns 200 OK with error message - dupe username handled" {
-        testApplication {
-            application { testModule() }
-            val response = client.post("/signup") {
-                setBody(FormDataContent(Parameters.build {
-                    append("firstname", "Ethan")
-                    append("lastname", "Harris")
-                    append("email", "ethan@gmail.com")
-                    append("username", "linguin0")
-                    append("password", "password123")
-                    append("confirmpassword", "password123")
-                    append("role", "student")
-                    append("keystage", "furthereducation")
-                }))
+        "POST /login w/ missing password returns 200 OK with error message - missing creds handled" {
+            testApplication {
+                application { testModule() }
+                val response =
+                    client.post("/login") {
+                        setBody(
+                            FormDataContent(
+                                Parameters.build {
+                                    append("username", "linguin0")
+                                },
+                            ),
+                        )
+                    }
+                response.status shouldBe HttpStatusCode.OK
+                response.bodyAsText() shouldContain "Missing input"
             }
-            response.status shouldBe HttpStatusCode.OK
-            response.bodyAsText() shouldContain "Username already exists"
         }
-    }
 
-    "POST /signup w/ valid student data sends user to /student-dashboard - student signup success works" {
-        testApplication {
-            application { testModule() }
-            val client = createClient { install(HttpCookies) }
-            val response = client.post("/signup") {
-                setBody(FormDataContent(Parameters.build {
-                    append("firstname", "Test")
-                    append("lastname", "User")
-                    append("email", "test@gmail.com")
-                    append("username", "newuser")
-                    append("password", "password123")
-                    append("confirmpassword", "password123")
-                    append("role", "student")
-                    append("keystage", "furthereducation")
-                }))
+        "POST /login w/ valid student creds sends user to /student-dashboard - student login works" {
+            testApplication {
+                application { testModule() }
+                val client = createClient { install(HttpCookies) }
+                val response =
+                    client.post("/login") {
+                        setBody(
+                            FormDataContent(
+                                Parameters.build {
+                                    append("username", "linguin0")
+                                    append("password", "password123")
+                                },
+                            ),
+                        )
+                    }
+                checkForRedirect(response, "/student-dashboard")
             }
-            checkForRedirect(response, "/student-dashboard")
         }
-    }
-})
+
+        "POST /login w/ valid teacher creds sends user to /teacher-dashboard - teacher login works" {
+            testApplication {
+                application { testModule() }
+                val client = createClient { install(HttpCookies) }
+                val response =
+                    client.post("/login") {
+                        setBody(
+                            FormDataContent(
+                                Parameters.build {
+                                    append("username", "JoanaKennah")
+                                    append("password", "password456")
+                                },
+                            ),
+                        )
+                    }
+                checkForRedirect(response, "/teacher-dashboard")
+            }
+        }
+
+        // signup post routes
+        "POST /signup w/password mismatch returns 200 OK with error message - confirm password mismatch handled" {
+            testApplication {
+                application { testModule() }
+                val response =
+                    client.post("/signup") {
+                        setBody(
+                            FormDataContent(
+                                Parameters.build {
+                                    append("firstname", "Test")
+                                    append("lastname", "User")
+                                    append("email", "test@test.com")
+                                    append("username", "testuser")
+                                    append("password", "password")
+                                    append("confirmpassword", "passwordmismatch")
+                                    append("role", "student")
+                                    append("keystage", "furthereducation")
+                                },
+                            ),
+                        )
+                    }
+                response.status shouldBe HttpStatusCode.OK
+                response.bodyAsText() shouldContain "Passwords do not match"
+            }
+        }
+
+        "POST /signup w/ dupe username returns 200 OK with error message - dupe username handled" {
+            testApplication {
+                application { testModule() }
+                val response =
+                    client.post("/signup") {
+                        setBody(
+                            FormDataContent(
+                                Parameters.build {
+                                    append("firstname", "Ethan")
+                                    append("lastname", "Harris")
+                                    append("email", "ethan@gmail.com")
+                                    append("username", "linguin0")
+                                    append("password", "password123")
+                                    append("confirmpassword", "password123")
+                                    append("role", "student")
+                                    append("keystage", "furthereducation")
+                                },
+                            ),
+                        )
+                    }
+                response.status shouldBe HttpStatusCode.OK
+                response.bodyAsText() shouldContain "Username already exists"
+            }
+        }
+
+        "POST /signup w/ valid student data sends user to /student-dashboard - student signup success works" {
+            testApplication {
+                application { testModule() }
+                val client = createClient { install(HttpCookies) }
+                val response =
+                    client.post("/signup") {
+                        setBody(
+                            FormDataContent(
+                                Parameters.build {
+                                    append("firstname", "Test")
+                                    append("lastname", "User")
+                                    append("email", "test@gmail.com")
+                                    append("username", "newuser")
+                                    append("password", "password123")
+                                    append("confirmpassword", "password123")
+                                    append("role", "student")
+                                    append("keystage", "furthereducation")
+                                },
+                            ),
+                        )
+                    }
+                checkForRedirect(response, "/student-dashboard")
+            }
+        }
+    })

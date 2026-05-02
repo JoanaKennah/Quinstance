@@ -38,6 +38,7 @@
         label {
             color: #20882E;
             font-weight: bold;
+            font-size: 24px;
             display: block;
             margin-top: 20px;
         }

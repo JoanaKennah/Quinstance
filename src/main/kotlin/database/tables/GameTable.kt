@@ -5,5 +5,10 @@ import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 
 object GameTable : IntIdTable() {
     val quiz = reference("quiz", QuizTable, ReferenceOption.CASCADE)
-    val timeStamp = varchar("created_at", 50).default(java.time.LocalDateTime.now().toString())
+    val timeStamp =
+        varchar("created_at", 50).default(
+            java.time.LocalDateTime
+                .now()
+                .toString(),
+        )
 }

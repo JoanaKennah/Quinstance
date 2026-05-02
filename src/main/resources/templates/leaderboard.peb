@@ -92,7 +92,7 @@
         }
       
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -130,7 +130,7 @@
         th {
             text-align: left;
             padding: 10px;
-            border-bottom: 2px solid #e63973;
+            border-bottom: 2px solid #d33469;
             color: black;
         }
 
@@ -163,7 +163,7 @@
             padding: 12px;
             background-color: white;
             color: black;
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             cursor: pointer;
             border-radius: 5px;
             text-align: center;
@@ -171,7 +171,7 @@
         }
 
         .control-btn:hover {
-            background-color: #e63973;
+            background-color: #b02a57;
             color: white;
         }
     </style>
@@ -201,7 +201,7 @@
                 </thead>
                 <tbody>
                     {% for player in players %}
-                        {% set ghostColor = theme == "spooky" ? "white" : "#e63973" %}
+                        {% set ghostColor = theme == "spooky" ? "white" : "#d33469" %}
                         <tr>
                             <td {% if player.isGhost %}style="color: {{ ghostColor }};"{% endif %}>{{ loop.index + 1 }}</td>
                             <td {% if player.isGhost %}style="color: {{ ghostColor }};"{% endif %}>{{ player.username }}</td>
