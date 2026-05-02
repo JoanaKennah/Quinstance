@@ -268,6 +268,24 @@
             window.location.href = "/selected-answer/{{ gameId }}?answer=" + encodeURIComponent(selectedText);
         }
 
+        function setAnswer(id, text) {
+            const btn = document.getElementById(id);
+
+            if (text && text.trim() !== "") {
+                btn.textContent = text;
+                btn.style.display = "block";
+                btn.disabled = false;
+                btn.removeAttribute("aria-hidden");
+                btn.removeAttribute("tabindex");
+            } else {
+                btn.textContent = "";
+                btn.style.display = "none";       // removes from accessibility tree
+                btn.disabled = true;              // extra safety
+                btn.setAttribute("aria-hidden", "true");
+                btn.setAttribute("tabindex", "-1");
+            }
+        }
+
     </script>
 
 </head>
