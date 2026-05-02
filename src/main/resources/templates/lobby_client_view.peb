@@ -83,7 +83,7 @@
         }
 
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -101,7 +101,7 @@
         }
 
         .title-box {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             border-radius: 10px;
             padding: 20px;
             margin: 0 auto 40px auto;
@@ -116,14 +116,14 @@
         }
 
         .waiting-message {
-            color: #e63973;
+            color: #d33469;
             font-weight: bold;
             font-size: 20px;
             margin-bottom: 35px;
         }
 
         .room-code-box {
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             border-radius: 10px;
             padding: 18px 40px;
             display: inline-block;
@@ -131,7 +131,7 @@
         }
 
         .room-code-box span {
-            color: #e63973;
+            color: #d33469;
             font-weight: bold;
             font-size: 24px;
         }
@@ -144,14 +144,14 @@
             font-size: 18px;
             background-color: white;
             color: black;
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             cursor: pointer;
             border-radius: 6px;
             font-weight: bold;
         }
 
         .leave-btn:hover {
-            background-color: #e63973;
+            background-color: #b02a57;
             color: white;
         }
     </style>

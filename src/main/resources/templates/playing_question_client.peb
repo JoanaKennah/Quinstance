@@ -153,7 +153,7 @@
         }
 
         .navbar {
-            background-color: #e63973;
+            background-color: #d33469;
             display: flex;
             justify-content: flex-end;
             padding: 12px 20px;
@@ -177,7 +177,7 @@
         }
 
         .question-box {
-            border: 4px solid #e63973;
+            border: 4px solid #d33469;
             background-color: white;
             color: black;
             padding: 20px;
@@ -203,19 +203,19 @@
             margin-bottom: 15px;
             background-color: white;
             color: black;
-            border: 2px solid #e63973;
+            border: 2px solid #d33469;
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
         }
       
         .answer-btn:hover {
-            background-color: #e63973;
+            background-color: #d33469;
             color: white;
         }
 
         .answer-btn.selected {
-            background-color: #e63973;
+            background-color: #b02a57;
             color: white;
         }
 
@@ -266,6 +266,24 @@
 
             //take user towaiting screen showing selected answer, handles special characters
             window.location.href = "/selected-answer/{{ gameId }}?answer=" + encodeURIComponent(selectedText);
+        }
+
+        function setAnswer(id, text) {
+            const btn = document.getElementById(id);
+
+            if (text && text.trim() !== "") {
+                btn.textContent = text;
+                btn.style.display = "block";
+                btn.disabled = false;
+                btn.removeAttribute("aria-hidden");
+                btn.removeAttribute("tabindex");
+            } else {
+                btn.textContent = "";
+                btn.style.display = "none";       // removes from accessibility tree
+                btn.disabled = true;              // extra safety
+                btn.setAttribute("aria-hidden", "true");
+                btn.setAttribute("tabindex", "-1");
+            }
         }
 
     </script>
