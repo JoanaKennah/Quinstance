@@ -227,7 +227,7 @@
         .username {
             font-size: 16px;
             font-weight: bold;
-            color: #d33469;
+            color: black;
         }
 
         .trophy-col {
@@ -306,7 +306,7 @@
 
             <div class="username-col" id="col1">
                 {% for user in col1_users %}
-                    <div class="username" {% if isReveal and isGhostCol1 %}style="color: {% if theme == 'spooky' %}white{% else %}black{% endif %};"{% endif %}>{{ user }}</div>
+                    <div class="username" {% if isReveal and isGhostCol1 %}style="color: {% if theme == 'spooky' %}white{% else %} #d33469{% endif %};"{% endif %}>{{ user }}</div>
                 {% endfor %}
             </div>
 
@@ -337,7 +337,7 @@
 
             <div class="username-col" id="col2">
                 {% for user in col2_users %}
-                    <div class="username" {% if isReveal and isGhostCol2 %}style="color: {% if theme == 'spooky' %}white{% else %}black{% endif %};"{% endif %}>{{ user }}</div>
+                    <div class="username" {% if isReveal and isGhostCol2 %}style="color: {% if theme == 'spooky' %}white{% else %} #d33469{% endif %};"{% endif %}>{{ user }}</div>
                 {% endfor %}
             </div>
 
@@ -368,7 +368,7 @@
 
             <div class="username-col" id="col3">
                 {% for user in col3_users %}
-                    <div class="username" {% if isReveal and isGhostCol3 %}style="color: {% if theme == 'spooky' %}white{% else %}black{% endif %};"{% endif %}>{{ user }}</div>
+                    <div class="username" {% if isReveal and isGhostCol3 %}style="color: {% if theme == 'spooky' %}white{% else %} #d33469{% endif %};"{% endif %}>{{ user }}</div>
                 {% endfor %}
             </div>
 
@@ -404,7 +404,7 @@
         const theme = "{{ theme }}";
 
         function getGhostColor() {
-            return theme === "spooky" ? "white" : "black";
+            return theme === "spooky" ? "white" : "#d33469";
         }
 
         const pollPicks = setInterval(() => {
