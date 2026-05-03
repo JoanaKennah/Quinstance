@@ -321,6 +321,37 @@ fun editQuestion(
 }
 
 /**
+ * Edits given Quiz (and details) in the Database
+ */
+fun editQuiz(
+    quiz: Quiz,
+    quizData: Map<String, String>
+) {
+    require(quizData.isNotEmpty()) { "Nothing to edit" }
+
+    transaction(TransactionManager.defaultDatabase) {
+        require(Quiz.findById(quiz.id) != null) { "Quiz must exist" }
+    }
+
+    for (item in quizData) {
+        require(
+            item.key in listOf("quizName", "description", "category", "keyStage")
+        ) { "quizData key must be a valid attribute" }
+    }
+
+    transaction(TransactionManager.defaultDatabase) {
+        quizData.forEach {
+            when (it.key) {
+                "quizName" -> quiz.quizName = it.value
+                "description" -> quiz.description = it.value
+                "category" -> quiz.category = it.value
+                "keyStage" -> quiz.keyStage = it.value
+            }
+        }
+    }
+}
+
+/**
  * Deletes given question from QuestionTable. Returns true if the question is successfully deleted
  * Created by Minghao in Routing, refactored and edited in Database.kt for testing purposes.
  * @param question Question object to be deleted
