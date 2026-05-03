@@ -109,6 +109,7 @@ data class GameSession(
     var kickedUsernames: MutableList<String> = mutableListOf(),
     var barredUsernames: MutableList<String> = mutableListOf(),
     var answeredPlayers: MutableSet<String> = mutableSetOf(),
+    var playerAnswers: MutableMap<String, String> = mutableMapOf(),
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet()),
 )
 
@@ -151,7 +152,8 @@ fun Application.configureSockets() {
                 val username = call.sessions.get<UserSession>()?.username
                 if (username != null && username in session.answeredPlayers) {
                     // Player already answered this question - send to waiting screen
-                    send(Frame.Text("{\"redirect\":\"/selected-answer/$gameId?answer=\"}"))
+                    val previousAnswer = session.playerAnswers[username] ?: ""
+                    send(Frame.Text("{\"redirect\":\"/selected-answer/$gameId?answer=$previousAnswer\"}"))
                 } else {
                     val question = session.questions[session.currentQuestionIndex]
                     val answers = retrieveQuestionAnswer(question)
@@ -183,6 +185,7 @@ fun Application.configureSockets() {
                             // Only process if player hasn't already answered current question
                             if (answerData.username !in session.answeredPlayers) {
                                 session.answeredPlayers.add(answerData.username)
+                                session.playerAnswers[answerData.username] = answerData.chosenAnswer
                                 UserAnswers.addAnswer(answerData)
                                 println("Answer recieved from ${answerData.username}: ${answerData.chosenAnswer}")
                             } else {
