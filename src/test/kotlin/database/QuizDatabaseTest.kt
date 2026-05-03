@@ -990,5 +990,4 @@ class QuizDatabaseTest :
         // Tests for editQuestion() TODO
 
         // Tests for deleteQuiz() TODO
-
     })
