@@ -291,7 +291,7 @@
 
     window.onload = function () {
         document.getElementById("start-form").addEventListener("submit", function(e) {
-            if (currentPlayerCount <= 1) {
+            if (currentPlayerCount <= 1 && {{ miniGamesEnabled }}) {
                 e.preventDefault();
                 document.getElementById("warning-bar").style.display = "flex";
             }
