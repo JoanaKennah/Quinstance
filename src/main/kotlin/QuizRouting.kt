@@ -106,7 +106,6 @@ fun Application.configureQuizRouting() {
                         mapOf("errorMessage" to "Missing input(s)"),
                     ),
                 )
-            val minigamesEnabled = parameters["miniGames"] == "true"
 
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
 
@@ -211,7 +210,7 @@ fun Application.configureQuizRouting() {
                             "resetQuestions" -> deleteQuestions = part.value.toBoolean()
                         }
                     }
-                    // Return an empty unit if nothing is sent.
+
                     else -> Unit
                 }
                 // Dispose of part so it can't be accessed by accident.

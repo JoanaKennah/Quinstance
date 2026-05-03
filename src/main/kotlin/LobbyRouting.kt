@@ -453,11 +453,7 @@ fun Application.configureLobbyRouting() {
                     val user = retrieveUser(username)
                     if (user != null) {
                         // Remove UserScore entry
-                        UserScore
-                            .find {
-                                UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
-                            }.firstOrNull()
-                            ?.delete()
+                        deleteUserScoreForGivenUser(game, user)
 
                         // Remove ghost entry if ghost
                         gameSession.ghostPlayers.remove(username)

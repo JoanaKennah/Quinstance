@@ -1,6 +1,5 @@
-package com.example
+package com.example.database
 
-import com.example.database.TestDatabase
 import com.example.database.objects.Game
 import com.example.database.objects.InUseCode
 import com.example.database.objects.Quiz
@@ -8,7 +7,12 @@ import com.example.database.objects.User
 import com.example.database.tables.InUseTable
 import com.example.database.tables.QuizTable
 import com.example.database.tables.UserTable
-import com.example.database.tables.UserTable.username
+import com.example.deleteInUseCode
+import com.example.retrieveAllUserScoresDescending
+import com.example.retrieveGame
+import com.example.retrieveQuizFromGameID
+import com.example.retrieveUserScore
+import com.example.testModule
 import com.password4j.Password
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -18,10 +22,10 @@ import io.kotest.matchers.shouldNotBe
 import io.ktor.server.testing.testApplication
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import java.time.LocalDateTime
 
 /**
- * Unit tests for Database functions 'retrieveGame', 'retrieveQuizFromGameID', 'retrieveUserScore', 'deleteInUseCode' and
- * 'retrieveAllUserScoresDescending'
+ * Unit tests for Database functions primarily used in GameRouting.kt.
  * @see retrieveGame
  * @see retrieveQuizFromGameID
  * @see retrieveUserScore
@@ -159,13 +163,13 @@ class GameDatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { username eq "MinghaoLe123" }.firstOrNull()
+                        User.Companion.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
                     }
                 user shouldNotBe null
 
                 val game =
                     transaction(TestDatabase.db) {
-                        Game.findById(1)
+                        Game.Companion.findById(1)
                     }
                 game shouldNotBe null
 
@@ -181,13 +185,13 @@ class GameDatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { username eq "JoanaKennah" }.firstOrNull()
+                        User.Companion.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
                     }
                 user shouldNotBe null
 
                 val game =
                     transaction(TestDatabase.db) {
-                        Game.findById(2)
+                        Game.Companion.findById(2)
                     }
                 game shouldNotBe null
 
@@ -202,22 +206,22 @@ class GameDatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { username eq "JoanaKennah" }.firstOrNull()
+                        User.Companion.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
                     }
                 user shouldNotBe null
 
                 val quiz =
                     transaction(TestDatabase.db) {
-                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                        Quiz.Companion.find { QuizTable.user eq user!!.id }.firstOrNull()
                     }
                 quiz shouldNotBe null
 
                 val game =
                     transaction(TestDatabase.db) {
-                        Game.new {
+                        Game.Companion.new {
                             this.quiz = quiz!!
                             this.timeStamp =
-                                java.time.LocalDateTime
+                                LocalDateTime
                                     .now()
                                     .toString()
                         }
@@ -237,7 +241,7 @@ class GameDatabaseTest :
                 val fakeUser =
                     transaction(TestDatabase.db) {
                         val hashedPass = Password.hash("test123").addRandomSalt(8).withScrypt()
-                        User.new {
+                        User.Companion.new {
                             this.username = "Test User"
                             this.password = hashedPass.result
                             this.name = "Test Test"
@@ -248,7 +252,7 @@ class GameDatabaseTest :
                     }
                 val game =
                     transaction(TestDatabase.db) {
-                        Game.findById(1)
+                        Game.Companion.findById(1)
                     }
                 game shouldNotBe null
 
@@ -267,7 +271,7 @@ class GameDatabaseTest :
 
                 val game =
                     transaction(TestDatabase.db) {
-                        val foundGame = Game.findById(1)
+                        val foundGame = Game.Companion.findById(1)
                         foundGame shouldNotBe null
                         foundGame!!.quiz.quizName shouldBe "COMP2860 Quiz"
                         return@transaction foundGame
@@ -276,7 +280,7 @@ class GameDatabaseTest :
                 deleteInUseCode(game)
 
                 transaction(TestDatabase.db) {
-                    val deleteCheck = InUseCode.find { InUseTable.game eq game.id }.firstOrNull()
+                    val deleteCheck = InUseCode.Companion.find { InUseTable.game eq game.id }.firstOrNull()
                     deleteCheck shouldBe null
                 }
             }
@@ -288,7 +292,7 @@ class GameDatabaseTest :
 
                 val game =
                     transaction(TestDatabase.db) {
-                        val foundGame = Game.findById(2)
+                        val foundGame = Game.Companion.findById(2)
                         foundGame shouldNotBe null
                         foundGame!!.quiz.quizName shouldBe "COMP2870 Quiz"
                         return@transaction foundGame
@@ -297,7 +301,7 @@ class GameDatabaseTest :
                 deleteInUseCode(game)
 
                 transaction(TestDatabase.db) {
-                    val deleteCheck = InUseCode.find { InUseTable.game eq game.id }.firstOrNull()
+                    val deleteCheck = InUseCode.Companion.find { InUseTable.game eq game.id }.firstOrNull()
                     deleteCheck shouldBe null
                 }
             }
@@ -309,23 +313,23 @@ class GameDatabaseTest :
 
                 val newGame =
                     transaction(TestDatabase.db) {
-                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        val user = User.Companion.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
                         user shouldNotBe null
 
-                        val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                        val quiz = Quiz.Companion.find { QuizTable.user eq user!!.id }.firstOrNull()
                         quiz shouldNotBe null
 
                         val game =
-                            Game.new {
+                            Game.Companion.new {
                                 this.quiz = quiz!!
                                 this.timeStamp =
-                                    java.time.LocalDateTime
+                                    LocalDateTime
                                         .now()
                                         .toString()
                             }
                         game shouldNotBe null
 
-                        InUseCode.new {
+                        InUseCode.Companion.new {
                             this.game = game
                             this.roomCode = "TEST1234"
                         }
@@ -353,7 +357,7 @@ class GameDatabaseTest :
 
                 val game =
                     transaction(TestDatabase.db) {
-                        Game.findById(1)
+                        Game.Companion.findById(1)
                     }
                 game shouldNotBe null
 
@@ -375,22 +379,22 @@ class GameDatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { username eq "JoanaKennah" }.firstOrNull()
+                        User.Companion.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
                     }
                 user shouldNotBe null
 
                 val quiz =
                     transaction(TestDatabase.db) {
-                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                        Quiz.Companion.find { QuizTable.user eq user!!.id }.firstOrNull()
                     }
                 quiz shouldNotBe null
 
                 val game =
                     transaction(TestDatabase.db) {
-                        Game.new {
+                        Game.Companion.new {
                             this.quiz = quiz!!
                             this.timeStamp =
-                                java.time.LocalDateTime
+                                LocalDateTime
                                     .now()
                                     .toString()
                         }
@@ -407,22 +411,22 @@ class GameDatabaseTest :
 
                 val user =
                     transaction(TestDatabase.db) {
-                        User.find { username eq "linguin0" }.firstOrNull()
+                        User.Companion.find { UserTable.username eq "linguin0" }.firstOrNull()
                     }
                 user shouldNotBe null
 
                 val quiz =
                     transaction(TestDatabase.db) {
-                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                        Quiz.Companion.find { QuizTable.user eq user!!.id }.firstOrNull()
                     }
                 quiz shouldNotBe null
 
                 val game =
                     transaction(TestDatabase.db) {
-                        Game.new {
+                        Game.Companion.new {
                             this.quiz = quiz!!
                             this.timeStamp =
-                                java.time.LocalDateTime
+                                LocalDateTime
                                     .now()
                                     .toString()
                         }

@@ -1,8 +1,11 @@
-package com.example
+package database
 
+import com.example.addUser
 import com.example.database.TestDatabase
 import com.example.database.objects.User
-import com.example.database.tables.UserTable.username
+import com.example.database.tables.UserTable
+import com.example.retrieveUser
+import com.example.testModule
 import com.password4j.Password
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -22,7 +25,6 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 class AuthDatabaseTest :
     StringSpec({
         // Tests for retrieveUser()
-
         "Retrieving user with empty username throws an IllegalArgumentException" {
             testApplication {
                 application { testModule() }
@@ -265,7 +267,7 @@ class AuthDatabaseTest :
 
                 val retrievedUser =
                     transaction(TestDatabase.db) {
-                        User.find { username eq user!!.username }.firstOrNull()
+                        User.Companion.find { UserTable.username eq user!!.username }.firstOrNull()
                     }
                 retrievedUser shouldNotBe null
                 retrievedUser!!.let {
