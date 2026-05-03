@@ -92,21 +92,6 @@ fun retrieveUser(username: String): User? {
 }
 
 /**
- * Adds a new User to UserTable. Returns null if user already exists
- * Retrieves user from UserTable using their ID, returns null if no user found
- * @param userId Unique identifier for a User in the Database
- * @return User object if User exists, null if they don't
- * @throws IllegalArgumentException if userID is less than or equal to 0
- */
-fun retrieveUserById(userId: Int): User? {
-    require(userId >= 0) { "User ID must be positive" }
-
-    return transaction(TransactionManager.defaultDatabase) {
-        User.findById(userId)
-    }
-}
-
-/**
  * Adds a new User to UserTable.
  * @param username Unique identifier for a User
  * @param password Plaintext password for a User to be hashed before being added to the Database
@@ -147,18 +132,6 @@ fun addUser(
         }
     }
     return null
-}
-
-/**
- * Deletes given user from UserTable (possibly used for Admin purposes).
- * @param user User object
- **/
-fun deleteUser(user: User) {
-    // Checks if the user exists in the table before deleting it
-    require(retrieveUser(user.username) != null) { "User must exist" }
-    transaction(TransactionManager.defaultDatabase) {
-        user.delete()
-    }
 }
 
 /**
@@ -321,7 +294,12 @@ fun editQuestion(
 }
 
 /**
- * Edits given Quiz (and details) in the Database
+ * Edits given Quiz (and details) in the Database.
+ * @param quiz Quiz object to be edited
+ * @param quizData Map containing new/edited data for Quiz. Includes four keys, "quizName", "description", "category" and "keyStage"
+ * @throws IllegalArgumentException If quizData is empty
+ * @throws IllegalArgumentException If quiz does not exist
+ * @throws IllegalArgumentException If quizData contains an invalid key
  */
 fun editQuiz(
     quiz: Quiz,

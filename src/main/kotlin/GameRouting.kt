@@ -529,7 +529,7 @@ fun Application.configureGameRouting() {
                     && gameSession.activeMinigames.isNotEmpty()
                     && !gameSession.minigameJustPlayed
                     //&& (0..1).random() == 0 -> {
-                    && testRandomValue == 1 -> {
+                    && randomValue == 1 -> {
 
                     gameSession.minigameJustPlayed = true
                     val selectedMinigame = gameSession.activeMinigames.random()
