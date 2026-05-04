@@ -533,7 +533,7 @@ fun Application.configureGameRouting() {
                     gameSession.lastIncorrectPlayers.size >= 2 &&
                     gameSession.activeMinigames.isNotEmpty() &&
                     !gameSession.minigameJustPlayed &&
-                    (0..1).randomValue() == 0 -> {
+                    (0..1).random() == 0 -> {
                     //&& testRandomValue == 1 -> {
 
                     gameSession.minigameJustPlayed = true
