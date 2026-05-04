@@ -140,7 +140,8 @@ fun addUser(
  * @param question question text
  * @param keyStage Key stage for the Question, e.g. Key Stage 1 or Further Education
  * @return new Question object
- * @throws IllegalArgumentException if any param is empty
+ * @throws IllegalArgumentException If any param is empty
+ * @throws IllegalArgumentException If Quiz does not exist
  */
 fun addQuestion(
     quiz: Quiz,
@@ -150,6 +151,11 @@ fun addQuestion(
     for (parameter in listOf(question, keyStage)) {
         require(parameter.isNotEmpty())
     }
+
+    transaction(TransactionManager.defaultDatabase) {
+        require(Quiz.findById(quiz.id) != null)
+    }
+
     val newQuestion =
         transaction(TransactionManager.defaultDatabase) {
             // Don't need to check if Question already exists
@@ -190,6 +196,7 @@ fun setAnswerOptions(
     require(option1 != "") { "option1 cannot be empty" }
     require(option2 != "") { "option2 cannot be empty" }
     require(correctIndex in 0..3) { "correctIndex must be between 0 and 3" }
+    require(listOf(option1, option2, option3, option4)[correctIndex] != null)
 
     val allOptions = listOfNotNull(option1, option2, option3, option4)
     val correctOption = allOptions[correctIndex]
@@ -237,14 +244,16 @@ fun setAnswerOptions(
 fun editQuestion(
     question: Question,
     questionData: Map<String, String>,
-    answer: Answer,
+    answer: Answer?,
     answerData: Map<String, String?>,
 ) {
-    require(questionData.isNotEmpty() && answerData.isNotEmpty()) { "Nothing to edit" }
+    require(!(questionData.isEmpty() && answerData.isEmpty())) { "Nothing to edit" }
     transaction(TransactionManager.defaultDatabase) {
         require(Question.findById(question.id) != null) { "Question must exist " }
-        require(Answer.findById(answer.id) != null) { "Answer must exist" }
-        require(answer.question.id == question.id) { "Answer must be for the given Question " }
+        if (answer != null) {
+            require(Answer.findById(answer.id) != null) { "Answer must exist" }
+            require(answer.question.id == question.id) { "Answer must be for the given Question " }
+        }
     }
 
     for (item in questionData) {
@@ -270,7 +279,7 @@ fun editQuestion(
             }
         }
 
-        if (answerData.isNotEmpty()) {
+        if (answerData.isNotEmpty() && answer != null) {
             val answerOptions =
                 setAnswerOptions(
                     answerData["option1"]!!,

@@ -8,10 +8,16 @@ import com.example.editQuiz
 import com.example.deleteQuiz
 import com.example.setAnswerOptions
 import com.example.editQuestion
+import com.example.database.objects.Answer
 import com.example.database.objects.Question
 import com.example.database.objects.Quinstance
 import com.example.database.objects.Quiz
 import com.example.database.objects.User
+import com.example.database.tables.AnswerTable
+import com.example.database.tables.AnswerTable.option2
+import com.example.database.tables.AnswerTable.option3
+import com.example.database.tables.AnswerTable.option4
+import com.example.database.tables.QuestionTable
 import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
 import com.example.database.tables.UserTable
@@ -1073,6 +1079,119 @@ class QuizDatabaseTest :
             }
         }
 
+        "Set answer options with option 3 being the correct option (all options not null)" {
+            testApplication {
+                application { testModule() }
+
+                val option1 = "Answer 1"
+                val option2 = "Answer 2"
+                val option3 = "Answer 3"
+                val option4 = "Answer 4"
+
+                val setOptions = setAnswerOptions(option1, option2, option3, option4, 2)
+                setOptions shouldHaveSize 4
+
+                setOptions[0] shouldBe option3
+                setOptions[1] shouldBe option1
+                setOptions[2] shouldBe option2
+                setOptions[3] shouldBe option4
+            }
+        }
+
+        "Set answer options with option 4 being the correct option (all options not null)" {
+            testApplication {
+                application { testModule() }
+
+                val option1 = "Answer 1"
+                val option2 = "Answer 2"
+                val option3 = "Answer 3"
+                val option4 = "Answer 4"
+
+                val setOptions = setAnswerOptions(option1, option2, option3, option4, 3)
+                setOptions shouldHaveSize 4
+
+                setOptions[0] shouldBe option4
+                setOptions[1] shouldBe option1
+                setOptions[2] shouldBe option2
+                setOptions[3] shouldBe option3
+            }
+        }
+
+        "Setting answer options with option 1 being empty should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val option1 = ""
+                val option2 = "Answer 2"
+                val option3 = "Answer 3"
+                val option4 = "Answer 4"
+
+                shouldThrow<IllegalArgumentException> {
+                    setAnswerOptions(option1, option2, option3, option4, 1)
+                }
+            }
+        }
+
+        "Setting answer options with option 2 being empty should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val option1 = "Answer 1"
+                val option2 = ""
+                val option3 = "Answer 3"
+                val option4 = "Answer 4"
+
+                shouldThrow<IllegalArgumentException> {
+                    setAnswerOptions(option1, option2, option3, option4, 0)
+                }
+            }
+        }
+
+        "Setting answer options with option 3 being empty and the correct answer should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val option1 = "Answer 1"
+                val option2 = "Answer 2"
+                val option3 = null
+                val option4 = "Answer 4"
+
+                shouldThrow<IllegalArgumentException> {
+                    setAnswerOptions(option1, option2, option3, option4, 2)
+                }
+            }
+        }
+
+        "Setting answer options with correctIndex < 0 correct answer should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val option1 = "Answer 1"
+                val option2 = "Answer 2"
+                val option3 = "Answer 3"
+                val option4 = "Answer 4"
+
+                shouldThrow<IllegalArgumentException> {
+                    setAnswerOptions(option1, option2, option3, option4, -1)
+                }
+            }
+        }
+
+        "Setting answer options with correctIndex > 3 should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val option1 = "Answer 1"
+                val option2 = "Answer 2"
+                val option3 = "Answer 3"
+                val option4 = "Answer 4"
+
+                shouldThrow<IllegalArgumentException> {
+                    setAnswerOptions(option1, option2, option3, option4, 4)
+                }
+            }
+        }
+
         // Tests for retrieveUserQuizzes()
         "Retrieve all (2) quizzes for user 'linguin0'" {
             testApplication {
@@ -1232,6 +1351,387 @@ class QuizDatabaseTest :
         }
 
         // Tests for editQuestion() TODO
+        "Edit Question 'What is a process?' to change the question text to 'Why is a process?'" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+
+                val questionData =
+                    mapOf(
+                        "question" to "Why is a process?",
+                    )
+
+                editQuestion(question!!, questionData, null,emptyMap<String, String>())
+
+                question.question shouldBe "Why is a process?"
+                question.keyStage shouldBe "furthereducation"
+            }
+        }
+
+        "Edit Question 'What is a process?' to change the question key stage to 'other'" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+
+                val questionData =
+                    mapOf(
+                        "keyStage" to "other",
+                    )
+
+                editQuestion(question!!, questionData, null,emptyMap<String, String>())
+
+                question.question shouldBe "What is a process?"
+                question.keyStage shouldBe "other"
+            }
+        }
+
+        "Editing Question that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+                transaction(TestDatabase.db) { question!!.delete() }
+
+                val questionData =
+                    mapOf(
+                        "keyStage" to "other",
+                    )
+
+                shouldThrow<IllegalArgumentException> {
+                    editQuestion(question!!, questionData, null,emptyMap<String, String>())
+                }
+            }
+        }
+
+        "Edit Question 'What is a process?' to change it's Answer option1 to 'This is an edit'" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+
+                val answer =
+                    transaction(TestDatabase.db) {
+                        Answer.find { AnswerTable.question eq question!!.id }.firstOrNull()
+                    }
+                answer shouldNotBe null
+
+                val answerData =
+                    mapOf(
+                        "option1" to "This is an edit",
+                        "option2" to "Come to understand or accept something over a period of time",
+                        "option3" to "A summons or writ requiring a person to appear in court",
+                        "option4" to "A program waiting to be executed",
+                        "correctIndex" to "0",
+                    )
+
+                editQuestion(question!!, emptyMap<String, String>(), answer, answerData)
+
+                answer!!.correctAnswer shouldBe "This is an edit"
+                answer.option2 shouldBe "Come to understand or accept something over a period of time"
+                answer.option3 shouldBe "A summons or writ requiring a person to appear in court"
+                answer.option4 shouldBe "A program waiting to be executed"
+            }
+        }
+
+        "Edit Question 'What is a process?' to change it's Answer option2 to 'This is an edit'" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+
+                val answer =
+                    transaction(TestDatabase.db) {
+                        Answer.find { AnswerTable.question eq question!!.id }.firstOrNull()
+                    }
+                answer shouldNotBe null
+
+                val answerData =
+                    mapOf(
+                        "option1" to "A program in execution",
+                        "option2" to "This is an edit",
+                        "option3" to "A summons or writ requiring a person to appear in court",
+                        "option4" to "A program waiting to be executed",
+                        "correctIndex" to "1",
+                    )
+
+                editQuestion(question!!, emptyMap<String, String>(), answer, answerData)
+
+                answer!!.correctAnswer shouldBe "This is an edit"
+                answer.option2 shouldBe "A program in execution"
+                answer.option3 shouldBe "A summons or writ requiring a person to appear in court"
+                answer.option4 shouldBe "A program waiting to be executed"
+            }
+        }
+
+        "Edit Question 'What is a process?' to change it's Answer option3 to 'This is an edit'" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+
+                val answer =
+                    transaction(TestDatabase.db) {
+                        Answer.find { AnswerTable.question eq question!!.id }.firstOrNull()
+                    }
+                answer shouldNotBe null
+
+                val answerData =
+                    mapOf(
+                        "option1" to "A program in execution",
+                        "option2" to "Come to understand or accept something over a period of time",
+                        "option3" to "This is an edit",
+                        "option4" to "A program waiting to be executed",
+                        "correctIndex" to "2",
+                    )
+
+                editQuestion(question!!, emptyMap<String, String>(), answer, answerData)
+
+                answer!!.correctAnswer shouldBe "This is an edit"
+                answer.option2 shouldBe "A program in execution"
+                answer.option3 shouldBe "Come to understand or accept something over a period of time"
+                answer.option4 shouldBe "A program waiting to be executed"
+            }
+        }
+
+        "Edit Question 'What is a process?' to change it's Answer option4 to 'This is an edit'" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+
+                val answer =
+                    transaction(TestDatabase.db) {
+                        Answer.find { AnswerTable.question eq question!!.id }.firstOrNull()
+                    }
+                answer shouldNotBe null
+
+                val answerData =
+                    mapOf(
+                        "option1" to "A program in execution",
+                        "option2" to "Come to understand or accept something over a period of time",
+                        "option3" to "A summons or writ requiring a person to appear in court",
+                        "option4" to "This is an edit",
+                        "correctIndex" to "3",
+                    )
+
+                editQuestion(question!!, emptyMap<String, String>(), answer, answerData)
+
+                answer!!.correctAnswer shouldBe "This is an edit"
+                answer.option2 shouldBe "A program in execution"
+                answer.option3 shouldBe "Come to understand or accept something over a period of time"
+                answer.option4 shouldBe "A summons or writ requiring a person to appear in court"
+            }
+        }
+
+        "Editing Question 'What is a process?' with a correctIndex that isn't a number should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+
+                val answer =
+                    transaction(TestDatabase.db) {
+                        Answer.find { AnswerTable.question eq question!!.id }.firstOrNull()
+                    }
+                answer shouldNotBe null
+
+                val answerData =
+                    mapOf(
+                        "option1" to "A program in execution",
+                        "option2" to "Come to understand or accept something over a period of time",
+                        "option3" to "A summons or writ requiring a person to appear in court",
+                        "option4" to "This is an edit",
+                        "correctIndex" to "f",
+                    )
+
+                shouldThrow<IllegalArgumentException> {
+                    editQuestion(question!!, emptyMap<String, String>(), answer, answerData)
+                }
+            }
+        }
+
+        "Editing a Question with questionData and answerData being empty should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+
+                val questionData = emptyMap<String, String>()
+                val answerData = emptyMap<String, String?>()
+
+
+                shouldThrow<IllegalArgumentException> {
+                    editQuestion(question!!, questionData, null, answerData)
+                }
+            }
+        }
+
+        "Editing a Question that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+
+                transaction(TestDatabase.db) { question!!.delete() }
+
+                val questionData =
+                    mapOf(
+                        "question" to "Why is a process?",
+                    )
+
+                shouldThrow<IllegalArgumentException> {
+                    editQuestion(question!!, questionData, null,emptyMap<String, String>())
+                }
+            }
+        }
+
+        "Editing a Question whose Answer doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+
+                val answer =
+                    transaction(TestDatabase.db) {
+                        Answer.find { AnswerTable.question eq question!!.id }.firstOrNull()
+                    }
+                answer shouldNotBe null
+
+                transaction(TestDatabase.db) { answer!!.delete() }
+
+                val questionData =
+                    mapOf(
+                        "question" to "Why is a process?",
+                    )
+
+                val answerData =
+                    mapOf(
+                        "option1" to "A program in execution",
+                        "option2" to "Come to understand or accept something over a period of time",
+                        "option3" to "A summons or writ requiring a person to appear in court",
+                        "option4" to "This is an edit",
+                        "correctIndex" to "3",
+                    )
+
+                shouldThrow<IllegalArgumentException> {
+                    editQuestion(question!!, questionData, answer, answerData)
+                }
+            }
+        }
+
+        "Editing a Question with an different Question's Answer should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val question =
+                    transaction(TestDatabase.db) {
+                        Question.find { QuestionTable.question eq "What is a process?" }.firstOrNull()
+                    }
+                question shouldNotBe null
+
+                val answer =
+                    transaction(TestDatabase.db) {
+                        Answer.find { AnswerTable.question eq 2 }.firstOrNull()
+                    }
+                answer shouldNotBe null
+
+                val answerData =
+                    mapOf(
+                        "option1" to "A program in execution",
+                        "option2" to "Come to understand or accept something over a period of time",
+                        "option3" to "A summons or writ requiring a person to appear in court",
+                        "option4" to "This is an edit",
+                        "correctIndex" to "3",
+                    )
+
+                shouldThrow<IllegalArgumentException> {
+                    editQuestion(question!!, emptyMap(), answer, answerData)
+                }
+            }
+        }
 
         // Tests for deleteQuiz() TODO
+        "Delete Quiz 'COMP2860 Quiz'" {
+            val quiz =
+                transaction(TestDatabase.db) {
+                    Quiz.find { QuizTable.id eq 1 }.firstOrNull()
+                }
+            quiz shouldNotBe null
+
+            deleteQuiz(quiz!!) shouldBe true
+
+            val checkQuiz = transaction(TestDatabase.db) {
+                Quiz.find { QuizTable.id eq 1 }.firstOrNull()
+            }
+            checkQuiz shouldBe null
+        }
+
+        "Deleting Quiz that has already been deleted should return False" {
+            val quiz =
+                transaction(TestDatabase.db) {
+                    Quiz.find { QuizTable.id eq 1 }.firstOrNull()
+                }
+            quiz shouldNotBe null
+
+            deleteQuiz(quiz!!) shouldBe true
+            deleteQuiz(quiz) shouldBe false
+        }
+
+        "Deleting Quiz that doesn't exist should return False" {
+            val quiz =
+                transaction(TestDatabase.db) {
+                    Quiz.find { QuizTable.id eq 1 }.firstOrNull()
+                }
+            quiz shouldNotBe null
+
+            transaction(TestDatabase.db) { quiz!!.delete() }
+
+            deleteQuiz(quiz!!) shouldBe false
+        }
     })
