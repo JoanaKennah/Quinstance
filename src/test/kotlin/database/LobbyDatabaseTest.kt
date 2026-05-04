@@ -929,7 +929,6 @@ class LobbyDatabaseTest :
                                 LocalDateTime
                                     .now()
                                     .toString()
-
                         }
                     }
                 game shouldNotBe null

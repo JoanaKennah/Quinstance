@@ -311,7 +311,7 @@ fun editQuestion(
  */
 fun editQuiz(
     quiz: Quiz,
-    quizData: Map<String, String>
+    quizData: Map<String, String>,
 ) {
     require(quizData.isNotEmpty()) { "Nothing to edit" }
 
@@ -321,7 +321,7 @@ fun editQuiz(
 
     for (item in quizData) {
         require(
-            item.key in listOf("quizName", "description", "category", "keyStage")
+            item.key in listOf("quizName", "description", "category", "keyStage"),
         ) { "quizData key must be a valid attribute" }
     }
 

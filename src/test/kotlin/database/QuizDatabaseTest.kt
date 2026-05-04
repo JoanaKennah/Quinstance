@@ -4,10 +4,6 @@ import com.example.addAnswer
 import com.example.addQuestion
 import com.example.addQuiz
 import com.example.database.TestDatabase
-import com.example.editQuiz
-import com.example.deleteQuiz
-import com.example.setAnswerOptions
-import com.example.editQuestion
 import com.example.database.objects.Answer
 import com.example.database.objects.Question
 import com.example.database.objects.Quinstance
@@ -22,9 +18,13 @@ import com.example.database.tables.QuinstanceTable
 import com.example.database.tables.QuizTable
 import com.example.database.tables.UserTable
 import com.example.deleteQuestion
+import com.example.deleteQuiz
+import com.example.editQuestion
+import com.example.editQuiz
 import com.example.retrieveQuestionAnswer
 import com.example.retrieveQuizQuestions
 import com.example.retrieveUserQuizzes
+import com.example.setAnswerOptions
 import com.example.testModule
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -908,8 +908,10 @@ class QuizDatabaseTest :
                         val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                         quiz shouldNotBe null
 
-                        return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }
-                            .firstOrNull()!!.question
+                        return@transaction Quinstance
+                            .find { QuinstanceTable.quiz eq quiz!!.id }
+                            .firstOrNull()!!
+                            .question
                     }
 
                 shouldThrow<IllegalArgumentException> {
@@ -937,8 +939,10 @@ class QuizDatabaseTest :
                         val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                         quiz shouldNotBe null
 
-                        return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }
-                            .firstOrNull()!!.question
+                        return@transaction Quinstance
+                            .find { QuinstanceTable.quiz eq quiz!!.id }
+                            .firstOrNull()!!
+                            .question
                     }
 
                 shouldThrow<IllegalArgumentException> {
@@ -966,8 +970,10 @@ class QuizDatabaseTest :
                         val quiz = Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
                         quiz shouldNotBe null
 
-                        return@transaction Quinstance.find { QuinstanceTable.quiz eq quiz!!.id }
-                            .firstOrNull()!!.question
+                        return@transaction Quinstance
+                            .find { QuinstanceTable.quiz eq quiz!!.id }
+                            .firstOrNull()!!
+                            .question
                     }
 
                 shouldThrow<IllegalArgumentException> {
@@ -1366,7 +1372,7 @@ class QuizDatabaseTest :
                         "question" to "Why is a process?",
                     )
 
-                editQuestion(question!!, questionData, null,emptyMap<String, String>())
+                editQuestion(question!!, questionData, null, emptyMap<String, String>())
 
                 question.question shouldBe "Why is a process?"
                 question.keyStage shouldBe "furthereducation"
@@ -1388,7 +1394,7 @@ class QuizDatabaseTest :
                         "keyStage" to "other",
                     )
 
-                editQuestion(question!!, questionData, null,emptyMap<String, String>())
+                editQuestion(question!!, questionData, null, emptyMap<String, String>())
 
                 question.question shouldBe "What is a process?"
                 question.keyStage shouldBe "other"
@@ -1412,7 +1418,7 @@ class QuizDatabaseTest :
                     )
 
                 shouldThrow<IllegalArgumentException> {
-                    editQuestion(question!!, questionData, null,emptyMap<String, String>())
+                    editQuestion(question!!, questionData, null, emptyMap<String, String>())
                 }
             }
         }
@@ -1597,7 +1603,6 @@ class QuizDatabaseTest :
                 val questionData = emptyMap<String, String>()
                 val answerData = emptyMap<String, String?>()
 
-
                 shouldThrow<IllegalArgumentException> {
                     editQuestion(question!!, questionData, null, answerData)
                 }
@@ -1622,7 +1627,7 @@ class QuizDatabaseTest :
                     )
 
                 shouldThrow<IllegalArgumentException> {
-                    editQuestion(question!!, questionData, null,emptyMap<String, String>())
+                    editQuestion(question!!, questionData, null, emptyMap<String, String>())
                 }
             }
         }
@@ -1706,9 +1711,10 @@ class QuizDatabaseTest :
 
             deleteQuiz(quiz!!) shouldBe true
 
-            val checkQuiz = transaction(TestDatabase.db) {
-                Quiz.find { QuizTable.id eq 1 }.firstOrNull()
-            }
+            val checkQuiz =
+                transaction(TestDatabase.db) {
+                    Quiz.find { QuizTable.id eq 1 }.firstOrNull()
+                }
             checkQuiz shouldBe null
         }
 

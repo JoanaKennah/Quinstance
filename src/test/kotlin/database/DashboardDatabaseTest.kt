@@ -90,7 +90,7 @@ class DashboardDatabaseTest :
 
         "Retrieving UserQuizAttempt(s) for a User that doesn't exist throws IllegalArgumentException" {
             testApplication {
-                application{ testModule() }
+                application { testModule() }
 
                 val user =
                     transaction(TestDatabase.db) {
