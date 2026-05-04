@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Game Night</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(#FFFFFF, #cfe2f3);
+        }
+
+        .navbar {
+            background-color: #cfe2f3;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(#B0D0ED, #cfe2f3);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+      
+        .navbar-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .logo-box {
+            border: 2px solid #1a5276;
+            padding: 6px 14px;
+            font-weight: bold;
+            color: #1a5276;
+            font-size: 14px;
+            /* Replace the text below with an <img> tag once a logo is available */
+        }
+
+        .site-name {
+            color: #1a5276;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .navbar a {
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .main {
+            padding: 30px 40px;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 3em;
+            color: black;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 1.5em;
+            text-align: center;
+            color: black;
+            margin-bottom: 8px;
+        }
+      
+        .columns {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .column {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="navbar-left">
+            <div class="logo-box">Logo</div>
+            <span class="site-name">Game Night</span>
+        </div>
+        <div class="navbar-right">
+            <a href="/home">Home</a>
+        </div>
+    </div>
+
+    <main class="main">
+        <h1>How to Play!</h1>
+      
+        <div class="columns">
+            <div class="column">
+                <h2 class="section-title">Quizzes:</h2>
+                <p>Text</p>
+            </div>
+
+            <div class="column">
+                <h2 class="section-title">Minigames:</h2>
+                <p>Text</p>
+            </div>
+
+            <div class="column">
+                <h2 class="section-title">Being a Ghost:</h2>
+                <p>Text</p>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

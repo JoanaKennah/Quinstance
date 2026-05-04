@@ -98,8 +98,8 @@
             {% for quiz in quizzes %}
                 <div class="quiz-box" style="display: flex; justify-content: space-between; align-items: center;">
                     <a href="/view-quiz/{{ quiz.id }}" style="flex-grow: 1"; text-decoration: none; color: black;">
-                        {{ loop.index + 1 }}. {{ quiz.quiz_name }}
-                    </a>
+                        {{ loop.index + 1 }}. {{ quiz.quizName }}
+                    </a> 
 
                     <form action="/delete-quiz/{{ quiz.id }}" method="post" style="margin: 0;">
                         <button
