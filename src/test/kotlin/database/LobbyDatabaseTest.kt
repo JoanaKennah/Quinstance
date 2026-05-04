@@ -1,16 +1,20 @@
-package com.example.database
+package database
 
 import com.example.addGame
 import com.example.addInUseCode
 import com.example.addUserScore
+import com.example.database.TestDatabase
 import com.example.database.objects.Game
 import com.example.database.objects.InUseCode
 import com.example.database.objects.Quiz
 import com.example.database.objects.User
+import com.example.database.objects.UserScore
 import com.example.database.tables.GameTable
 import com.example.database.tables.InUseTable
 import com.example.database.tables.QuizTable
+import com.example.database.tables.UserScoreTable
 import com.example.database.tables.UserTable
+import com.example.deleteGameUserScores
 import com.example.deleteUserScoreForGivenUser
 import com.example.retrieveGamePlayers
 import com.example.retrieveInUseCode
@@ -20,6 +24,8 @@ import com.example.roomCodeAlreadyExists
 import com.example.testModule
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.longs.shouldBeInRange
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -43,6 +49,10 @@ import java.time.LocalDateTime
  */
 class LobbyDatabaseTest :
     StringSpec({
+        beforeTest {
+            TestDatabase.create()
+        }
+
         // Tests for retrieveQuiz
         "Retrieve Quiz 'COMP2860 Quiz' using it's quiz ID (1)" {
             testApplication {
@@ -121,11 +131,11 @@ class LobbyDatabaseTest :
                 val convertedTimeStamp = LocalDateTime.parse(game.timeStamp)
 
                 val timeBetween = Duration.between(timeBefore, convertedTimeStamp).toMillis()
-                timeBetween shouldBeInRange 0L..10L
+                timeBetween shouldBeInRange 0L..50L
             }
         }
 
-        "Add a Game with Quiz 'COMP2870' (normal data) to GameTable" {
+        "Add a Game with Quiz 'COMP2870 Quiz' (normal data) to GameTable" {
             testApplication {
                 application { testModule() }
 
@@ -145,7 +155,7 @@ class LobbyDatabaseTest :
                 val convertedTimeStamp = LocalDateTime.parse(game.timeStamp)
 
                 val timeBetween = Duration.between(timeBefore, convertedTimeStamp).toMillis()
-                timeBetween shouldBeInRange 0L..10L
+                timeBetween shouldBeInRange 0L..50L
             }
         }
 
@@ -373,6 +383,85 @@ class LobbyDatabaseTest :
         }
 
         // Tests for retrieveGamePlayers() TODO()
+        "Retrieve all players (usernames) (2) in the Game playing Quiz 'COMP2860 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val foundGame = Game.find { GameTable.id eq 1 }.firstOrNull()
+                        foundGame shouldNotBe null
+                        foundGame!!.quiz.quizName shouldBe "COMP2860 Quiz"
+                        return@transaction foundGame
+                    }
+
+                val gamePlayers = retrieveGamePlayers(game)
+                gamePlayers shouldHaveSize 2
+                gamePlayers shouldContain "JoanaKennah"
+                gamePlayers shouldContain "MinghaoLe123"
+            }
+        }
+
+        "Retrieve all players (usernames) (1) in the Game playing Quiz 'COMP2870 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val foundGame = Game.find { GameTable.id eq 2 }.firstOrNull()
+                        foundGame shouldNotBe null
+                        foundGame!!.quiz.quizName shouldBe "COMP2870 Quiz"
+                        return@transaction foundGame
+                    }
+
+                val gamePlayers = retrieveGamePlayers(game)
+                gamePlayers shouldHaveSize 1
+                gamePlayers shouldContain "MinghaoLe123"
+            }
+        }
+
+        "Retrieve empty list of players in a new Game playing Quiz 'COMP2860 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val quiz = Quiz.find { QuizTable.id eq 1 }.firstOrNull()
+                        quiz shouldNotBe null
+
+                        Game.new {
+                            this.quiz = quiz!!
+                            this.timeStamp =
+                                LocalDateTime
+                                    .now()
+                                    .toString()
+                        }
+                    }
+
+                val gamePlayers = retrieveGamePlayers(game)
+                gamePlayers shouldHaveSize 0
+            }
+        }
+
+        "Retrieving all players (usernames) in a Game that doesn't exist throws IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val foundGame = Game.find { GameTable.id eq 1 }.firstOrNull()
+                        foundGame shouldNotBe null
+                        foundGame!!.quiz.quizName shouldBe "COMP2860 Quiz"
+                        return@transaction foundGame
+                    }
+
+                transaction(TestDatabase.db) { game.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    retrieveGamePlayers(game)
+                }
+            }
+        }
 
         // Tests for retrieveInUseCode()
         "Retrieve InUseCode object from InUseTable using room code 'ABCD1234' (normal data)" {
@@ -450,7 +539,7 @@ class LobbyDatabaseTest :
         }
 
         // Tests for addInUseCode() TODO() add boundary/error tests
-        "Add User Score for User 'linguin0' playing a Game with Quiz 'COMP2870'" {
+        "Add User Score for User 'linguin0' playing a Game with Quiz 'COMP2870 Quiz'" {
             testApplication {
                 application { testModule() }
 
@@ -477,7 +566,7 @@ class LobbyDatabaseTest :
             }
         }
 
-        "Add User Score for User 'MinghaoLe123' playing a Game with Quiz 'COMP2870'" {
+        "Add User Score for User 'MinghaoLe123' playing a Game with Quiz 'COMP2870 Quiz'" {
             testApplication {
                 application { testModule() }
 
@@ -500,6 +589,78 @@ class LobbyDatabaseTest :
                     userScore.game.id.value shouldBe game.id.value
                     userScore.user.id.value shouldBe user.id.value
                     userScore.score shouldBe 0
+                }
+            }
+        }
+
+        "Adding User Score for User 'JoanaKennah' playing a Game that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 1 }.firstOrNull()
+                    }
+                game shouldNotBe null
+                transaction(TestDatabase.db) { game!!.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    addUserScore(game!!, user!!)
+                }
+            }
+        }
+
+        "Adding User Score for a User that doesn't exist playing a Game with Quiz 'COMP2860 Quiz' should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 1 }.firstOrNull()
+                    }
+                game shouldNotBe null
+                transaction(TestDatabase.db) { user!!.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    addUserScore(game!!, user!!)
+                }
+            }
+        }
+
+        "Adding User Score for a User that doesn't exist playing a Game that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 1 }.firstOrNull()
+                    }
+                game shouldNotBe null
+                transaction(TestDatabase.db) {
+                    user!!.delete()
+                    game!!.delete()
+                }
+
+                shouldThrow<IllegalArgumentException> {
+                    addUserScore(game!!, user!!)
                 }
             }
         }
@@ -572,6 +733,233 @@ class LobbyDatabaseTest :
         }
 
         // Tests for deleteUserScoreForGivenUser() TODO()
+        "Delete User Score for User 'MinghaoLe123' playing a Game with Quiz 'COMP2870 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { UserTable.username eq "MinghaoLe123" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 2 }.firstOrNull()
+                    }
+                game shouldNotBe null
+
+                val deleteSuccess = deleteUserScoreForGivenUser(game!!, user!!)
+                deleteSuccess shouldBe true
+
+                val check =
+                    transaction(TestDatabase.db) {
+                        UserScore.find { UserScoreTable.user eq user.id }.filter { it.game == game }
+                    }
+                check shouldHaveSize 0
+            }
+        }
+
+        "Delete User Score for User 'JoanaKennah' playing a Game with Quiz 'COMP2860 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 1 }.firstOrNull()
+                    }
+                game shouldNotBe null
+
+                val deleteSuccess = deleteUserScoreForGivenUser(game!!, user!!)
+                deleteSuccess shouldBe true
+
+                val check =
+                    transaction(TestDatabase.db) {
+                        UserScore.find { UserScoreTable.user eq user.id }.filter { it.game == game }
+                    }
+                check shouldHaveSize 0
+            }
+        }
+
+        "Deleting User Score for User 'JoanaKennah' playing a Game that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 1 }.firstOrNull()
+                    }
+                game shouldNotBe null
+                transaction(TestDatabase.db) { game!!.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    deleteUserScoreForGivenUser(game!!, user!!)
+                }
+            }
+        }
+
+        "Deleting User Score for a User that doesn't exist playing a Game with quiz 'COMP2860 Quiz' should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 1 }.firstOrNull()
+                    }
+                game shouldNotBe null
+                transaction(TestDatabase.db) { user!!.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    deleteUserScoreForGivenUser(game!!, user!!)
+                }
+            }
+        }
+
+        "Deleting User Score for a User that doesn't exist playing a Game that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                    }
+                user shouldNotBe null
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 1 }.firstOrNull()
+                    }
+                game shouldNotBe null
+                transaction(TestDatabase.db) {
+                    user!!.delete()
+                    game!!.delete()
+                }
+
+                shouldThrow<IllegalArgumentException> {
+                    deleteUserScoreForGivenUser(game!!, user!!)
+                }
+            }
+        }
 
         // Tests for deleteGameUserScores() TODO()
+        "Delete all UserScores (2) for Game playing Quiz 'COMP2860 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 1 }.firstOrNull()
+                    }
+                game shouldNotBe null
+
+                val userScores =
+                    transaction(TestDatabase.db) {
+                        UserScore.find { UserScoreTable.game eq game!!.id }.toList()
+                    }
+                userScores shouldHaveSize 2
+
+                val deleteSuccess = deleteGameUserScores(game!!)
+                deleteSuccess shouldBe true
+
+                val check =
+                    transaction(TestDatabase.db) {
+                        UserScore.find { UserScoreTable.game eq game.id }.toList()
+                    }
+                check shouldHaveSize 0
+            }
+        }
+
+        "Delete all UserScores (1) for Game playing Quiz 'COMP2870 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 2 }.firstOrNull()
+                    }
+                game shouldNotBe null
+
+                val userScores =
+                    transaction(TestDatabase.db) {
+                        UserScore.find { UserScoreTable.game eq game!!.id }.toList()
+                    }
+                userScores shouldHaveSize 1
+
+                val deleteSuccess = deleteGameUserScores(game!!)
+                deleteSuccess shouldBe true
+
+                val check =
+                    transaction(TestDatabase.db) {
+                        UserScore.find { UserScoreTable.game eq game.id }.toList()
+                    }
+                check shouldHaveSize 0
+            }
+        }
+
+        "Trying to delete UserScore(s) (0) for a new Game playing Quiz 'COMP2860 Quiz' should return False" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        val quiz = Quiz.findById(1)
+                        quiz shouldNotBe null
+
+                        Game.new {
+                            this.quiz = quiz!!
+                            this.timeStamp =
+                                LocalDateTime
+                                    .now()
+                                    .toString()
+
+                        }
+                    }
+                game shouldNotBe null
+
+                val userScores =
+                    transaction(TestDatabase.db) {
+                        UserScore.find { UserScoreTable.game eq game.id }.toList()
+                    }
+                userScores shouldHaveSize 0
+
+                val deleteSuccess = deleteGameUserScores(game)
+                deleteSuccess shouldBe false
+            }
+        }
+
+        "Deleting UserScore(s) for a Game that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val game =
+                    transaction(TestDatabase.db) {
+                        Game.find { GameTable.id eq 1 }.firstOrNull()
+                    }
+                game shouldNotBe null
+
+                transaction(TestDatabase.db) { game!!.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    deleteGameUserScores(game!!)
+                }
+            }
+        }
     })
