@@ -382,7 +382,7 @@ class LobbyDatabaseTest :
             }
         }
 
-        // Tests for retrieveGamePlayers() TODO()
+        // Tests for retrieveGamePlayers()
         "Retrieve all players (usernames) (2) in the Game playing Quiz 'COMP2860 Quiz'" {
             testApplication {
                 application { testModule() }
@@ -538,7 +538,7 @@ class LobbyDatabaseTest :
             }
         }
 
-        // Tests for addInUseCode() TODO() add boundary/error tests
+        // Tests for addInUseCode()
         "Add User Score for User 'linguin0' playing a Game with Quiz 'COMP2870 Quiz'" {
             testApplication {
                 application { testModule() }
@@ -732,7 +732,7 @@ class LobbyDatabaseTest :
             }
         }
 
-        // Tests for deleteUserScoreForGivenUser() TODO()
+        // Tests for deleteUserScoreForGivenUser()
         "Delete User Score for User 'MinghaoLe123' playing a Game with Quiz 'COMP2870 Quiz'" {
             testApplication {
                 application { testModule() }
@@ -859,7 +859,7 @@ class LobbyDatabaseTest :
             }
         }
 
-        // Tests for deleteGameUserScores() TODO()
+        // Tests for deleteGameUserScores()
         "Delete all UserScores (2) for Game playing Quiz 'COMP2860 Quiz'" {
             testApplication {
                 application { testModule() }
