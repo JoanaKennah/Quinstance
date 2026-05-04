@@ -1,8 +1,9 @@
-package com.example.database
+package database
 
 import com.example.addAnswer
 import com.example.addQuestion
 import com.example.addQuiz
+import com.example.database.TestDatabase
 import com.example.editQuiz
 import com.example.deleteQuiz
 import com.example.setAnswerOptions
@@ -46,6 +47,10 @@ import kotlin.collections.buildList
  */
 class QuizDatabaseTest :
     StringSpec({
+        beforeTest {
+            TestDatabase.create()
+        }
+
         // Tests for addQuiz
         "Add a new Quiz (normal data) under user 'MinghaoLe123'" {
             testApplication {
@@ -182,6 +187,184 @@ class QuizDatabaseTest :
         }
 
         // Tests for editQuiz() TODO()
+        "Edit Quiz 'COMP2860 Quiz' and change the quiz name to 'UoL COMP2860 Quiz'" {
+            testApplication {
+                application { testModule() }
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        val user = User.findById(1)
+                        user shouldNotBe null
+
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull { it.quizName == "COMP2860 Quiz" }
+                    }
+                quiz shouldNotBe null
+
+                val quizData =
+                    mapOf(
+                        "quizName" to "UoL COMP2860 Quiz",
+                    )
+
+                editQuiz(quiz!!, quizData)
+
+                quiz.quizName shouldBe "UoL COMP2860 Quiz"
+                quiz.description shouldBe "Quiz to test my limited knowledge on COMP2860"
+                quiz.category shouldBe "computerscience"
+                quiz.keyStage shouldBe "furthereducation"
+            }
+        }
+
+        "Edit Quiz 'COMP2860 Quiz' and change the quiz description to 'Quiz to test my (still) limited knowledge on COMP2860'" {
+            testApplication {
+                application { testModule() }
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        val user = User.findById(1)
+                        user shouldNotBe null
+
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull { it.quizName == "COMP2860 Quiz" }
+                    }
+                quiz shouldNotBe null
+
+                val quizData =
+                    mapOf(
+                        "description" to "Quiz to test my (still) limited knowledge on COMP2860",
+                    )
+
+                editQuiz(quiz!!, quizData)
+
+                quiz.quizName shouldBe "COMP2860 Quiz"
+                quiz.description shouldBe "Quiz to test my (still) limited knowledge on COMP2860"
+                quiz.category shouldBe "computerscience"
+                quiz.keyStage shouldBe "furthereducation"
+            }
+        }
+
+        "Edit Quiz 'COMP2860 Quiz' and change the quiz category to 'other'" {
+            testApplication {
+                application { testModule() }
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        val user = User.findById(1)
+                        user shouldNotBe null
+
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull { it.quizName == "COMP2860 Quiz" }
+                    }
+                quiz shouldNotBe null
+
+                val quizData =
+                    mapOf(
+                        "category" to "other",
+                    )
+
+                editQuiz(quiz!!, quizData)
+
+                quiz.quizName shouldBe "COMP2860 Quiz"
+                quiz.description shouldBe "Quiz to test my limited knowledge on COMP2860"
+                quiz.category shouldBe "other"
+                quiz.keyStage shouldBe "furthereducation"
+            }
+        }
+
+        "Edit Quiz 'COMP2860 Quiz' and change the quiz key stage to 'other'" {
+            testApplication {
+                application { testModule() }
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        val user = User.findById(1)
+                        user shouldNotBe null
+
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull { it.quizName == "COMP2860 Quiz" }
+                    }
+                quiz shouldNotBe null
+
+                val editData =
+                    mapOf(
+                        "keyStage" to "nonapplicable",
+                    )
+
+                editQuiz(quiz!!, editData)
+
+                quiz.quizName shouldBe "COMP2860 Quiz"
+                quiz.description shouldBe "Quiz to test my limited knowledge on COMP2860"
+                quiz.category shouldBe "computerscience"
+                quiz.keyStage shouldBe "nonapplicable"
+            }
+        }
+
+        "Trying to edit Quiz 'COMP2860 Quiz' with an empty quizData map should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        val user = User.findById(1)
+                        user shouldNotBe null
+
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull { it.quizName == "COMP2860 Quiz" }
+                    }
+                quiz shouldNotBe null
+
+                val quizData = emptyMap<String, String>()
+
+                shouldThrow<IllegalArgumentException> {
+                    editQuiz(quiz!!, quizData)
+                }
+            }
+        }
+
+        "Trying to edit Quiz 'COMP2860 Quiz' with an invalid key should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        val user = User.findById(1)
+                        user shouldNotBe null
+
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull { it.quizName == "COMP2860 Quiz" }
+                    }
+                quiz shouldNotBe null
+
+                val quizData =
+                    mapOf(
+                        "quiz name" to quiz!!.quizName,
+                    )
+
+                shouldThrow<IllegalArgumentException> {
+                    editQuiz(quiz, quizData)
+                }
+            }
+        }
+
+        "Trying to edit a Quiz that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        val user = User.findById(1)
+                        user shouldNotBe null
+
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull { it.quizName == "COMP2860 Quiz" }
+                    }
+                quiz shouldNotBe null
+
+                transaction(TestDatabase.db) { quiz!!.delete() }
+
+                val quizData =
+                    mapOf(
+                        "quizName" to "Deleted Quiz!",
+                    )
+
+                shouldThrow<IllegalArgumentException> {
+                    editQuiz(quiz!!, quizData)
+                }
+            }
+        }
 
         // Tests for retrieveQuizQuestions()
         "Retrieve all questions (2) from Quiz 'COMP2860 Quiz'" {
@@ -357,6 +540,30 @@ class QuizDatabaseTest :
                     addQuestion(
                         quiz!!,
                         "This is a test question. I don't know how to make this long to be honest. Hello examiner, how has your day been? Writing tests are very important but do you enjoy writing tests? I think I enjoy it but it can be quite tedious, but is important. What is 2+2????!",
+                        "furthereducation",
+                    )
+                }
+            }
+        }
+
+        "Add a Question to a Quiz that doesn't exist should throw IllegalArgumentException" {
+            testApplication {
+                application { testModule() }
+
+                val quiz =
+                    transaction(TestDatabase.db) {
+                        val user = User.find { UserTable.username eq "JoanaKennah" }.firstOrNull()
+                        user shouldNotBe null
+                        Quiz.find { QuizTable.user eq user!!.id }.firstOrNull()
+                    }
+                quiz shouldNotBe null
+
+                transaction(TestDatabase.db) { quiz!!.delete() }
+
+                shouldThrow<IllegalArgumentException> {
+                    addQuestion(
+                        quiz!!,
+                        "This is a test question",
                         "furthereducation",
                     )
                 }
@@ -828,6 +1035,43 @@ class QuizDatabaseTest :
         }
 
         // Tests for setAnswerOptions() TODO
+        "Set answer options with option 1 being the correct option (all options not null)" {
+            testApplication {
+                application { testModule() }
+
+                val option1 = "Answer 1"
+                val option2 = "Answer 2"
+                val option3 = "Answer 3"
+                val option4 = "Answer 4"
+
+                val setOptions = setAnswerOptions(option1, option2, option3, option4, 0)
+                setOptions shouldHaveSize 4
+
+                setOptions[0] shouldBe option1
+                setOptions[1] shouldBe option2
+                setOptions[2] shouldBe option3
+                setOptions[3] shouldBe option4
+            }
+        }
+
+        "Set answer options with option 2 being the correct option (all options not null)" {
+            testApplication {
+                application { testModule() }
+
+                val option1 = "Answer 1"
+                val option2 = "Answer 2"
+                val option3 = "Answer 3"
+                val option4 = "Answer 4"
+
+                val setOptions = setAnswerOptions(option1, option2, option3, option4, 1)
+                setOptions shouldHaveSize 4
+
+                setOptions[0] shouldBe option2
+                setOptions[1] shouldBe option1
+                setOptions[2] shouldBe option3
+                setOptions[3] shouldBe option4
+            }
+        }
 
         // Tests for retrieveUserQuizzes()
         "Retrieve all (2) quizzes for user 'linguin0'" {

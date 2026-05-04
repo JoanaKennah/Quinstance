@@ -177,7 +177,6 @@ fun addQuestion(
  * @param option2 Second possible answer for a question, can be empty
  * @param option3 Third possible answer for a question, can be empty
  * @param option4 Fourth possible answer for a question, can be empty
- * @return listOf(correctOption, option2, option3?, option4?)
  * @throws IllegalArgumentException if option1 or option2 is empty, or if correctIndex isn't within 0 to 3.
  * @return listOf(correctOption, finalOption2, finalOption3, finalOption4)
  */
