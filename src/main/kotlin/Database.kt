@@ -848,6 +848,7 @@ fun deleteGameUserScores(game: Game): Boolean {
  * @param user User object
  * @return List of UserQuizAttempt objects (can be empty)
  * @throws IllegalArgumentException If given User does not exist
+ * @see UserQuizAttempt
  */
 fun retrieveUserQuizAttempts(user: User): List<UserQuizAttempt> {
     require(retrieveUser(user.username) != null) { "User must exist" }

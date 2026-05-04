@@ -267,7 +267,7 @@ class AuthDatabaseTest :
 
                 val retrievedUser =
                     transaction(TestDatabase.db) {
-                        User.Companion.find { UserTable.username eq user!!.username }.firstOrNull()
+                        User.find { UserTable.username eq user!!.username }.firstOrNull()
                     }
                 retrievedUser shouldNotBe null
                 retrievedUser!!.let {
