@@ -1,5 +1,6 @@
-package com.example.database
+package database
 
+import com.example.database.TestDatabase
 import com.example.database.objects.Game
 import com.example.database.objects.InUseCode
 import com.example.database.objects.Quiz
@@ -34,8 +35,11 @@ import java.time.LocalDateTime
  */
 class GameDatabaseTest :
     StringSpec({
-        // Tests for retrieveGame()
+        beforeTest {
+            TestDatabase.create()
+        }
 
+        // Tests for retrieveGame()
         "Retrieve Game using given gameID for Quiz 'COMP2860 Quiz'" {
             testApplication {
                 application { testModule() }

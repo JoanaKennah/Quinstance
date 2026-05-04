@@ -1,10 +1,8 @@
 package database
 
-import com.example.UserAnswers
 import com.example.database.TestDatabase
 import com.example.database.objects.User
 import com.example.database.tables.UserTable
-import com.example.retrieveUser
 import com.example.retrieveUserQuizAttempts
 import com.example.testModule
 import io.kotest.assertions.throwables.shouldThrow
@@ -19,14 +17,13 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 /**
  * Unit tests for Database functions primarily used in DashboardRouting.kt.
  * @see retrieveUserQuizAttempts
- */
+ **/
 class DashboardDatabaseTest :
     StringSpec({
-        // Tests for retrieveUserQuizAttempts
         beforeTest {
             TestDatabase.create()
         }
-
+        // Tests for retrieveUserQuizAttempts
         "Retrieve all UserQuizAttempt(s) for User 'JoanaKennah'" {
             testApplication {
                 application { testModule() }
