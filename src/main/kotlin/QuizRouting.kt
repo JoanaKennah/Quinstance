@@ -71,9 +71,9 @@ fun Application.configureQuizRouting() {
                         "previousDescription" to quiz.description,
                         "previousKeyStage" to quiz.keyStage,
                         "previousCategory" to quiz.category,
-                        "returnURL" to returnURL
-                    )
-                )
+                        "returnURL" to returnURL,
+                    ),
+                ),
             )
         }
 
@@ -106,7 +106,6 @@ fun Application.configureQuizRouting() {
                         mapOf("errorMessage" to "Missing input(s)"),
                     ),
                 )
-            val minigamesEnabled = parameters["miniGames"] == "true"
 
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
 
@@ -147,7 +146,7 @@ fun Application.configureQuizRouting() {
                     "quizName" to quizName,
                     "description" to description,
                     "keyStage" to keyStage,
-                    "category" to category
+                    "category" to category,
                 )
 
             editQuiz(quiz, quizData)
@@ -211,7 +210,7 @@ fun Application.configureQuizRouting() {
                             "resetQuestions" -> deleteQuestions = part.value.toBoolean()
                         }
                     }
-                    // Return an empty unit if nothing is sent.
+
                     else -> Unit
                 }
                 // Dispose of part so it can't be accessed by accident.

@@ -35,7 +35,7 @@ fun Application.configureAuthRouting() {
         get("/how-to-play") {
             call.respond(PebbleContent("how_to_play.peb", mapOf()))
         }
-        
+
         // Serves login page
         get("/login") {
             call.respond(PebbleContent("login.peb", mapOf()))

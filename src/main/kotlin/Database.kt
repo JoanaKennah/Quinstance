@@ -92,21 +92,6 @@ fun retrieveUser(username: String): User? {
 }
 
 /**
- * Adds a new User to UserTable. Returns null if user already exists
- * Retrieves user from UserTable using their ID, returns null if no user found
- * @param userId Unique identifier for a User in the Database
- * @return User object if User exists, null if they don't
- * @throws IllegalArgumentException if userID is less than or equal to 0
- */
-fun retrieveUserById(userId: Int): User? {
-    require(userId >= 0) { "User ID must be positive" }
-
-    return transaction(TransactionManager.defaultDatabase) {
-        User.findById(userId)
-    }
-}
-
-/**
  * Adds a new User to UserTable.
  * @param username Unique identifier for a User
  * @param password Plaintext password for a User to be hashed before being added to the Database
@@ -150,24 +135,13 @@ fun addUser(
 }
 
 /**
- * Deletes given user from UserTable (possibly used for Admin purposes).
- * @param user User object
- **/
-fun deleteUser(user: User) {
-    // Checks if the user exists in the table before deleting it
-    require(retrieveUser(user.username) != null) { "User must exist" }
-    transaction(TransactionManager.defaultDatabase) {
-        user.delete()
-    }
-}
-
-/**
  * Creates and adds a new Question to QuestionTable. Increments given Quiz numOfQuestions by 1
  * @param quiz Quiz object that will be associated with the new question
  * @param question question text
  * @param keyStage Key stage for the Question, e.g. Key Stage 1 or Further Education
  * @return new Question object
- * @throws IllegalArgumentException if any param is empty
+ * @throws IllegalArgumentException If any param is empty
+ * @throws IllegalArgumentException If Quiz does not exist
  */
 fun addQuestion(
     quiz: Quiz,
@@ -177,6 +151,11 @@ fun addQuestion(
     for (parameter in listOf(question, keyStage)) {
         require(parameter.isNotEmpty())
     }
+
+    transaction(TransactionManager.defaultDatabase) {
+        require(Quiz.findById(quiz.id) != null)
+    }
+
     val newQuestion =
         transaction(TransactionManager.defaultDatabase) {
             // Don't need to check if Question already exists
@@ -204,7 +183,6 @@ fun addQuestion(
  * @param option2 Second possible answer for a question, can be empty
  * @param option3 Third possible answer for a question, can be empty
  * @param option4 Fourth possible answer for a question, can be empty
- * @return listOf(correctOption, option2, option3?, option4?)
  * @throws IllegalArgumentException if option1 or option2 is empty, or if correctIndex isn't within 0 to 3.
  * @return listOf(correctOption, finalOption2, finalOption3, finalOption4)
  */
@@ -218,6 +196,7 @@ fun setAnswerOptions(
     require(option1 != "") { "option1 cannot be empty" }
     require(option2 != "") { "option2 cannot be empty" }
     require(correctIndex in 0..3) { "correctIndex must be between 0 and 3" }
+    require(listOf(option1, option2, option3, option4)[correctIndex] != null)
 
     val allOptions = listOfNotNull(option1, option2, option3, option4)
     val correctOption = allOptions[correctIndex]
@@ -265,14 +244,16 @@ fun setAnswerOptions(
 fun editQuestion(
     question: Question,
     questionData: Map<String, String>,
-    answer: Answer,
+    answer: Answer?,
     answerData: Map<String, String?>,
 ) {
-    require(questionData.isNotEmpty() && answerData.isNotEmpty()) { "Nothing to edit" }
+    require(!(questionData.isEmpty() && answerData.isEmpty())) { "Nothing to edit" }
     transaction(TransactionManager.defaultDatabase) {
         require(Question.findById(question.id) != null) { "Question must exist " }
-        require(Answer.findById(answer.id) != null) { "Answer must exist" }
-        require(answer.question.id == question.id) { "Answer must be for the given Question " }
+        if (answer != null) {
+            require(Answer.findById(answer.id) != null) { "Answer must exist" }
+            require(answer.question.id == question.id) { "Answer must be for the given Question " }
+        }
     }
 
     for (item in questionData) {
@@ -298,7 +279,7 @@ fun editQuestion(
             }
         }
 
-        if (answerData.isNotEmpty()) {
+        if (answerData.isNotEmpty() && answer != null) {
             val answerOptions =
                 setAnswerOptions(
                     answerData["option1"]!!,
@@ -321,11 +302,16 @@ fun editQuestion(
 }
 
 /**
- * Edits given Quiz (and details) in the Database
+ * Edits given Quiz (and details) in the Database.
+ * @param quiz Quiz object to be edited
+ * @param quizData Map containing new/edited data for Quiz. Includes four keys, "quizName", "description", "category" and "keyStage"
+ * @throws IllegalArgumentException If quizData is empty
+ * @throws IllegalArgumentException If quiz does not exist
+ * @throws IllegalArgumentException If quizData contains an invalid key
  */
 fun editQuiz(
     quiz: Quiz,
-    quizData: Map<String, String>
+    quizData: Map<String, String>,
 ) {
     require(quizData.isNotEmpty()) { "Nothing to edit" }
 
@@ -335,7 +321,7 @@ fun editQuiz(
 
     for (item in quizData) {
         require(
-            item.key in listOf("quizName", "description", "category", "keyStage")
+            item.key in listOf("quizName", "description", "category", "keyStage"),
         ) { "quizData key must be a valid attribute" }
     }
 
@@ -870,6 +856,7 @@ fun deleteGameUserScores(game: Game): Boolean {
  * @param user User object
  * @return List of UserQuizAttempt objects (can be empty)
  * @throws IllegalArgumentException If given User does not exist
+ * @see UserQuizAttempt
  */
 fun retrieveUserQuizAttempts(user: User): List<UserQuizAttempt> {
     require(retrieveUser(user.username) != null) { "User must exist" }
