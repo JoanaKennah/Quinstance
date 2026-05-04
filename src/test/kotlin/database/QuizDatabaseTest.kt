@@ -192,7 +192,7 @@ class QuizDatabaseTest :
             }
         }
 
-        // Tests for editQuiz() TODO()
+        // Tests for editQuiz() ()
         "Edit Quiz 'COMP2860 Quiz' and change the quiz name to 'UoL COMP2860 Quiz'" {
             testApplication {
                 application { testModule() }
@@ -479,7 +479,7 @@ class QuizDatabaseTest :
             }
         }
 
-        // Tests for addQuestion() TODO() if quiz object doesnt exist
+        // Tests for addQuestion() () if quiz object doesnt exist
         "Add a Question (normal data) to Quiz 'COMP2860 Quiz'" {
             testApplication {
                 application { testModule() }
@@ -1046,7 +1046,7 @@ class QuizDatabaseTest :
             }
         }
 
-        // Tests for setAnswerOptions() TODO
+        // Tests for setAnswerOptions() 
         "Set answer options with option 1 being the correct option (all options not null)" {
             testApplication {
                 application { testModule() }
@@ -1356,7 +1356,7 @@ class QuizDatabaseTest :
             }
         }
 
-        // Tests for editQuestion() TODO
+        // Tests for editQuestion() 
         "Edit Question 'What is a process?' to change the question text to 'Why is a process?'" {
             testApplication {
                 application { testModule() }
@@ -1701,7 +1701,7 @@ class QuizDatabaseTest :
             }
         }
 
-        // Tests for deleteQuiz() TODO
+        // Tests for deleteQuiz() 
         "Delete Quiz 'COMP2860 Quiz'" {
             val quiz =
                 transaction(TestDatabase.db) {
