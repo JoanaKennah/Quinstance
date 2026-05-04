@@ -146,7 +146,7 @@ fun Application.configureGameRouting() {
                     connection.send(Frame.Text("{\"redirect\":\"/end-game/$gameId\"}"))
                 }
 
-                activeSessions.remove(gameId)           //cut game and go to leaderboard
+                activeSessions.remove(gameId) // cut game and go to leaderboard
                 deleteInUseCode(game)
                 call.respondRedirect("/leaderboard/$gameId")
             } else {
@@ -528,12 +528,12 @@ fun Application.configureGameRouting() {
                     )
                 }
 
-                //When finished testing, swap out random line
-                gameSession.miniGamesEnabled
-                    && gameSession.lastIncorrectPlayers.size >= 2
-                    && gameSession.activeMinigames.isNotEmpty()
-                    && !gameSession.minigameJustPlayed
-                    && (0..1).random() == 0 -> {
+                // When finished testing, swap out random line
+                gameSession.miniGamesEnabled &&
+                    gameSession.lastIncorrectPlayers.size >= 2 &&
+                    gameSession.activeMinigames.isNotEmpty() &&
+                    !gameSession.minigameJustPlayed &&
+                    (0..1).random() == 0 -> {
                     //&& testRandomValue == 1 -> {
 
                     gameSession.minigameJustPlayed = true

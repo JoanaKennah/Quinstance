@@ -1,10 +1,9 @@
 package com.example
 
-import com.example.SentAnswerData
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.*
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.shouldBe
 
 class UserAnswersTest :
     StringSpec({
