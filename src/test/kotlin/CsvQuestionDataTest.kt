@@ -13,7 +13,7 @@ class CsvQuestionDataTest :
             val questionData =
                 listOf(
                     listOf("What is my name?", "Ethan", "Joana", "Minghao", "Emily", "0", "furthereducation"),
-                    listOf("Is this a good quiz?", "Yes", "NO!", "", "", "1", "furthereducation")
+                    listOf("Is this a good quiz?", "Yes", "NO!", "", "", "1", "furthereducation"),
                 )
 
             val dataStream: InputStream = File("normal.csv").inputStream()

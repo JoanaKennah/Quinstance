@@ -1,7 +1,6 @@
 package com.example
 
 import java.io.InputStream
-import java.util.Locale
 import java.util.Locale.getDefault
 
 /**
@@ -38,7 +37,19 @@ fun readCsv(inputStream: InputStream): List<CsvQuestionData>? {
 
     if (headerData.size != 7) return null
 
-    if (headerData != listOf("question","option1","option2","option3","option4","correctOption","key_stage")) return null
+    if (headerData !=
+        listOf(
+            "question",
+            "option1",
+            "option2",
+            "option3",
+            "option4",
+            "correctOption",
+            "key_stage",
+        )
+    ) {
+        return null
+    }
 
     // Check to see if header is accurate.
     try {
@@ -54,8 +65,11 @@ fun readCsv(inputStream: InputStream): List<CsvQuestionData>? {
 
                     // Ensures key stage is in the correct format as best as I could think of.
                     val formattedKeyStage =
-                        when (keyStage.trim()
-                            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(getDefault()) else it.toString() }) {
+                        when (
+                            keyStage
+                                .trim()
+                                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(getDefault()) else it.toString() }
+                        ) {
                             "KS1", "Key Stage 1" -> "keystage1"
                             "KS2", "Key Stage 2" -> "keystage2"
                             "KS3", "Key Stage 3" -> "keystage3"

@@ -1046,7 +1046,7 @@ class QuizDatabaseTest :
             }
         }
 
-        // Tests for setAnswerOptions() 
+        // Tests for setAnswerOptions()
         "Set answer options with option 1 being the correct option (all options not null)" {
             testApplication {
                 application { testModule() }
@@ -1356,7 +1356,7 @@ class QuizDatabaseTest :
             }
         }
 
-        // Tests for editQuestion() 
+        // Tests for editQuestion()
         "Edit Question 'What is a process?' to change the question text to 'Why is a process?'" {
             testApplication {
                 application { testModule() }
@@ -1701,7 +1701,7 @@ class QuizDatabaseTest :
             }
         }
 
-        // Tests for deleteQuiz() 
+        // Tests for deleteQuiz()
         "Delete Quiz 'COMP2860 Quiz'" {
             val quiz =
                 transaction(TestDatabase.db) {
