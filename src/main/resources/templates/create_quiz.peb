@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Create a Quiz</title>
+    {% if isEdit %}
+        <title>Edit Quiz</title>
+    {% else %}
+        <title>Create a Quiz</title>
+    {% endif %}
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
@@ -95,15 +99,6 @@
         }
       
     </style>
-
-    <script>
-        function toggleMiniGames() {
-            const toggle = document.getElementById("miniGamesToggle");
-            const options = document.getElementById("gamesOptions");
-
-            options.style.display = toggle.checked ? "block" : "none";
-        }
-    </script>
 </head>
 
 <body>
@@ -114,58 +109,63 @@
 
 <div class="content">
 
-<h1>Create a Quiz</h1>
+<h1>
+{% if isEdit %}
+    Edit Quiz
+{% else %}
+    Create a Quiz
+{% endif %}
+</h1>
 
-<form method="post" action="/create-quiz">
-
+<form method="post" action="{% if isEdit %}/edit-quiz/{{ quizId }}{% else %}/create-quiz{% endif %}">
     <div class="container">
 
         <div class="left">
             <label for="quizName">Quiz Name:</label>
-            <input type="text" id="quizName" name="quizName" required>
+            <input type="text" id="quizName" name="quizName" value="{{ previousQuizName }}" required>
 
             <label for="description">Description:</label>
-            <textarea id="description" name="description" required></textarea>
+            <textarea id="description" name="description" required>{{ previousDescription }}</textarea>
         </div>
 
         <div class="right">
             <label for="keyStage">Key Stage:</label>
-            <select id="keyStage" name="keystage" required>
+            <select id="keyStage" name="keyStage" required>
                 <option value="">Select...</option>
-                <option value="KS1">KS1</option>
-                <option value="KS2">KS2</option>
-                <option value="KS3">KS3</option>
-                <option value="KS4">KS4</option>
-                <option value="KS5">KS5</option>
-                <option value="furthereducation">Further Education</option>
-                <optin value ="nonapplicable">N/A</option>
+                <option value="KS1" {% if previousKeyStage == "KS1" %}selected{% endif %}>KS1</option>
+                <option value="KS2" {% if previousKeyStage == "KS2" %}selected{% endif %}>KS2</option>
+                <option value="KS3" {% if previousKeyStage == "KS3" %}selected{% endif %}>KS3</option>
+                <option value="KS4" {% if previousKeyStage == "KS4" %}selected{% endif %}>KS4</option>
+                <option value="KS5" {% if previousKeyStage == "KS5" %}selected{% endif %}>KS5</option>
+                <option value="furthereducation" {% if previousKeyStage == "furthereducation" %}selected{% endif %}>Further Education</option>
+                <option value="nonapplicable" {% if previousKeyStage == "nonapplicable" %}selected{% endif %}>N/A</option>
             </select>
 
             <label for="category">Category:</label>
             <select id="category" name="category" required>
                 <option value="">Select...</option>
-                <option value="art">Art and Design</option>
-                <option value="biology">Biology</option>
-                <option value="business">Business Studies</option>
-                <option value="chemistry">Chemistry</option>
-                <option value="cs">Computer Science</option>
-                <option value="dt">Design and Technology</option>
-                <option value="drama">Drama</option>
-                <option value="eng_lang">English Language</option>
-                <option value="eng_lit">English Literature</option>
-                <option value="french">French</option>
-                <option value="geography">Geography</option>
-                <option value="german">German</option>
-                <option value="history">History</option>
-                <option value="latin">Latin</option>
-                <option value="maths">Mathematics</option>
-                <option value="media">Media Studies</option>
-                <option value="music">Music</option>
-                <option value="pe">Physical Education</option>
-                <option value="physics">Physics</option>
-                <option value="rs">Religious Studies</option>
-                <option value="spanish">Spanish</option>
-                <option value="other">Other</option>
+                <option value="art" {% if previousCategory == "art" %}selected{% endif %}>Art and Design</option>
+                <option value="biology" {% if previousCategory == "biology" %}selected{% endif %} >Biology</option>
+                <option value="business" {% if previousCategory == "business" %}selected{% endif %}>Business Studies</option>
+                <option value="chemistry" {% if previousCategory == "chemistry" %}selected{% endif %}>Chemistry</option>
+                <option value="cs" {% if previousCategory == "cs" %}selected{% endif %}>Computer Science</option>
+                <option value="dt" {% if previousCategory == "dt" %}selected{% endif %}>Design and Technology</option>
+                <option value="drama" {% if previousCategory == "drama" %}selected{% endif %}>Drama</option>
+                <option value="eng_lang" {% if previousCategory == "eng_lang" %}selected{% endif %}>English Language</option>
+                <option value="eng_lit" {% if previousCategory == "eng_lit" %}selected{% endif %}>English Literature</option>
+                <option value="french" {% if previousCategory == "french" %}selected{% endif %}>French</option>
+                <option value="geography" {% if previousCategory == "geography" %}selected{% endif %}>Geography</option>
+                <option value="german" {% if previousCategory == "german" %}selected{% endif %}>German</option>
+                <option value="history" {% if previousCategory == "history" %}selected{% endif %}>History</option>
+                <option value="latin" {% if previousCategory == "latin" %}selected{% endif %}>Latin</option>
+                <option value="maths" {% if previousCategory == "maths" %}selected{% endif %}>Mathematics</option>
+                <option value="media" {% if previousCategory == "media" %}selected{% endif %}>Media Studies</option>
+                <option value="music" {% if previousCategory == "music" %}selected{% endif %}>Music</option>
+                <option value="pe" {% if previousCategory == "pe" %}selected{% endif %}>Physical Education</option>
+                <option value="physics" {% if previousCategory == "physics" %}selected{% endif %}>Physics</option>
+                <option value="rs" {% if previousCategory == "rs" %}selected{% endif %}>Religious Studies</option>
+                <option value="spanish" {% if previousCategory == "spanish" %}selected{% endif %}>Spanish</option>
+                <option value="other" {% if previousCategory == "other" %}selected{% endif %}>Other</option>
                 
             </select>
         </div>
@@ -174,9 +174,9 @@
 
     <div class="bottom-bar">
 
-        <a class="cancel" href={{ returnURL }}>Cancel</a>
+        <a class="cancel" href='/view-quizzes'>Cancel</a>
 
-        <button type="submit">Next</button>
+        <button type="submit">{% if isEdit %}Save{% else %}Next{% endif %}</button>
 
     </div>
 

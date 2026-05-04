@@ -42,6 +42,41 @@ fun Application.configureQuizRouting() {
             call.respond(PebbleContent("create_quiz.peb", mapOf("returnURL" to returnURL)))
         }
 
+        // get quiz creation for edit mode
+        get("/edit-quiz/{quizId}") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+
+            val quizId =
+                call.parameters["quizId"]?.toIntOrNull()
+                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid quiz ID")))
+
+            val quiz =
+                retrieveQuiz(quizId)
+                    ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
+
+            val returnURL =
+                when (session.role) {
+                    "teacher" -> "/teacher-dashboard"
+                    "student" -> "/student-dashboard"
+                    else -> return@get call.respondRedirect("/login")
+                }
+
+            call.respond(
+                PebbleContent(
+                    "create_quiz.peb",
+                    mapOf(
+                        "isEdit" to true,
+                        "quizId" to quiz.id.value,
+                        "previousQuizName" to quiz.quizName,
+                        "previousDescription" to quiz.description,
+                        "previousKeyStage" to quiz.keyStage,
+                        "previousCategory" to quiz.category,
+                        "returnURL" to returnURL
+                    )
+                )
+            )
+        }
+
         // saves created quiz to db, redirects to add Qs page
         post("/create-quiz") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
@@ -78,6 +113,46 @@ fun Application.configureQuizRouting() {
             val quiz = addQuiz(user, quizName, description, category, keystage)
 
             call.respondRedirect("/view-quiz-questions/${quiz.id.value}")
+        }
+
+        post("/edit-quiz/{quizId}") {
+            val quizId =
+                call.parameters["quizId"]?.toIntOrNull()
+                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid quizID")))
+
+            val quiz =
+                retrieveQuiz(quizId)
+                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
+
+            val parameters = call.receiveParameters()
+
+            val quizName =
+                parameters["quizName"]
+                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing input(s)")))
+
+            val description =
+                parameters["description"]
+                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing input(s)")))
+
+            val keyStage =
+                parameters["keyStage"]
+                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing input(s)")))
+
+            val category =
+                parameters["category"]
+                    ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Missing input(s)")))
+
+            val quizData =
+                mapOf(
+                    "quizName" to quizName,
+                    "description" to description,
+                    "keyStage" to keyStage,
+                    "category" to category
+                )
+
+            editQuiz(quiz, quizData)
+
+            call.respondRedirect("/view-quiz-questions/$quizId")
         }
 
         // serves list of Qs in quiz

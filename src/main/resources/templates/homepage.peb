@@ -123,6 +123,19 @@
             background-color: #f0f0f0;
         }
 
+        .btn-howtoplay {
+            background-color: white;
+            color: #1a5276;
+            border: 2px solid #1a5276;
+            padding: 8px 22px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-howtoplay:hover {
+            background-color: #f0f0f0;
+        }
+
         /* ── Main content ── */
         .main {
             padding: 30px 40px;
@@ -199,6 +212,7 @@
             <span class="site-name">Game Night</span>
         </div>
         <div class="navbar-right">
+            <button class="btn-howtoplay" onclick="window.location.href='/how-to-play'">How to Play</button>
             <button class="btn-signup" onclick="window.location.href='/signup'">Sign Up</button>
             <button class="btn-login" action="javascript:test()" onclick="window.location.href='/login'">Log In</button>
         </div>
