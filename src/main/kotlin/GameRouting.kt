@@ -110,7 +110,7 @@ fun Application.configureGameRouting() {
                 activeSessions[gameId]
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
 
-            // Clear maths game and auto-ghost state ready for next question
+            // Clear minigame and auto-ghost state ready for next question
             gameSession.mathsGameState = null
             gameSession.potionsGameState = null
             gameSession.roomsGameState = null
@@ -118,6 +118,8 @@ fun Application.configureGameRouting() {
             gameSession.autoGhostedPlayer = null
             gameSession.minigameJustPlayed = false
             gameSession.answeredPlayers.clear()
+            gameSession.playerAnswers.clear()
+            gameSession.isShowingCorrectAnswer = false
 
             if (gameSession.isAdvanced) {
                 return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Already advancing")))
@@ -261,6 +263,9 @@ fun Application.configureGameRouting() {
             val gameSession =
                 activeSessions[gameId]
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+
+            // set this to fix refreshing
+            gameSession.isShowingCorrectAnswer = true
 
             // Get current Question and correct answer
             val currentQuestion = gameSession.questions[gameSession.currentQuestionIndex]
@@ -528,8 +533,8 @@ fun Application.configureGameRouting() {
                     && gameSession.lastIncorrectPlayers.size >= 2
                     && gameSession.activeMinigames.isNotEmpty()
                     && !gameSession.minigameJustPlayed
-                    //&& (0..1).random() == 0 -> {
-                    && randomValue == 1 -> {
+                    && (0..1).random() == 0 -> {
+                    //&& testRandomValue == 1 -> {
 
                     gameSession.minigameJustPlayed = true
                     val selectedMinigame = gameSession.activeMinigames.random()

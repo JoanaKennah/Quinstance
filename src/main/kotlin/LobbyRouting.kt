@@ -155,6 +155,7 @@ fun Application.configureLobbyRouting() {
                         "players" to players,
                         "gameId" to gameId,
                         "theme" to session.theme,
+                        "miniGamesEnabled" to (activeSessions[gameId]?.miniGamesEnabled ?: false),
                     ),
                 ),
             )
