@@ -330,7 +330,7 @@ fun editQuiz(
 
 /**
  * Deletes given question from QuestionTable. Returns true if the question is successfully deleted
- * Created by Minghao in Routing.kt, refactored and edited in Database.kt for testing purposes.
+ * Created by Minghao in Routing, refactored and edited in Database.kt for testing purposes.
  * @param question Question object to be deleted
  * @return True/False if the question has been successfully deleted or not
  */
@@ -439,7 +439,7 @@ fun deleteQuiz(quiz: Quiz): Boolean {
 
 /**
  * Retrieves Quiz from QuizTable using a quizID, returns null if no Quiz found.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param quizID Unique identifier for Quiz object in Database to be found
  * @return Quiz if found, null otherwise
  * @throws IllegalArgumentException If quizId is less than or equal to 0
@@ -453,7 +453,7 @@ fun retrieveQuiz(quizID: Int): Quiz? {
 
 /**
  * Retrieves Quiz from QuizTable using a gameID, returns null if no Quiz found.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param gameID Unique identifier for Game object in Database
  * @return Retrieved Quiz if found, null otherwise
  * @throws IllegalArgumentException If gameID is less than or equal to 0
@@ -559,7 +559,7 @@ fun retrieveQuestionAnswer(question: Question): Answer? {
 
 /**
  * Retrieves Game from GameTable using its gameID, returns null if no Game found.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param gameID Unique identifier for the Game object in Database to be received
  * @return Retrieved Game object if it exists, null otherwise
  * @throws IllegalArgumentException If gameID is less than or equal to 0
@@ -574,7 +574,7 @@ fun retrieveGame(gameID: Int): Game? {
 
 /**
  * Creates and adds a new Game to GameTable.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param quiz Quiz object to be associated with new Game object
  * @return Created Game object
  * @throws IllegalArgumentException if Quiz does not exist
@@ -595,7 +595,7 @@ fun addGame(quiz: Quiz): Game {
 
 /**
  * Retrieve all players from an existing Game and return them inside a List.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param game Game object to receive players from
  * @return List of User usernames
  * @throws IllegalArgumentException If Game given does not exist
@@ -632,7 +632,7 @@ fun roomCodeAlreadyExists(roomCode: String): Boolean {
 
 /**
  * Creates and adds a new InUseCode record to InUseCodeTable.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param roomCode Unique code associated with an ongoing Game
  * @param game Game object to be associated with the given room code
  * @return InUseCode object
@@ -664,7 +664,7 @@ fun addInUseCode(
 
 /**
  * Retrieves room code attribute for the given Game, stored in InUseCodeTable.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param game Game object to retrieve room code for
  * @return Room code associated with the given Game or null if it doesn't exist
  * @throws IllegalArgumentException If the given Game doesn't exist
@@ -680,7 +680,7 @@ fun retrieveRoomCode(game: Game): String? {
 
 /**
  * Retrieves InUseCode object from InUseCodeTable using its room code, returns null if it doesn't exist
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param roomCode Unique identifier for an ongoing Game
  * @return InUseCode object associated with given room code or null if one doesn't exist
  * @throws IllegalArgumentException If the given room code is empty or contains characters that aren't letters or numbers
@@ -701,7 +701,7 @@ fun retrieveInUseCode(roomCode: String): InUseCode? {
 }
 
 /**
- * Retrieves Game associated with given InUseCode record. Required in some parts of Routing.kt due to init errors.
+ * Retrieves Game associated with given InUseCode record. Required in some parts of Routing due to init errors.
  * Exposed DAO is shite.
  * @param inUseCode InUseCode object associated with the wanted Game
  * @return Game object if it exists, null otherwise
@@ -716,7 +716,7 @@ fun retrieveInUseCodeGame(inUseCode: InUseCode): Game? {
 
 /**
  * Delete InUseCode record from InUseCodeTable using given game object.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param game Game object associated with the InUseCode to be deleted
  * @throws IllegalArgumentException If Game given does not exist
  */
@@ -729,7 +729,7 @@ fun deleteInUseCode(game: Game) {
 
 /**
  * Creates and adds a new UserScore record to UserScoreTable
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param game Game object
  * @param user User object
  * @return New UserScore object, with score attribute being set to 0
@@ -756,7 +756,7 @@ fun addUserScore(
 
 /**
  * Retrieves UserScore from UserScoreTable, returns null if UserScore doesn't exist.
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param game Game object associated with the wanted UserScore
  * @param user User object associated with the wanted UserScore
  * @return UserScore object if found, null otherwise
@@ -780,7 +780,7 @@ fun retrieveUserScore(
 
 /**
  * Retrieves all UserScores from a given Game
- * Created by Emily in Routing.kt, refactored to Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored to Database.kt for testing purposes.
  * @param game Game object needed to retrieve all associated UserScore objects
  * @return List of PlayerScoreInfo objects (can be empty)
  * @throws IllegalArgumentException If given Game does not exist
@@ -800,7 +800,7 @@ fun retrieveAllUserScoresDescending(game: Game): List<PlayerScoreInfo> {
 
 /**
  * Deletes UserScore object for a given User.
- * Created by Emily in Routing.kt, refactored and edited in Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored and edited in Database.kt for testing purposes.
  * @param game Game object associated with the UserScore to be deleted
  * @param user User object associated with the UserScore to be deleted
  * @return True if delete is successful, false if UserScore doesn't exist
@@ -825,7 +825,7 @@ fun deleteUserScoreForGivenUser(
 
 /**
  * Deletes all UserScores for a given Game.
- * Created by Emily in Routing.kt, refactored and edited in Database.kt for testing purposes.
+ * Created by Emily in Routing, refactored and edited in Database.kt for testing purposes.
  * @param game Game object associated with UserScore objects to be deleted
  * @return True if delete is successful, false if there are no UserScores to delete
  * @throws IllegalArgumentException If the given Game does not exist

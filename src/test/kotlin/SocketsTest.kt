@@ -1,8 +1,7 @@
 package com.example
 
 import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.*
-import io.ktor.server.testing.*
+import io.kotest.matchers.shouldBe
 
 class SocketsTest :
     StringSpec({
