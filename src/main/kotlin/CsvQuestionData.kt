@@ -1,6 +1,7 @@
 package com.example
 
 import java.io.InputStream
+import java.util.Locale.getDefault
 
 /**
  * Question data from a .csv file,
@@ -32,24 +33,31 @@ fun readCsv(inputStream: InputStream): List<CsvQuestionData>? {
 
     // If file is empty (aka no header), return an empty list.
     val header = reader.readLine() ?: return emptyList()
+    val headerData = header.split(',', ignoreCase = false)
 
-    try {
-        val headerData = header.split(',', ignoreCase = false, limit = 7)
+    if (headerData.size != 7) return null
 
-        // If header has less than 7 items or isn't correct format
-        if (headerData.size != 7) return null
-    } catch (e: Exception) {
-        // If header has more data than 7 items.
-        println("Exception while reading CSV")
+    if (headerData !=
+        listOf(
+            "question",
+            "option1",
+            "option2",
+            "option3",
+            "option4",
+            "correctOption",
+            "key_stage",
+        )
+    ) {
         return null
     }
+
     // Check to see if header is accurate.
     try {
         val questionList =
             reader
                 .lineSequence()
                 .filter { it.isNotBlank() }
-                .map {
+                .map { it ->
                     // Had to split data into two due to an error with there not being a 7th component for splitting data.
                     val data = it.split(',', ignoreCase = false, limit = 7)
                     val (question, option1, option2, option3) = data.chunked(4)[0]
@@ -57,14 +65,18 @@ fun readCsv(inputStream: InputStream): List<CsvQuestionData>? {
 
                     // Ensures key stage is in the correct format as best as I could think of.
                     val formattedKeyStage =
-                        when (keyStage.trim().uppercase()) {
+                        when (
+                            keyStage
+                                .trim()
+                                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(getDefault()) else it.toString() }
+                        ) {
                             "KS1", "Key Stage 1" -> "keystage1"
                             "KS2", "Key Stage 2" -> "keystage2"
                             "KS3", "Key Stage 3" -> "keystage3"
                             "KS4", "Key Stage 4" -> "keystage4"
                             "KS5", "Key Stage 5" -> "keystage5"
-                            "Further Education" -> "Further Education"
-                            "nonapplicable" -> "N/A"
+                            "Further Education", "furthereducation" -> "furthereducation"
+                            "nonapplicable", "N/A", "NA" -> "nonapplicable"
                             else -> "nonapplicable"
                         }
 
