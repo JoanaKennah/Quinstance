@@ -35,7 +35,7 @@ fun sendResetEmail(toEmail: String) {
             MimeMessage(session).apply {
                 setFrom(InternetAddress(from))
                 setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail))
-                subject = "Password Reset for Quinstance"
+                subject = "Password Reset Request for Quinstance"
 
                 setText(
                     """
