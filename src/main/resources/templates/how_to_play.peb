@@ -72,12 +72,33 @@
             margin-bottom: 30px;
         }
 
+        h3 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1em;
+            color: black;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
         .section-title {
             font-weight: bold;
             font-size: 1.5em;
             text-align: center;
             color: black;
             margin-bottom: 8px;
+        }
+
+        .content-box {
+            border: 1px solid #1a5276;
+            border-radius: 15px;
+            background-color: white;
+            min-height: 100px;
+            width: 100%;
+            padding: 10px;
+            font-size: 20px;
+            color: #333;
+            text-align: center;
         }
       
         .columns {
@@ -98,7 +119,7 @@
     <div class="navbar">
         <div class="navbar-left">
             <div class="logo-box">Logo</div>
-            <span class="site-name">Game Night</span>
+            <span class="site-name">Quinstance</span>
         </div>
         <div class="navbar-right">
             <a href="/home">Home</a>
@@ -110,8 +131,17 @@
       
         <div class="columns">
             <div class="column">
-                <h2 class="section-title">Quizzes:</h2>
-                <p>Text</p>
+                <div class="content-box">
+                    <h2 class="section-title">Quizzes</h2>
+                    <h3>Create a Quiz</h3>
+                    <p>Create quizzes with questions that have up to 4 possible answers - but only one correct option!.
+                    Quizzes have an assigned Category and Key Stage, with a wide range of options to choose from.</p>
+                    <h3>Edit Quizzes</h3>
+                    <p>Edit anything you customised! Thought of a new name for your Quiz? Think a question is too easy
+                    or way too difficult? Edit that too - no need to recreate a quiz or question!</p>
+                    <h3>Delete a Quiz</h3>
+                    <p>Not happy with your quiz? Not to worry! You can just delete it and try again.</p>
+                </div>
             </div>
 
             <div class="column">

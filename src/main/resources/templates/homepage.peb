@@ -1,53 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Game Night</title>
+    <title>Quinstance</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-        <!--- ALL OF THIS IS JUST TO TEST HOW WEBSOCKETS WORK :) --->
-        let serverURL;
-        let socket;
-
-        function setupSocket() {
-            serverURL = 'ws://127.0.0.1:8080/gameServer';
-            socket = new WebSocket(serverURL);
-
-            socket.onopen = logOpenToConsole;
-            socket.onclose = logCloseToConsole;
-            socket.onmessage = test;
-        }
-
-        function logOpenToConsole() {
-            console.log("Web socket connection opened");
-        }
-
-        function logCloseToConsole() {
-            console.log("Web socket connection closed");
-        }
-
-        function test(event) {
-            let questionData = JSON.parse(event.data);
-            console.log(`Retrieved question: ${questionData.questionText}`);
-            console.log(`Retrieved answers: ${questionData.answerOne}, ${questionData.answerTwo}, ${questionData.answerThree}, ${questionData.answerFour} `);
-
-            let data = buildAnswer()
-            sendAnswerViaSocket(data)
-
-        }
-
-        <!--- temp userID, will need to pass this into peb file --->
-        function buildAnswer() {
-            return {
-                userID: 1,
-                chosenAnswer: 0,
-                answerSpeed: 1.0
-            }
-        }
-
-        function sendAnswerViaSocket(data) {
-            socket.send(JSON.stringify(data));
-        }
-    </script>
     <style>
 
         * {
@@ -159,10 +114,10 @@
         }
 
         .content-box {
-            /*border: 1px solid #1a5276;*/
+            border: 1px solid #1a5276;
             border-radius: 15px;
             background-color: white;
-            min-height: 160px;
+            min-height: 100px;
             width: 100%;
             padding: 10px;
             font-size: 20px;
@@ -208,8 +163,8 @@
     <!-- Navigation bar -->
     <nav class="navbar">
         <div class="navbar-left">
-            <div class="logo-box">Logo</div>
-            <span class="site-name">Game Night</span>
+            <img src="/resources/logo.png">
+            <span class="site-name">Quinstance</span>
         </div>
         <div class="navbar-right">
             <button class="btn-howtoplay" onclick="window.location.href='/how-to-play'">How to Play</button>
@@ -220,7 +175,7 @@
 
     <!-- Page content -->
     <main class="main">
-        <h1>Welcome to Game Night!</h1>
+        <h1>Welcome to Quinstance!</h1>
 
         <!-- What is this? -->
         <div class="block-left">
