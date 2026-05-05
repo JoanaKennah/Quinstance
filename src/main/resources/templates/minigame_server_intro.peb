@@ -72,6 +72,12 @@
         .logout-btn:hover {
             text-decoration: underline;
         }
+
+        .rules {
+            font-size: 16px;
+            margin-top: 15px;
+            max-width: 400px;
+        }
     </style>
 
     {% else %}
@@ -140,6 +146,12 @@
         .logout-btn:hover, .logout-btn:focus {
             text-decoration: underline;
         }
+
+        .rules {
+            font-size: 16px;
+            margin-top: 15px;
+            max-width: 400px;
+        }
     </style>
     {% endif %}
 </head>
@@ -155,6 +167,17 @@
         <div class="box">
             <h1>Minigame Incoming:</h1>
             <h2>{{ minigameName }}</h2>
+                <p class="rules">
+                    {% if minigameName == "Maths" %}
+                        Solve quick maths problems under time pressure to avoid becoming a ghost. Players who answered correctly can play along!
+                    {% elseif minigameName == "Potions" %}
+                        Choose the correct potion to avoid becoming a ghost.
+                    {% elseif minigameName == "Rooms" %}
+                        Choose a door; if everyone picks the same you all win, if not, everyone in the busiest room becomes a ghost!
+                    {% elseif minigameName == "Words" %}
+                        Create the longest word possible from the given letters to avoid becoming a ghost. Players who answered correctly can play along!
+                    {% endif %}
+                </p>
             <form method="post" action="{{ beginRoute }}">
                 <button type="submit" class="btn-start">Start</button>
             </form>
