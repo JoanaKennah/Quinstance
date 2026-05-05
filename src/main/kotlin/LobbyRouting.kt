@@ -340,7 +340,7 @@ fun Application.configureLobbyRouting() {
 
         // Deletes room code, player scores and game, then redirects host to their dashboard
         post("/close-lobby/{gameId}") {
-            call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
                 call.parameters["gameId"]?.toIntOrNull()
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
@@ -355,7 +355,14 @@ fun Application.configureLobbyRouting() {
                 deleteGameUserScores(game)
                 transaction(TransactionManager.defaultDatabase) { game.delete() }
             }
-            call.respondRedirect("/teacher-dashboard")
+            
+            val returnURL =
+                if (session.role == "teacher" || session.role == "admin") {
+                    "/teacher-dashboard"
+                } else {
+                    "/student-dashboard"
+                }
+            call.respondRedirect(returnURL)
         }
 
         // Gets game session details, populated and serves settings page
