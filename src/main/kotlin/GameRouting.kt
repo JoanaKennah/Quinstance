@@ -896,5 +896,12 @@ fun Application.configureGameRouting() {
 
             call.respondText("{\"redirect\":${if (redirect != null) "\"$redirect\"" else "null"}}", ContentType.Application.Json)
         }
+
+        // routes client or host back to dash when quit button on navbar pressed
+        get("/quit-game") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val returnURL = if (session.role == "teacher" || session.role == "admin") "/teacher-dashboard" else "/student-dashboard"
+            call.respondRedirect(returnURL)
+        }
     }
 }
