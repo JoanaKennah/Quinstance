@@ -871,3 +871,16 @@ fun retrieveUserQuizAttempts(user: User): List<UserQuizAttempt> {
             }
     }
 }
+
+/**
+ * Deletes given user from UserTable.
+ * @param user User object to be deleted
+ * @throws IllegalArgumentException If User does not exist
+ * added for playwright testing purposes
+ */
+fun deleteUser(user: User) {
+    require(retrieveUser(user.username) != null) { "User must exist" }
+    transaction(TransactionManager.defaultDatabase) {
+        user.delete()
+    }
+}
