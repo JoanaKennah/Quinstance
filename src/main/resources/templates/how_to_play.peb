@@ -72,12 +72,33 @@
             margin-bottom: 30px;
         }
 
+        h3 {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1em;
+            color: black;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
         .section-title {
             font-weight: bold;
             font-size: 1.5em;
             text-align: center;
             color: black;
             margin-bottom: 8px;
+        }
+
+        .content-box {
+            border: 1px solid #1a5276;
+            border-radius: 15px;
+            background-color: white;
+            min-height: 100px;
+            width: 100%;
+            padding: 10px;
+            font-size: 20px;
+            color: #333;
+            text-align: center;
         }
       
         .columns {
@@ -98,7 +119,7 @@
     <div class="navbar">
         <div class="navbar-left">
             <div class="logo-box">Logo</div>
-            <span class="site-name">Game Night</span>
+            <span class="site-name">Quinstance</span>
         </div>
         <div class="navbar-right">
             <a href="/home">Home</a>
@@ -110,18 +131,61 @@
       
         <div class="columns">
             <div class="column">
-                <h2 class="section-title">Quizzes:</h2>
-                <p>Text</p>
+                <div class="content-box">
+                    <h2 class="section-title">Quizzes</h2>
+                    <h3>Create a Quiz</h3>
+                    <p>Create quizzes with questions that have up to 4 possible answers - but only one correct option!
+                    Quizzes have an assigned Category and Key Stage, with a wide range of options to choose from.</p>
+                    <h3>Edit Quizzes</h3>
+                    <p>Edit anything you customised! Thought of a new name for your Quiz? Think a question is too easy
+                    or way too difficult? Edit that too - no need to recreate a quiz or question!</p>
+                    <h3>Host a Quiz</h3>
+                    Hosting your quiz has never been easier. Just create a lobby and customise how you want students to play,
+                    then share the randomly generated code given and press 'Start'! However, lobbies must contain at least
+                    one player to start, and two players for minigames to be enabled.
+                    <h3>Delete a Quiz</h3>
+                    <p>Not happy with your quiz? Not to worry! You can just delete it and try again.</p>
+                </div>
             </div>
 
             <div class="column">
-                <h2 class="section-title">Minigames:</h2>
-                <p>Text</p>
+                <div class="content-box">
+                    <h2 class="section-title">Minigames</h2>
+                    <p>We have four minigames on offer. If minigames aren't your style, they can be toggled on/off in the
+                    lobby setup and settings page offered during quiz hosting. Each minigame has an equal chance to
+                    appear after a question, if at least two people got it wrong!
+                    <h3>Maths</h3>
+                    <p>Solve as many simple maths problems as you can in the given time. The player(s) with the least score
+                    will become a ghost! Watch out - if you answer a maths question wrong, you will be stunned for 3 seconds,
+                    so make sure you're quick and accurate!
+                    <h3>Potions</h3>
+                    <p>A simple game of luck. Pick a potion and hope that the one you picked wasn't the "ghost" potion. All players
+                    who picked the ghost potion will become a ghost!
+                    <h3>Rooms</h3>
+                    <p>Players will have the option to pick a door, with three on offer. If all players pick the same door,
+                    everyone is safe. Otherwise, the door with the most players will have a ghost hiding in it, turning those
+                    players into ghosts!
+                    <h3>Words</h3>
+                    <p>A 5x5 grid with letters is generated and requires players to create the longest word they can think of
+                    from those given letters. If the letters they use aren't in the grid or the word isn't real, they will have
+                    to try again - no cheating! The player(s) with the shortest word in the lobby become ghosts!
+                </div>
             </div>
 
             <div class="column">
-                <h2 class="section-title">Being a Ghost:</h2>
-                <p>Text</p>
+                <div class="content-box">
+                    <h2 class="section-title">Becoming a Ghost:</h2>
+                    <p>It's not game over if you become a ghost - minigames enabled or not, if a ghost player gets a
+                    question right, they are revived and become a normal player again!</p>
+                    <br>
+                    <p>When a player becomes a ghost, they are unable to score points until they are revived. Ghost players
+                    can still take part in quizzes and minigames.
+                    <h3>With Minigames Enabled</h3>
+                    <p>If a player loses a Minigame, they will become a ghost. If a lobby only has one non-ghost player,
+                    if the remaining player gets a question wrong, they will automatically become a ghost!</p>
+                    <h3>No Minigames Enabled</h3>
+                    <p>If the host has no minigames enabled and a player gets a question wrong, they will become a ghost!
+                </div>
             </div>
         </div>
     </main>

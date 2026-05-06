@@ -293,7 +293,7 @@
                 </div>
 
                 <div style="margin-top: 20px; font-size: 16px; color: black;">
-                    <label for="minigamesToggle">Mini Games:</label>
+                    <label for="minigamesToggle">Minigames:</label>
                     <input type="checkbox" 
                         id="minigamesToggle" 
                         name="minigames" 

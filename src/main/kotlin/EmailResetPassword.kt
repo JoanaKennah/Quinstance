@@ -35,13 +35,13 @@ fun sendResetEmail(toEmail: String) {
             MimeMessage(session).apply {
                 setFrom(InternetAddress(from))
                 setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail))
-                subject = "Password Reset Request"
+                subject = "Password Reset Request for Quinstance"
 
                 setText(
                     """
                     Hello,
 
-                    We have received a request that you would like to reset your password with Game Night Quizzes.
+                    We have received a request that you would like to reset your password with Quinstance.
                     
                     Unfortunately, the way to do this requires sending you a link to reset.
                     
