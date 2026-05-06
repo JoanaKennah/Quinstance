@@ -638,6 +638,12 @@ fun Application.configureGameRouting() {
                         }
 
                         else -> {
+                            if (gameSession.lastIncorrectPlayers.size > 1) {
+                                val numGhosts = Math.ceil(gameSession.lastIncorrectPlayers.size * 0.1).toInt()
+                                val newGhosts = gameSession.lastIncorrectPlayers.shuffled().take(numGhosts)
+                                gameSession.ghostPlayers.addAll(newGhosts)
+                            }
+
                             gameSession.connections.forEach { connection ->
                                 connection.send(Frame.Text("{\"redirect\":\"/client-position/$gameId\"}"))
                             }
