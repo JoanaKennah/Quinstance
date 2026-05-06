@@ -638,6 +638,12 @@ fun Application.configureGameRouting() {
                         }
 
                         else -> {
+                            if (gameSession.lastIncorrectPlayers.size > 1) {
+                                val numGhosts = Math.ceil(gameSession.lastIncorrectPlayers.size * 0.1).toInt()
+                                val newGhosts = gameSession.lastIncorrectPlayers.shuffled().take(numGhosts)
+                                gameSession.ghostPlayers.addAll(newGhosts)
+                            }
+
                             gameSession.connections.forEach { connection ->
                                 connection.send(Frame.Text("{\"redirect\":\"/client-position/$gameId\"}"))
                             }
@@ -895,6 +901,13 @@ fun Application.configureGameRouting() {
                 }
 
             call.respondText("{\"redirect\":${if (redirect != null) "\"$redirect\"" else "null"}}", ContentType.Application.Json)
+        }
+
+        // routes client or host back to dash when quit button on navbar pressed
+        get("/quit-game") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val returnURL = if (session.role == "teacher" || session.role == "admin") "/teacher-dashboard" else "/student-dashboard"
+            call.respondRedirect(returnURL)
         }
     }
 }
