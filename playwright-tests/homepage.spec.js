@@ -1,11 +1,11 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
 
-test('has title', async ({ page }) => {
-  await page.goto('http://127.0.0.1:8080');
+test('Has title "Quinstance"', async ({ page }) => {
+  await page.goto('http://localhost:8080');
 
   // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Game Night/);
+  await expect(page).toHaveTitle(/Quinstance/);
 });
 
 test('get started link', async ({ page }) => {
