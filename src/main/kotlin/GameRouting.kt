@@ -539,10 +539,6 @@ fun Application.configureGameRouting() {
                     gameSession.minigameJustPlayed = true
                     val selectedMinigame = gameSession.activeMinigames.random()
 
-                    println(
-                        "miniGamesEnabled: ${gameSession.miniGamesEnabled}, incorrectPlayers: ${gameSession.lastIncorrectPlayers.size}, activeMinigames: ${gameSession.activeMinigames}, minigameJustPlayed: ${gameSession.minigameJustPlayed}, random: $randomValue",
-                    )
-
                     // Set up and serve selected minigame pages to the host
                     when (selectedMinigame) {
                         "maths" -> {

@@ -124,14 +124,10 @@ fun Application.configureSockets() {
         maxFrameSize = Long.MAX_VALUE
         masking = false
     }
-    println("Server socket configured")
 
     routing {
         webSocket("/game/{gameId}") {
             val gameId = call.parameters["gameId"]?.toIntOrNull()
-
-            println("WebSocket connection attempt for gameId: $gameId")
-            println("Active sessions: ${activeSessions.keys}")
 
             if (gameId == null) {
                 close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "Invalid Game Id"))
@@ -145,7 +141,6 @@ fun Application.configureSockets() {
             }
 
             session.connections.add(this)
-            println("Player Connected To Game $gameId, ${session.connections.size} players connected")
 
             // Immediately send current question or redirect if already answered
             // Prevents sync issue where client connects after broadcastQuestion fires
@@ -199,7 +194,6 @@ fun Application.configureSockets() {
                 }
             } finally {
                 session.connections.remove(this)
-                println("Player Disconnected From Game $gameId, ${session.connections.size} players remaining")
             }
         }
     }
