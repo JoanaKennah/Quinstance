@@ -762,14 +762,15 @@ class GameRoutingTest :
             }
         }
 
-        //tests for new quit route added on client side
+        // tests for new quit route added on client side
         "GET /quit-game w/ student session redirects to student dashboard - student quit works" {
             testApplication {
                 application { testModule() }
-                val client = createClient {
-                    install(HttpCookies)
-                    followRedirects = false
-                }
+                val client =
+                    createClient {
+                        install(HttpCookies)
+                        followRedirects = false
+                    }
                 preLogin(client, "linguin0", "password123")
                 val response = client.get("/quit-game")
                 checkForRedirect(response, "/student-dashboard")
@@ -779,10 +780,11 @@ class GameRoutingTest :
         "GET /quit-game w/ teacher session redirects to teacher dashboard - teacher quit works" {
             testApplication {
                 application { testModule() }
-                val client = createClient {
-                    install(HttpCookies)
-                    followRedirects = false
-                }
+                val client =
+                    createClient {
+                        install(HttpCookies)
+                        followRedirects = false
+                    }
                 preLogin(client, "JoanaKennah", "password456")
                 val response = client.get("/quit-game")
                 checkForRedirect(response, "/teacher-dashboard")
