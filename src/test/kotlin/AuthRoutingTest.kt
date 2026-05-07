@@ -202,7 +202,8 @@ class AuthRoutingTest :
         "DELETE /user/{username} w/ valid username returns 200 OK - user deleted successfully" {
             testApplication {
                 application { testModule() }
-                client.get("/") // trigger application initialisation
+                // initialise application before testing add/delete user
+                client.get("/") 
                 addUser("testdelete", "password123", "Test Delete", "test@test.com", "furthereducation", "student")
                 val response = client.delete("/user/testdelete")
                 val body = response.bodyAsText()

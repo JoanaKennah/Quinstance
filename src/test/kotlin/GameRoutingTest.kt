@@ -95,6 +95,7 @@ class GameRoutingTest :
             }
         }
 
+        // between-question-screens checks
         "POST /show-correct-answer/{gameId} w/ valid ID returns 200 OK w/ HTML - host sees correct answer page" {
             testApplication {
                 application { testModule() }
@@ -223,6 +224,7 @@ class GameRoutingTest :
             }
         }
 
+        // game flow progression checks
         "POST /next-question/{gameId} on last question redirects to leaderboard - game ends correctly and displays leaderboard" {
             testApplication {
                 application { testModule() }
@@ -444,6 +446,7 @@ class GameRoutingTest :
             }
         }
 
+        // active minigame polling checks for start and end
         "GET /minigame-active/{gameId} returns true while minigame is active - polling for minigame works" {
             testApplication {
                 application { testModule() }
@@ -547,7 +550,7 @@ class GameRoutingTest :
             }
         }
 
-        // minigame redirect polling
+        // checking minigame redirect polling per minigame and null
         "GET /minigame-redirect/{gameId} returns null before any minigame starts - no minigame handled" {
             testApplication {
                 application { testModule() }
@@ -759,6 +762,7 @@ class GameRoutingTest :
             }
         }
 
+        //tests for new quit route added on client side
         "GET /quit-game w/ student session redirects to student dashboard - student quit works" {
             testApplication {
                 application { testModule() }
