@@ -15,7 +15,6 @@ import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 fun Application.configureMathsMinigameRouting() {
-    // Maths Minigame
     routing {
         // Serves start screens to clients and host when host presses start
         post("/maths-begin/{gameId}") {
@@ -62,6 +61,7 @@ fun Application.configureMathsMinigameRouting() {
 
             val userScore = retrieveUserScore(game, user)?.score ?: 0
 
+            // splits players
             if (session.username in gameSession.lastIncorrectPlayers) {
                 call.respond(
                     PebbleContent(
@@ -87,7 +87,7 @@ fun Application.configureMathsMinigameRouting() {
             }
         }
 
-        // Serves client with a given maths question and four options, one being the correct answer.
+        // Serves client with a given maths question and four options, one correct answer
         get("/minigame-question/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -106,6 +106,7 @@ fun Application.configureMathsMinigameRouting() {
                 mathsState.questions.getOrNull(questionIndex)
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No question available")))
 
+            // get answer options and shuffle
             val options: List<String> =
                 listOf(
                     mathsQuestion.correctAnswer,
@@ -131,7 +132,7 @@ fun Application.configureMathsMinigameRouting() {
             )
         }
 
-        // If the client gets the maths question right, update the maths state and send the client a new maths question.
+        // If client gets maths question right, update maths state and send client a new maths question
         get("/minigame-correct/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -156,7 +157,7 @@ fun Application.configureMathsMinigameRouting() {
             call.respondRedirect("/minigame-question/$gameId")
         }
 
-        // If the client gets the maths question wrong, send them to the incorrect page.
+        // If the client gets the maths question wrong, send them to the incorrect/stunned page for 3 seconds
         get("/minigame-incorrect/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -176,7 +177,7 @@ fun Application.configureMathsMinigameRouting() {
             )
         }
 
-        // Calculate which clients got the lowest score (can be a draw) and add them to the Maths state ghost player list.
+        // Calculate which clients got the lowest score (can be a draw) and add them to Maths state ghost player list.
         post("/minigame-end/{gameId}") {
             call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
@@ -202,9 +203,9 @@ fun Application.configureMathsMinigameRouting() {
                     .filter { it.value == minScore }
                     .map { it.key }
 
-            // Consolation points for winning minigame, if players > 3.
+            // Incentive points for winning minigame, if players > 3.
             if (gameSession.lastIncorrectPlayers.size >= 3) {
-                // Sort scores descending, exclude 0s.
+                // Sort scores descending, exclude 0s for top scorers check
                 val topScorers =
                     mathsState.mathsScores
                         .filter { it.value > 0 }

@@ -18,7 +18,7 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 fun Application.configureLobbyRouting() {
     routing {
-        // Sserves create lobby page, same formatting for category & Kstage
+        // Serves create lobby page, with formatting for category & Kstage
         get("/create-lobby/{quizId}") {
             call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val quizId =
@@ -99,6 +99,7 @@ fun Application.configureLobbyRouting() {
 
             call.sessions.set(session.copy(theme = theme))
 
+            // init gameSession
             val game = addGame(quiz)
             val questions = retrieveQuizQuestions(quiz)
             val gameSession =
@@ -123,7 +124,7 @@ fun Application.configureLobbyRouting() {
             call.respondRedirect("/lobby-server/${game.id.value}")
         }
 
-        // Serves host lobby view with joined players
+        // Serves host lobby view with joined player usernames - mostly handled in front-end
         get("/lobby-server/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -204,7 +205,7 @@ fun Application.configureLobbyRouting() {
                 retrieveInUseCodeGame(inUseCode)
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Game not found")))
 
-            // Stop players joining after game started
+            // check to stop players joining after game started
             if (activeSessions[game.id.value]?.isStarted == true) {
                 call.respond(
                     PebbleContent(
@@ -223,7 +224,7 @@ fun Application.configureLobbyRouting() {
 
             val gameSession = activeSessions[game.id.value]
 
-            // Block host from joining their own game
+            // Block host from joining own game
             if (gameSession != null && session.username == gameSession.hostUsername) {
                 call.respond(
                     PebbleContent(
@@ -241,7 +242,7 @@ fun Application.configureLobbyRouting() {
             val theme = gameSession?.theme ?: "default"
             call.sessions.set(session.copy(theme = theme))
 
-            // Block previously removed players from joining back
+            // Block previously removed players from rejoining, in lobby or mid-game
             if (gameSession != null && session.username in gameSession.barredUsernames) {
                 call.respond(
                     PebbleContent(
@@ -256,7 +257,7 @@ fun Application.configureLobbyRouting() {
                 return@post
             }
 
-            // Block players after the lobby cap is reached
+            // Block players from joining after lobby cap is reached
             if (gameSession != null && retrieveGamePlayers(game).size >= gameSession.maxPlayers) {
                 call.respond(
                     PebbleContent(
@@ -288,6 +289,7 @@ fun Application.configureLobbyRouting() {
                 retrieveQuizFromGameID(gameId)
                     ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
 
+            // check to verify player is registered to this game
             val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
             retrieveUserScore(game, user)
                 ?: return@get call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "You are not a player in this quiz")))
@@ -319,6 +321,7 @@ fun Application.configureLobbyRouting() {
                 retrieveGame(gameId) ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Game not found")))
             val user = retrieveUser(session.username) ?: return@post call.respondRedirect("/login")
 
+            // check if UserScore deletion was successful
             val test = deleteUserScoreForGivenUser(game, user)
             if (!test) {
                 return@post call.respond(
@@ -330,7 +333,7 @@ fun Application.configureLobbyRouting() {
             }
 
             val returnURL =
-                if (session.role == "teacher" || session.role == "admin") { // delete UserScore to remove player from game
+                if (session.role == "teacher" || session.role == "admin") { 
                     "/teacher-dashboard"
                 } else {
                     "/student-dashboard"
@@ -452,6 +455,7 @@ fun Application.configureLobbyRouting() {
             val parameters = call.receiveParameters()
             val kickedPlayers = parameters.getAll("kickedPlayers") ?: emptyList()
 
+            // removes kicked players from scoring and ghost lists
             transaction(TransactionManager.defaultDatabase) {
                 kickedPlayers.forEach { username ->
                     val user = retrieveUser(username)
@@ -482,7 +486,7 @@ fun Application.configureLobbyRouting() {
             val gameSession = activeSessions[gameId] ?: return@get call.respondText("No active session found")
             val user = retrieveUser(session.username) ?: return@get call.respondRedirect("/login")
 
-            // Send host back to settings
+            // Send host back to settings instead of kicked
             if (session.username == gameSession.hostUsername) {
                 call.respondRedirect("/settings/$gameId")
                 return@get
