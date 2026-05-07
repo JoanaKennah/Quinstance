@@ -77,6 +77,9 @@ export default defineConfig({
      command: '"./gradlew" run',
      url: 'http://localhost:8080',
      reuseExistingServer: !process.env.CI,
+     env: {
+          USE_TEST_DB: 'true'
+     }
   },
 });
 

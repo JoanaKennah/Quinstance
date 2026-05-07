@@ -20,7 +20,13 @@ fun main(args: Array<String>) {
  * configures all routing files and session file.
  */
 fun Application.module() {
-    TransactionManager.defaultDatabase = ProjectDatabase.database
+    val useTestDb = System.getenv("USE_TEST_DB") == "true"
+    if (useTestDb) {
+        TestDatabase.create()
+        TransactionManager.defaultDatabase = TestDatabase.db
+    } else {
+        TransactionManager.defaultDatabase = ProjectDatabase.database
+    }
     configureSessions()
     configureDatabase()
     configureTemplating()

@@ -114,6 +114,7 @@ fun Application.configureQuizRouting() {
             call.respondRedirect("/view-quiz-questions/${quiz.id.value}")
         }
 
+        // saves edited data to DB, redirects to view questions
         post("/edit-quiz/{quizId}") {
             val quizId =
                 call.parameters["quizId"]?.toIntOrNull()
@@ -154,7 +155,7 @@ fun Application.configureQuizRouting() {
             call.respondRedirect("/view-quiz-questions/$quizId")
         }
 
-        // serves list of Qs in quiz
+        // serves list of Qs in created quiz
         get("/view-quiz-questions/{quizId}") {
             val quizId =
                 call.parameters["quizId"]?.toIntOrNull()
@@ -183,7 +184,8 @@ fun Application.configureQuizRouting() {
             )
         }
 
-        post("/view-quiz-questions/{quidId}") {
+        // user uploaded quiz csv handling in here
+        post("/view-quiz-questions/{quizId}") {
             // References: https://tahaben.com.ly/2023/04/ktor-server-for-beginners-uploading-files/
             // https://ryanharrison.co.uk/2018/09/20/ktor-file-upload-download.html
 
@@ -310,6 +312,7 @@ fun Application.configureQuizRouting() {
             }
         }
 
+        // deletes question from a created quiz
         post("/delete-question/{questionId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
 
@@ -342,6 +345,7 @@ fun Application.configureQuizRouting() {
             }
         }
 
+        // serves csv template for question upload
         get("/questionTemplate") {
             // Reference: https://ryanharrison.co.uk/2018/09/20/ktor-file-upload-download.html
             val file = File("src/main/resources/questionTemplate.csv")
@@ -352,7 +356,7 @@ fun Application.configureQuizRouting() {
             }
         }
 
-        // serves add question to quiz form
+        // serves form for adding question to quiz
         get("/add-question/{quizId}") {
             val quizId =
                 call.parameters["quizId"]?.toIntOrNull()
@@ -384,6 +388,7 @@ fun Application.configureQuizRouting() {
             )
         }
 
+        // serves form for editing a question on existing quiz
         get("/edit-question/{questionId}") {
             val questionId =
                 call.parameters["questionId"]?.toIntOrNull()
@@ -591,6 +596,7 @@ fun Application.configureQuizRouting() {
             )
         }
 
+        // deletes a created quiz from db
         post("/delete-quiz/{quizId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
 
@@ -606,6 +612,7 @@ fun Application.configureQuizRouting() {
 
             val deleted =
                 transaction(TransactionManager.defaultDatabase) {
+                    // check so user can only delete own quiz
                     if (quiz.user.id != user.id) {
                         return@transaction false
                     }

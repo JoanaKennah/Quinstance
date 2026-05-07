@@ -95,6 +95,7 @@ class GameRoutingTest :
             }
         }
 
+        // between-question-screens checks
         "POST /show-correct-answer/{gameId} w/ valid ID returns 200 OK w/ HTML - host sees correct answer page" {
             testApplication {
                 application { testModule() }
@@ -223,6 +224,7 @@ class GameRoutingTest :
             }
         }
 
+        // game flow progression checks
         "POST /next-question/{gameId} on last question redirects to leaderboard - game ends correctly and displays leaderboard" {
             testApplication {
                 application { testModule() }
@@ -444,6 +446,7 @@ class GameRoutingTest :
             }
         }
 
+        // active minigame polling checks for start and end
         "GET /minigame-active/{gameId} returns true while minigame is active - polling for minigame works" {
             testApplication {
                 application { testModule() }
@@ -547,7 +550,7 @@ class GameRoutingTest :
             }
         }
 
-        // minigame redirect polling
+        // checking minigame redirect polling per minigame and null
         "GET /minigame-redirect/{gameId} returns null before any minigame starts - no minigame handled" {
             testApplication {
                 application { testModule() }
@@ -756,6 +759,42 @@ class GameRoutingTest :
                 val response = client.get("/minigame-redirect/$gameId")
                 response.status shouldBe HttpStatusCode.OK
                 response.bodyAsText() shouldContain "/words-start/$gameId"
+            }
+        }
+
+        //tests for new quit route added on client side
+        "GET /quit-game w/ student session redirects to student dashboard - student quit works" {
+            testApplication {
+                application { testModule() }
+                val client = createClient {
+                    install(HttpCookies)
+                    followRedirects = false
+                }
+                preLogin(client, "linguin0", "password123")
+                val response = client.get("/quit-game")
+                checkForRedirect(response, "/student-dashboard")
+            }
+        }
+
+        "GET /quit-game w/ teacher session redirects to teacher dashboard - teacher quit works" {
+            testApplication {
+                application { testModule() }
+                val client = createClient {
+                    install(HttpCookies)
+                    followRedirects = false
+                }
+                preLogin(client, "JoanaKennah", "password456")
+                val response = client.get("/quit-game")
+                checkForRedirect(response, "/teacher-dashboard")
+            }
+        }
+
+        "GET /quit-game w/out session redirects to login - protected route guard works" {
+            testApplication {
+                application { testModule() }
+                val client = createClient { followRedirects = false }
+                val response = client.get("/quit-game")
+                checkForRedirect(response, "/login")
             }
         }
     })

@@ -13,6 +13,7 @@ import io.ktor.server.routing.routing
 import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
+import io.ktor.server.routing.delete
 
 fun Application.configureAuthRouting() {
     routing {
@@ -224,6 +225,18 @@ fun Application.configureAuthRouting() {
         post("/logout") {
             call.sessions.clear<UserSession>()
             call.respondRedirect("/")
+        }
+
+        // calls delete user, added so playwright auth tests can be rerun
+        delete("/user/{username}") {
+            val username = call.parameters["username"] ?: return@delete call.respond(
+                PebbleContent("error.peb", mapOf("errorMessage" to "Missing username"))
+            )
+            val user = retrieveUser(username) ?: return@delete call.respond(
+                PebbleContent("error.peb", mapOf("errorMessage" to "User not found"))
+            )
+            deleteUser(user)
+            call.respondText("OK")
         }
     }
 }
