@@ -282,17 +282,43 @@ class AuthDatabaseTest :
         "deleteUser should successfully delete an existing user from database" {
             testApplication {
                 application { testModule() }
-                val user = addUser("testdelete", "password123", "Test Delete", "test@test.com", "furthereducation", "student")!!
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.new {
+                            this.username = "testdelete"
+                            this.password = "password123"
+                            this.name = "Test Delete"
+                            this.email = "test@test.com"
+                            this.keyStage = "furthereducation"
+                            this.role = "student"
+                        }
+                    }
+                user shouldNotBe null
                 deleteUser(user)
-                retrieveUser("testdelete") shouldBe null
+                val checkUser =
+                    transaction(TestDatabase.db) {
+                        User.find { UserTable.username eq user.username }.firstOrNull()
+                    }
+                checkUser shouldBe null
             }
         }
 
         "deleteUser should throw IllegalArgumentException if user does not exist" {
             testApplication {
                 application { testModule() }
-                val user = addUser("testdelete2", "password123", "Test Delete", "test@test.com", "furthereducation", "student")!!
-                deleteUser(user)
+                val user =
+                    transaction(TestDatabase.db) {
+                        User.new {
+                            this.username = "testdelete"
+                            this.password = "password123"
+                            this.name = "Test Delete"
+                            this.email = "test@test.com"
+                            this.keyStage = "furthereducation"
+                            this.role = "student"
+                        }
+                    }
+                transaction(TestDatabase.db) { user.delete() }
+
                 shouldThrow<IllegalArgumentException> {
                     deleteUser(user)
                 }

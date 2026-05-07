@@ -873,10 +873,9 @@ fun retrieveUserQuizAttempts(user: User): List<UserQuizAttempt> {
 }
 
 /**
- * Deletes given user from UserTable.
+ * Deletes given user from UserTable. Added for playwright testing purposes.
  * @param user User object to be deleted
  * @throws IllegalArgumentException If User does not exist
- * added for playwright testing purposes
  */
 fun deleteUser(user: User) {
     require(retrieveUser(user.username) != null) { "User must exist" }
