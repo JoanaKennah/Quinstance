@@ -1,6 +1,10 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
 
+// Note for future testing ---
+//These tests need to be run with --workers=1 because sharing server state breaks them.
+//This is purely test architecture and does not affect a real scenario
+
 // just checking host flow
 test('Host can create a lobby and sees room code', async ({ browser }) => {
     // uses browser instead of page to create multiple contexts for game
@@ -31,6 +35,7 @@ test('Host can create a lobby and sees room code', async ({ browser }) => {
 test('Client can join lobby with valid room code and appears in player list', async ({ browser }) => {
     // create two separate contexts, one host one client
     const hostContext = await browser.newContext();
+    // create client context w/ storage explicitly cleared to avoid shared cookies
     const clientContext = await browser.newContext({ storageState: { cookies: [], origins: [] } });
     const hostPage = await hostContext.newPage();
     const clientPage = await clientContext.newPage();
@@ -63,7 +68,6 @@ test('Client can join lobby with valid room code and appears in player list', as
     await clientPage.waitForURL('**/*');
     console.log('Client landed on:', clientPage.url());
     await clientPage.goto('/join-lobby');
-
     // added wait for load for webkit functionality
     await clientPage.waitForLoadState('networkidle');
     await clientPage.getByLabel('Room Code').fill(roomCode);
@@ -100,7 +104,8 @@ test('Client cannot join lobby with invalid room code', async ({ page }) => {
 // client leaving lobby - needs two contexts
 test('Client can leave lobby and is removed from player list', async ({ browser }) => {
     const hostContext = await browser.newContext();
-    const clientContext = await browser.newContext();
+    // create client context w/ storage explicitly cleared to avoid shared cookies
+    const clientContext = await browser.newContext({ storageState: { cookies: [], origins: [] } });
     const hostPage = await hostContext.newPage();
     const clientPage = await clientContext.newPage();
 
@@ -147,7 +152,8 @@ test('Client can leave lobby and is removed from player list', async ({ browser 
 //host kicks client - two contexts
 test('Host can kick client from lobby', async ({ browser }) => {
     const hostContext = await browser.newContext();
-    const clientContext = await browser.newContext();
+    // create client context w/ storage explicitly cleared to avoid shared cookies
+    const clientContext = await browser.newContext({ storageState: { cookies: [], origins: [] } });
     const hostPage = await hostContext.newPage();
     const clientPage = await clientContext.newPage();
 
