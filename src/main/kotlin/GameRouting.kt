@@ -59,7 +59,7 @@ fun Application.configureGameRouting() {
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
 
             // load questions into quiz
-            val questions = retrieveQuizQuestions(quiz) 
+            val questions = retrieveQuizQuestions(quiz)
             if (questions.isEmpty()) {
                 return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No questions found in this quiz")))
             }
@@ -148,7 +148,7 @@ fun Application.configureGameRouting() {
                 }
 
                 // cut game and go to leaderboard
-                activeSessions.remove(gameId) 
+                activeSessions.remove(gameId)
                 deleteInUseCode(game)
                 call.respondRedirect("/leaderboard/$gameId")
             } else {
@@ -298,7 +298,7 @@ fun Application.configureGameRouting() {
                             } else {
                                 val userScore = retrieveUserScore(game, user)
                                 if (userScore != null) {
-                                    //award points - 100-1000 based on time remaining
+                                    // award points - 100-1000 based on time remaining
                                     val pointsEarned =
                                         if (gameSession.timeLimit == 0) {
                                             1000

@@ -14,7 +14,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import io.ktor.server.testing.testApplication
 
-
 class AuthRoutingTest :
     StringSpec({
 
@@ -203,7 +202,7 @@ class AuthRoutingTest :
             testApplication {
                 application { testModule() }
                 // initialise application before testing add/delete user
-                client.get("/") 
+                client.get("/")
                 addUser("testdelete", "password123", "Test Delete", "test@test.com", "furthereducation", "student")
                 val response = client.delete("/user/testdelete")
                 val body = response.bodyAsText()
