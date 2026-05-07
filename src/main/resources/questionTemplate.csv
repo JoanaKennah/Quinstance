@@ -1,2 +1,2 @@
 question,option1,option2,option3,option4,correctOption,key_stage
-"This is a test question","This is option 1", "This is option 2", "This is option 3 - I can be empty!", "This is option 4 - I can be empty!",0,"KS1"
+This is a test question,This is option 1,This is option 2,This is option 3 - I can be empty!,This is option 4 - I can be empty!,0,KS1
