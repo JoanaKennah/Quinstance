@@ -20,7 +20,7 @@ TODO() finish this a bit more
 
 ## Running our Application
 To run the Quinstance application, enter this command into the terminal:
-`./gradlew run`
+`./gradlew clean run`
 
 ## Logging In
 We have created a few accounts for you to explore. Each teacher will have a quiz or two, which their students will have
