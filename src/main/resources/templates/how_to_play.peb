@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Game Night</title>
+    <title>How to Play</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         * {
@@ -36,12 +36,15 @@
         }
 
         .logo-box {
-            border: 2px solid #1a5276;
-            padding: 6px 14px;
-            font-weight: bold;
-            color: #1a5276;
-            font-size: 14px;
-            /* Replace the text below with an <img> tag once a logo is available */
+            display: flex;
+            align-items: center;
+            padding: 0;
+        }
+
+        .logo-img {
+            height: 44px;
+            width: auto;
+            display: block;
         }
 
         .site-name {
@@ -118,7 +121,16 @@
 <body>
     <div class="navbar">
         <div class="navbar-left">
-            <div class="logo-box">Logo</div>
+            <div class="logo-box">
+                <svg class="logo-img" viewBox="0 0 1140 1140" xmlns="http://www.w3.org/2000/svg" aria-label="Game Night logo" role="img">
+                    <circle cx="570" cy="570" r="520" fill="none" stroke="#7FC87F" stroke-width="40"/>
+                    <path fill="#7FC87F" fill-rule="evenodd"
+                          d="M 570 180 C 410 180 300 320 300 500 C 275 680 215 820 240 920 Q 320 965 410 935 Q 475 975 540 925 Q 610 970 675 915 Q 740 960 810 900 C 825 750 840 600 840 500 C 840 320 730 180 570 180 Z M 570 230 C 425 230 350 340 350 510 C 330 680 285 800 295 900 Q 365 940 440 915 Q 500 945 555 910 Q 615 940 670 910 Q 720 930 760 905 C 775 750 790 600 790 510 C 790 340 715 230 570 230 Z"/>
+                    <circle cx="500" cy="480" r="30" fill="#7FC87F"/>
+                    <circle cx="640" cy="480" r="30" fill="#7FC87F"/>
+                    <ellipse cx="570" cy="580" rx="30" ry="42" fill="#7FC87F"/>
+                </svg>
+            </div>
             <span class="site-name">Quinstance</span>
         </div>
         <div class="navbar-right">

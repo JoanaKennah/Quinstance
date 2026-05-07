@@ -62,9 +62,16 @@
 
         .answers {
             margin-top: 30px;
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 columns */
+            grid-template-rows: auto auto;  /* 2 rows */
+            gap: 15px;
         }
+      
+        #a1 { grid-area: 1 / 1; }
+        #a2 { grid-area: 1 / 2; }
+        #a3 { grid-area: 2 / 1; }
+        #a4 { grid-area: 2 / 2; }
 
         .column {
             width: 45%;
@@ -170,10 +177,7 @@
                 newIndex++;
             }
 
-            answerCount++;
-
-            const cols = document.querySelectorAll(".column");
-            const col = (newIndex % 2 === 0) ? cols[1] : cols[0];
+            const container = document.querySelector(".answers");
 
             const div = document.createElement("div");
             div.className = "answer-box";
@@ -183,7 +187,16 @@
                 <input type="text" name="answers[]" placeholder="Answer ${newIndex}">
                 <input type="radio" name="correct${newIndex}" value="${newIndex - 1}" tabindex="0">
             `;
-            col.appendChild(div);
+            container.appendChild(div);
+
+            const nextEl = document.getElementById("a" + (newIndex + 1));
+            if (nextEl) {
+                container.insertBefore(div, nextEl);
+            } else {
+                container.appendChild(div);
+            }
+
+            answerCount++;
         }
 
         function validateForm() {
@@ -264,7 +277,6 @@
         </div>
 
         <div class="answers">
-            <div class="column">
                 <div class="answer-box" id="a1">
                     <label for="answer1" class="visually-hidden">Answer 1</label>
                     <input type="text" id="answer1" value='{{ previousCorrectAnswer }}' name="answers[]" placeholder="Answer 1">
@@ -273,7 +285,13 @@
                         {% if isEdit %}checked{% endif %}>
                     <label for="correct1" class="visually-hidden">Mark Answer 1 as correct</label>
                 </div>
+                <div class="answer-box" id="a2">
+                    <label for="answer2" class="visually-hidden">Answer 2</label>
+                    <input type="text" id="answer2" value='{{ previousOption2 }}' name="answers[]" placeholder="Answer 2">
 
+                    <input type="radio" id="correct2" name="correct2" value="1" tabindex="0">
+                    <label for="correct2" class="visually-hidden">Mark Answer 2 as correct</label>
+                </div>
                 <div class="answer-box" id="a3">
                     <button type="button" class="remove-btn" onclick="removeAnswer('a3')">x</button>
 
@@ -283,19 +301,6 @@
                     <input type="radio" id="correct3" name="correct3" value="2" tabindex="0">
                     <label for="correct3" class="visually-hidden">Mark Answer 3 as correct</label>
                 </div>
-
-            </div>
-
-            <div class="column">
-
-                <div class="answer-box" id="a2">
-                    <label for="answer2" class="visually-hidden">Answer 2</label>
-                    <input type="text" id="answer2" value='{{ previousOption2 }}' name="answers[]" placeholder="Answer 2">
-
-                    <input type="radio" id="correct2" name="correct2" value="1" tabindex="0">
-                    <label for="correct2" class="visually-hidden">Mark Answer 2 as correct</label>
-                </div>
-
                 <div class="answer-box" id="a4">
                     <button type="button" class="remove-btn" onclick="removeAnswer('a4')">x</button>
 
@@ -305,8 +310,6 @@
                     <input type="radio" id="correct4" name="correct4" value="3" tabindex="0">
                     <label for="correct4" class="visually-hidden">Mark Answer 4 as correct</label>
                 </div>
-
-            </div>
 
         </div>
 
