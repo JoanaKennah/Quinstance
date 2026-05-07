@@ -88,29 +88,49 @@ data class GameSession(
     val hostUsername: String,
     val questions: List<Question>,
     var currentQuestionIndex: Int = 0,
+
+    // flags to assist with quiz progression
     var isAdvanced: Boolean = false,
     var isStarted: Boolean = false,
     var isFinished: Boolean = false,
+
+    // lobby defaults
     val timeLimit: Int = 30,
     val maxPlayers: Int = 40,
+
+    // required for minigame triggers
     val miniGamesEnabled: Boolean = false,
     val activeMinigames: List<String> = listOf("maths", "potions", "rooms", "words"),
+
     val theme: String = "default",
+
+    // lists to split players for minigames
     var lastCorrectPlayers: List<String> = emptyList(),
     var lastIncorrectPlayers: List<String> = emptyList(),
+
+    // stops duplicate minigames triggering and 2 in a row
     var minigameJustPlayed: Boolean = false,
+
+    // minigame states for progression
     var mathsGameState: MathsGameState? = null,
     var potionsGameState: PotionsGameState? = null,
     var roomsGameState: RoomsGameState? = null,
     var wordsGameState: WordsGameState? = null,
+
+    // sort players by status for redirects
     var ghostPlayers: MutableList<String> = mutableListOf(),
     var revivedPlayers: MutableList<String> = mutableListOf(),
     var autoGhostedPlayer: String? = null,
+
+    // used in managing participants
     var kickedUsernames: MutableList<String> = mutableListOf(),
     var barredUsernames: MutableList<String> = mutableListOf(),
+
+    // assists with websocket loop issues and timing bugs
     var answeredPlayers: MutableSet<String> = mutableSetOf(),
     var playerAnswers: MutableMap<String, String> = mutableMapOf(),
     var isShowingCorrectAnswer: Boolean = false,
+
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet()),
 )
 
@@ -125,6 +145,7 @@ fun Application.configureSockets() {
         masking = false
     }
 
+    // additional routing where game flow requiring large amounts of websocket integration
     routing {
         webSocket("/game/{gameId}") {
             val gameId = call.parameters["gameId"]?.toIntOrNull()
@@ -140,6 +161,7 @@ fun Application.configureSockets() {
                 return@webSocket
             }
 
+            // register client connection for host to broadcast to
             session.connections.add(this)
 
             // Immediately send current question or redirect if already answered
@@ -151,6 +173,7 @@ fun Application.configureSockets() {
                     val previousAnswer = session.playerAnswers[username] ?: ""
                     send(Frame.Text("{\"redirect\":\"/selected-answer/$gameId?answer=$previousAnswer\"}"))
                 } else {
+                    // player yet to answer so send current question
                     val question = session.questions[session.currentQuestionIndex]
                     val answers = retrieveQuestionAnswer(question)
                     if (answers != null) {
@@ -172,10 +195,10 @@ fun Application.configureSockets() {
             }
 
             try {
+                // listen for incoming answers from client
                 for (frame in incoming) {
                     if (frame is Frame.Text) {
                         val rawText = frame.readText()
-                        println("Raw frame recieved: $rawText")
                         try {
                             val answerData = Json.decodeFromString<SentAnswerData>(frame.readText())
                             // Only process if player hasn't already answered current question
@@ -183,16 +206,17 @@ fun Application.configureSockets() {
                                 session.answeredPlayers.add(answerData.username)
                                 session.playerAnswers[answerData.username] = answerData.chosenAnswer
                                 UserAnswers.addAnswer(answerData)
-                                println("Answer recieved from ${answerData.username}: ${answerData.chosenAnswer}")
                             } else {
-                                println("Duplicate answer ignored from ${answerData.username}")
+                                // dupe answer recieved so ignore - fixes a double scoring issue
                             }
                         } catch (e: Exception) {
+                            // ignore a frame with invalid answer data and print error
                             println("Could not deserialise answer: ${e.message}")
                         }
                     }
                 }
             } finally {
+                // deregister connection when client disconnects
                 session.connections.remove(this)
             }
         }
