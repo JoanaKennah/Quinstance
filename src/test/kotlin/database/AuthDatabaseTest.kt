@@ -6,6 +6,7 @@ import com.example.database.objects.User
 import com.example.database.tables.UserTable
 import com.example.retrieveUser
 import com.example.testModule
+import com.example.deleteUser
 import com.password4j.Password
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
