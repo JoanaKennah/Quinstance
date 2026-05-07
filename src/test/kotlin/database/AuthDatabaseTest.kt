@@ -6,6 +6,7 @@ import com.example.database.objects.User
 import com.example.database.tables.UserTable
 import com.example.retrieveUser
 import com.example.testModule
+import com.example.deleteUser
 import com.password4j.Password
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.StringSpec
@@ -273,6 +274,27 @@ class AuthDatabaseTest :
                 retrievedUser!!.let {
                     it.password shouldContain "\$100801\$"
                     it.password shouldHaveLength 109
+                }
+            }
+        }
+
+        // Tests for deleteUser()
+        "deleteUser should successfully delete an existing user from database" {
+            testApplication {
+                application { testModule() }
+                val user = addUser("testdelete", "password123", "Test Delete", "test@test.com", "furthereducation", "student")!!
+                deleteUser(user)
+                retrieveUser("testdelete") shouldBe null
+            }
+        }
+
+        "deleteUser should throw IllegalArgumentException if user does not exist" {
+            testApplication {
+                application { testModule() }
+                val user = addUser("testdelete2", "password123", "Test Delete", "test@test.com", "furthereducation", "student")!!
+                deleteUser(user)
+                shouldThrow<IllegalArgumentException> {
+                    deleteUser(user)
                 }
             }
         }

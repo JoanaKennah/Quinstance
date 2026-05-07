@@ -57,7 +57,7 @@ fun Application.configureDashboardRouting() {
             )
         }
 
-        // Serves user statistic page showing all previous games the client has played
+        // Serves user stats page showing all previous games the client has played
         get("/user-stats") {
             val session =
                 call.sessions.get<UserSession>()

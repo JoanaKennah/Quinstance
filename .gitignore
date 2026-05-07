@@ -35,3 +35,7 @@ out/
 ### VS Code ###
 .vscode/
 *.db
+
+### playwright ###
+node_modules/
+package-lock.json
