@@ -758,4 +758,39 @@ class GameRoutingTest :
                 response.bodyAsText() shouldContain "/words-start/$gameId"
             }
         }
+
+        "GET /quit-game w/ student session redirects to student dashboard - student quit works" {
+            testApplication {
+                application { testModule() }
+                val client = createClient {
+                    install(HttpCookies)
+                    followRedirects = false
+                }
+                preLogin(client, "linguin0", "password123")
+                val response = client.get("/quit-game")
+                checkForRedirect(response, "/student-dashboard")
+            }
+        }
+
+        "GET /quit-game w/ teacher session redirects to teacher dashboard - teacher quit works" {
+            testApplication {
+                application { testModule() }
+                val client = createClient {
+                    install(HttpCookies)
+                    followRedirects = false
+                }
+                preLogin(client, "JoanaKennah", "password456")
+                val response = client.get("/quit-game")
+                checkForRedirect(response, "/teacher-dashboard")
+            }
+        }
+
+        "GET /quit-game w/out session redirects to login - protected route guard works" {
+            testApplication {
+                application { testModule() }
+                val client = createClient { followRedirects = false }
+                val response = client.get("/quit-game")
+                checkForRedirect(response, "/login")
+            }
+        }
     })

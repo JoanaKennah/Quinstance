@@ -276,4 +276,25 @@ class AuthDatabaseTest :
                 }
             }
         }
+
+        // Tests for deleteUser()
+        "deleteUser should successfully delete an existing user from database" {
+            testApplication {
+                application { testModule() }
+                val user = addUser("testdelete", "password123", "Test Delete", "test@test.com", "furthereducation", "student")!!
+                deleteUser(user)
+                retrieveUser("testdelete") shouldBe null
+            }
+        }
+
+        "deleteUser should throw IllegalArgumentException if user does not exist" {
+            testApplication {
+                application { testModule() }
+                val user = addUser("testdelete2", "password123", "Test Delete", "test@test.com", "furthereducation", "student")!!
+                deleteUser(user)
+                shouldThrow<IllegalArgumentException> {
+                    deleteUser(user)
+                }
+            }
+        }
     })

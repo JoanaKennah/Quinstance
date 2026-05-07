@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.ktor.client.plugins.cookies.HttpCookies
+import io.ktor.client.request.delete
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -12,6 +13,7 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import io.ktor.server.testing.testApplication
+
 
 class AuthRoutingTest :
     StringSpec({
@@ -194,6 +196,26 @@ class AuthRoutingTest :
                         )
                     }
                 checkForRedirect(response, "/student-dashboard")
+            }
+        }
+
+        "DELETE /user/{username} w/ valid username returns 200 OK - user deleted successfully" {
+            testApplication {
+                application { testModule() }
+                val client = createClient { install(HttpCookies) }
+                addUser("testdelete", "password123", "Test Delete", "test@test.com", "furthereducation", "student")
+                val response = client.delete("/user/testdelete")
+                response.status shouldBe HttpStatusCode.OK
+                response.bodyAsText() shouldContain "OK"
+            }
+        }
+
+        "DELETE /user/nonexistentuser returns error message - missing user handled" {
+            testApplication {
+                application { testModule() }
+                val response = client.delete("/user/nonexistentuser")
+                response.status shouldBe HttpStatusCode.OK
+                response.bodyAsText() shouldContain "User not found"
             }
         }
     })
