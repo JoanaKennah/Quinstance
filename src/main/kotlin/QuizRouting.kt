@@ -71,9 +71,9 @@ fun Application.configureQuizRouting() {
                         "previousDescription" to quiz.description,
                         "previousKeyStage" to quiz.keyStage,
                         "previousCategory" to quiz.category,
-                        "returnURL" to returnURL
-                    )
-                )
+                        "returnURL" to returnURL,
+                    ),
+                ),
             )
         }
 
@@ -147,7 +147,7 @@ fun Application.configureQuizRouting() {
                     "quizName" to quizName,
                     "description" to description,
                     "keyStage" to keyStage,
-                    "category" to category
+                    "category" to category,
                 )
 
             editQuiz(quiz, quizData)
