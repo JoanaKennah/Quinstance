@@ -58,7 +58,8 @@ fun Application.configureGameRouting() {
                 retrieveQuizFromGameID(gameId)
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Quiz not found")))
 
-            val questions = retrieveQuizQuestions(quiz) // load questions into quiz
+            // load questions into quiz
+            val questions = retrieveQuizQuestions(quiz) 
             if (questions.isEmpty()) {
                 return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No questions found in this quiz")))
             }
@@ -110,7 +111,7 @@ fun Application.configureGameRouting() {
                 activeSessions[gameId]
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
 
-            // Clear minigame and auto-ghost state ready for next question
+            // Clear minigame, auto-ghost states, and player answers for next question
             gameSession.mathsGameState = null
             gameSession.potionsGameState = null
             gameSession.roomsGameState = null
@@ -126,7 +127,7 @@ fun Application.configureGameRouting() {
             }
             gameSession.isAdvanced = true
 
-            // Advance Quiz to next Question
+            // Advance Quiz to next Q
             gameSession.currentQuestionIndex++
 
             if (gameSession.currentQuestionIndex >= gameSession.questions.size) {
@@ -146,7 +147,8 @@ fun Application.configureGameRouting() {
                     connection.send(Frame.Text("{\"redirect\":\"/end-game/$gameId\"}"))
                 }
 
-                activeSessions.remove(gameId) // cut game and go to leaderboard
+                // cut game and go to leaderboard
+                activeSessions.remove(gameId) 
                 deleteInUseCode(game)
                 call.respondRedirect("/leaderboard/$gameId")
             } else {
@@ -176,7 +178,7 @@ fun Application.configureGameRouting() {
             }
         }
 
-        // Serves final leaderboard at end of game
+        // Serves final leaderboard at end of game - not to be confused with mid-game leaderboard
         get("/leaderboard/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -209,7 +211,7 @@ fun Application.configureGameRouting() {
             )
         }
 
-        // Quit button back to dashboard from leaderboards
+        // Quit button back to dashboard from end leaderboards
         post("/leaderboard-quit/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val returnURL =
@@ -264,7 +266,7 @@ fun Application.configureGameRouting() {
                 activeSessions[gameId]
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
 
-            // set this to fix refreshing
+            // set this to fix refreshing loop for clients
             gameSession.isShowingCorrectAnswer = true
 
             // Get current Question and correct answer
@@ -289,13 +291,14 @@ fun Application.configureGameRouting() {
                     if (answerData.chosenAnswer == correctAnswer) {
                         val user = retrieveUser(answerData.username)
                         if (user != null) {
-                            // Check if player is a ghost
+                            // Check if player is a ghost so they can be revived instead of scoring
                             if (answerData.username in gameSession.ghostPlayers) {
                                 gameSession.ghostPlayers.remove(answerData.username)
                                 gameSession.revivedPlayers.add(answerData.username)
                             } else {
                                 val userScore = retrieveUserScore(game, user)
                                 if (userScore != null) {
+                                    //award points - 100-1000 based on time remaining
                                     val pointsEarned =
                                         if (gameSession.timeLimit == 0) {
                                             1000
@@ -325,7 +328,7 @@ fun Application.configureGameRouting() {
                     .map { it.username }
                     .filter { it !in dangerPlayers }
 
-            // Clear answers ready for next question
+            // Clear answers for next question
             UserAnswers.clearAnswers()
 
             // Send clients to correct answer page
@@ -528,7 +531,8 @@ fun Application.configureGameRouting() {
                     )
                 }
 
-                // When finished testing, swap out random line
+                // testRandomValue here for testing, sets minigame chance to 1
+                // activate minigame
                 gameSession.miniGamesEnabled &&
                     gameSession.lastIncorrectPlayers.size >= 2 &&
                     gameSession.activeMinigames.isNotEmpty() &&
@@ -635,6 +639,8 @@ fun Application.configureGameRouting() {
 
                         else -> {
                             if (gameSession.lastIncorrectPlayers.size > 1) {
+                                // ghost mechanic when no minigames enabled
+                                // ceiling of playercount/10 become ghosts at random
                                 val numGhosts = Math.ceil(gameSession.lastIncorrectPlayers.size * 0.1).toInt()
                                 val newGhosts = gameSession.lastIncorrectPlayers.shuffled().take(numGhosts)
                                 gameSession.ghostPlayers.addAll(newGhosts)
@@ -660,6 +666,7 @@ fun Application.configureGameRouting() {
                     }
                 }
 
+                // fallback if no incorrect players or minigameJustPlayed
                 else -> {
                     gameSession.connections.forEach { connection ->
                         connection.send(Frame.Text("{\"redirect\":\"/client-position/$gameId\"}"))
@@ -757,7 +764,7 @@ fun Application.configureGameRouting() {
             )
         }
 
-        // Serves client with the auto-ghost page if they lost a minigame or get a question wrong and there's not enough players for a minigame
+        // Serves client with auto-ghost page
         get("/auto-ghost-result/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -810,7 +817,8 @@ fun Application.configureGameRouting() {
             }
         }
 
-        // Serve leaderboard page for a host when they return from a game
+        // Serve leaderboard page for a host when they return from settings page save button
+        // Could be amalgamated but useful for future additions
         get("/leaderboard-return/{gameId}") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val gameId =
@@ -899,7 +907,7 @@ fun Application.configureGameRouting() {
             call.respondText("{\"redirect\":${if (redirect != null) "\"$redirect\"" else "null"}}", ContentType.Application.Json)
         }
 
-        // routes client or host back to dash when quit button on navbar pressed
+        // routes client or host back to respective dash when quit button on navbar pressed
         get("/quit-game") {
             val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
             val returnURL = if (session.role == "teacher" || session.role == "admin") "/teacher-dashboard" else "/student-dashboard"
