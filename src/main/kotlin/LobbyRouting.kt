@@ -1,7 +1,5 @@
 package com.example
 
-import com.example.database.objects.UserScore
-import com.example.database.tables.UserScoreTable
 import io.ktor.http.ContentType
 import io.ktor.server.application.Application
 import io.ktor.server.pebble.PebbleContent
@@ -15,8 +13,6 @@ import io.ktor.server.routing.routing
 import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
-import org.jetbrains.exposed.v1.core.and
-import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
@@ -155,6 +151,7 @@ fun Application.configureLobbyRouting() {
                         "players" to players,
                         "gameId" to gameId,
                         "theme" to session.theme,
+                        "miniGamesEnabled" to (activeSessions[gameId]?.miniGamesEnabled ?: false),
                     ),
                 ),
             )
@@ -343,7 +340,7 @@ fun Application.configureLobbyRouting() {
 
         // Deletes room code, player scores and game, then redirects host to their dashboard
         post("/close-lobby/{gameId}") {
-            call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
+            val session = call.sessions.get<UserSession>() ?: return@post call.respondRedirect("/login")
             val gameId =
                 call.parameters["gameId"]?.toIntOrNull()
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Invalid gameID")))
@@ -358,7 +355,14 @@ fun Application.configureLobbyRouting() {
                 deleteGameUserScores(game)
                 transaction(TransactionManager.defaultDatabase) { game.delete() }
             }
-            call.respondRedirect("/teacher-dashboard")
+            
+            val returnURL =
+                if (session.role == "teacher" || session.role == "admin") {
+                    "/teacher-dashboard"
+                } else {
+                    "/student-dashboard"
+                }
+            call.respondRedirect(returnURL)
         }
 
         // Gets game session details, populated and serves settings page
@@ -453,11 +457,7 @@ fun Application.configureLobbyRouting() {
                     val user = retrieveUser(username)
                     if (user != null) {
                         // Remove UserScore entry
-                        UserScore
-                            .find {
-                                UserScoreTable.game eq game.id and (UserScoreTable.user eq user.id)
-                            }.firstOrNull()
-                            ?.delete()
+                        deleteUserScoreForGivenUser(game, user)
 
                         // Remove ghost entry if ghost
                         gameSession.ghostPlayers.remove(username)

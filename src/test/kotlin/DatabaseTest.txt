@@ -1,3 +1,5 @@
+//Legacy file - code is now all refactored into modular DatabaseTest files (in package database)
+
 package com.example
 import com.example.database.ProjectDatabase
 import com.example.database.TestDatabase

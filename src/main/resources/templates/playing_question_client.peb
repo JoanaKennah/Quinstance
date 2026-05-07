@@ -85,7 +85,8 @@
         .navbar {
             background-color: #2DC84D;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
             padding: 12px 20px;
         }
         .navbar a {
@@ -155,7 +156,8 @@
         .navbar {
             background-color: #d33469;
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
             padding: 12px 20px;
         }
       
@@ -293,6 +295,7 @@
 <body onload='setupSocket(); startTimer();'>
 
 <div class="navbar">
+    <a href="/quit-game" style="color: black; text-decoration: none; font-weight: bold;">Quit</a>
     <a>{{ quizName }}</a>
 </div>
 

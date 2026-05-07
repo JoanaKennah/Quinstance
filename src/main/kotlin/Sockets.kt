@@ -110,6 +110,7 @@ data class GameSession(
     var barredUsernames: MutableList<String> = mutableListOf(),
     var answeredPlayers: MutableSet<String> = mutableSetOf(),
     var playerAnswers: MutableMap<String, String> = mutableMapOf(),
+    var isShowingCorrectAnswer: Boolean = false,
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet()),
 )
 
@@ -150,7 +151,7 @@ fun Application.configureSockets() {
             // Prevents sync issue where client connects after broadcastQuestion fires
             if (session.isStarted) {
                 val username = call.sessions.get<UserSession>()?.username
-                if (username != null && username in session.answeredPlayers) {
+                if (username != null && username in session.answeredPlayers && !session.isShowingCorrectAnswer) {
                     // Player already answered this question - send to waiting screen
                     val previousAnswer = session.playerAnswers[username] ?: ""
                     send(Frame.Text("{\"redirect\":\"/selected-answer/$gameId?answer=$previousAnswer\"}"))

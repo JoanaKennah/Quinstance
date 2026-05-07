@@ -109,6 +109,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 15px 20px;
+        box-sizing: border-box;
         }
     </style>
 
@@ -219,6 +220,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 15px 20px;
+        box-sizing: border-box;
         }
     </style>
     {% endif %}
@@ -272,6 +274,12 @@
         <button class="btn btn-start" onclick="forceStart()">Ignore</button>
     </div>
 </div>
+<div class="warning-bar" id="no-players-bar">
+    <span>Please wait for at least one player to join</span>
+    <div>
+        <button class="btn" onclick="document.getElementById('no-players-bar').style.display='none'">OK</button>
+    </div>
+</div>
 
 <script>
     let currentPlayerCount = 0;
@@ -291,7 +299,10 @@
 
     window.onload = function () {
         document.getElementById("start-form").addEventListener("submit", function(e) {
-            if (currentPlayerCount <= 1) {
+            if (currentPlayerCount === 0) {
+                e.preventDefault();
+                document.getElementById("no-players-bar").style.display = "flex";
+            } else if (currentPlayerCount <= 1 && {{ miniGamesEnabled }}) {
                 e.preventDefault();
                 document.getElementById("warning-bar").style.display = "flex";
             }

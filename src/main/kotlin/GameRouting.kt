@@ -110,7 +110,7 @@ fun Application.configureGameRouting() {
                 activeSessions[gameId]
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
 
-            // Clear maths game and auto-ghost state ready for next question
+            // Clear minigame and auto-ghost state ready for next question
             gameSession.mathsGameState = null
             gameSession.potionsGameState = null
             gameSession.roomsGameState = null
@@ -118,6 +118,8 @@ fun Application.configureGameRouting() {
             gameSession.autoGhostedPlayer = null
             gameSession.minigameJustPlayed = false
             gameSession.answeredPlayers.clear()
+            gameSession.playerAnswers.clear()
+            gameSession.isShowingCorrectAnswer = false
 
             if (gameSession.isAdvanced) {
                 return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Already advancing")))
@@ -261,6 +263,9 @@ fun Application.configureGameRouting() {
             val gameSession =
                 activeSessions[gameId]
                     ?: return@post call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "No active session found")))
+
+            // set this to fix refreshing
+            gameSession.isShowingCorrectAnswer = true
 
             // Get current Question and correct answer
             val currentQuestion = gameSession.questions[gameSession.currentQuestionIndex]
@@ -528,7 +533,9 @@ fun Application.configureGameRouting() {
                     gameSession.lastIncorrectPlayers.size >= 2 &&
                     gameSession.activeMinigames.isNotEmpty() &&
                     !gameSession.minigameJustPlayed &&
-                    randomValue == 1 -> {
+                    (0..1).random() == 0 -> {
+                    // && testRandomValue == 1 -> {
+
                     gameSession.minigameJustPlayed = true
                     val selectedMinigame = gameSession.activeMinigames.random()
 
@@ -631,6 +638,12 @@ fun Application.configureGameRouting() {
                         }
 
                         else -> {
+                            if (gameSession.lastIncorrectPlayers.size > 1) {
+                                val numGhosts = Math.ceil(gameSession.lastIncorrectPlayers.size * 0.1).toInt()
+                                val newGhosts = gameSession.lastIncorrectPlayers.shuffled().take(numGhosts)
+                                gameSession.ghostPlayers.addAll(newGhosts)
+                            }
+
                             gameSession.connections.forEach { connection ->
                                 connection.send(Frame.Text("{\"redirect\":\"/client-position/$gameId\"}"))
                             }
@@ -888,6 +901,13 @@ fun Application.configureGameRouting() {
                 }
 
             call.respondText("{\"redirect\":${if (redirect != null) "\"$redirect\"" else "null"}}", ContentType.Application.Json)
+        }
+
+        // routes client or host back to dash when quit button on navbar pressed
+        get("/quit-game") {
+            val session = call.sessions.get<UserSession>() ?: return@get call.respondRedirect("/login")
+            val returnURL = if (session.role == "teacher" || session.role == "admin") "/teacher-dashboard" else "/student-dashboard"
+            call.respondRedirect(returnURL)
         }
     }
 }

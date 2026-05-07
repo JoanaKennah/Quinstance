@@ -17,8 +17,7 @@ import org.jetbrains.exposed.v1.jdbc.insertAndGetId
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 /**
- * Demo database used for Testing. It is currently set up to test our first Sprint. Contains 3 Users, all with hashed
- * passwords.
+ * Demo database used for Testing
  * @param db connection to access the demo Database
  */
 object TestDatabase {
@@ -29,7 +28,9 @@ object TestDatabase {
         Database.connect(URL, DRIVER)
     }
 
-    // Creates UserTable and three Users for testing purposes.
+    /**
+     * Builds and populates TestDatabase with test data.
+     */
     fun create() {
         transaction(db) {
             SchemaUtils.drop(UserTable, QuizTable, QuestionTable, AnswerTable, QuinstanceTable, GameTable, UserScoreTable, InUseTable)
@@ -213,7 +214,7 @@ object TestDatabase {
                 it[score] = 500
             }
 
-            // User Score for Minghao playing a Game with Quiz 'COMP2870'
+            // User Score for Minghao playing a Game with Quiz 'COMP2870 Quiz'
             UserScoreTable.insert {
                 it[game] = gameTwo
                 it[user] = userThree

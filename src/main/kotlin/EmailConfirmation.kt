@@ -41,13 +41,13 @@ fun sendConfirmationEmail(
             MimeMessage(session).apply {
                 setFrom(InternetAddress(from))
                 setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail))
-                subject = "Welcome to Game Night Quizzes!"
+                subject = "Welcome to Quinstance!"
 
                 setText(
                     """
                     Hi $firstName $lastName,
 
-                    Welcome to Game Night Quizzes!
+                    Welcome to Quinstance!
                     Your account has been created successfully!
 
                     Username: $username
