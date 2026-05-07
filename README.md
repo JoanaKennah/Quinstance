@@ -1,5 +1,11 @@
 # Welcome to Quinstance!
-## Information
+## Table of Contents
+1. [Project Information](#project-information)
+2. [Running our Application](#running-our-application)
+3. [Logging In](#logging-in)
+4. [Running Tests](#running-tests)
+
+## Project Information
 ### Who we are
 This is Games Night #10's group project, consisting of four members:
 * Emily Williams [ spdx5651@leeds.ac.uk ]
@@ -54,5 +60,10 @@ Student 2 - Rory M
 We have created two kinds of tests for our project. These include **Unit tests** using Kotest and **Integration tests** using
 Playwright.
 
-To run our Kotest tests, please run `./gradlew test`
+### Kotest
+To run our Kotest tests, please run `./gradlew check`. This will not only run all the Kotest tests but also run a **Ktlint
+check** also on our Main project files and Test files!
+
+### Playwright
+To run our Playwright tests, please run `npx playwright test`
 
