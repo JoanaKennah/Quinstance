@@ -355,7 +355,7 @@ fun Application.configureLobbyRouting() {
                 deleteGameUserScores(game)
                 transaction(TransactionManager.defaultDatabase) { game.delete() }
             }
-            
+
             val returnURL =
                 if (session.role == "teacher" || session.role == "admin") {
                     "/teacher-dashboard"
