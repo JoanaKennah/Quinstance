@@ -88,49 +88,38 @@ data class GameSession(
     val hostUsername: String,
     val questions: List<Question>,
     var currentQuestionIndex: Int = 0,
-
     // flags to assist with quiz progression
     var isAdvanced: Boolean = false,
     var isStarted: Boolean = false,
     var isFinished: Boolean = false,
-
     // lobby defaults
     val timeLimit: Int = 30,
     val maxPlayers: Int = 40,
-
     // required for minigame triggers
     val miniGamesEnabled: Boolean = false,
     val activeMinigames: List<String> = listOf("maths", "potions", "rooms", "words"),
-
     val theme: String = "default",
-
     // lists to split players for minigames
     var lastCorrectPlayers: List<String> = emptyList(),
     var lastIncorrectPlayers: List<String> = emptyList(),
-
     // stops duplicate minigames triggering and 2 in a row
     var minigameJustPlayed: Boolean = false,
-
     // minigame states for progression
     var mathsGameState: MathsGameState? = null,
     var potionsGameState: PotionsGameState? = null,
     var roomsGameState: RoomsGameState? = null,
     var wordsGameState: WordsGameState? = null,
-
     // sort players by status for redirects
     var ghostPlayers: MutableList<String> = mutableListOf(),
     var revivedPlayers: MutableList<String> = mutableListOf(),
     var autoGhostedPlayer: String? = null,
-
     // used in managing participants
     var kickedUsernames: MutableList<String> = mutableListOf(),
     var barredUsernames: MutableList<String> = mutableListOf(),
-
     // assists with websocket loop issues and timing bugs
     var answeredPlayers: MutableSet<String> = mutableSetOf(),
     var playerAnswers: MutableMap<String, String> = mutableMapOf(),
     var isShowingCorrectAnswer: Boolean = false,
-
     val connections: MutableSet<WebSocketServerSession> = Collections.synchronizedSet(LinkedHashSet()),
 )
 

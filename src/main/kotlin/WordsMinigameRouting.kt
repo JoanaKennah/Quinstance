@@ -181,8 +181,8 @@ fun Application.configureWordsMinigameRouting() {
 
             val parameters = call.receiveParameters()
             val word =
-                parameters["word"]?.uppercase()?.trim() ?: return@post call.respondRedirect("/words-start/$gameId?error=Please+enter+a+valid+word")
-
+                parameters["word"]?.uppercase()?.trim()
+                    ?: return@post call.respondRedirect("/words-start/$gameId?error=Please+enter+a+valid+word")
 
             // Check letters in word against letters in grid
             val gridLetterCounts = wordsState.grid.groupingBy { it }.eachCount()

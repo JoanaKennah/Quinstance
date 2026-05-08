@@ -32,7 +32,7 @@ fun Application.configureDashboardRouting() {
                     "teacher_dashboard.peb",
                     mapOf(
                         "username" to session.username,
-                        "studentCreated" to studentCreated
+                        "studentCreated" to studentCreated,
                     ),
                 ),
             )

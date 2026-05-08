@@ -12,9 +12,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.ktor.server.sessions.clear
+import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
-import io.ktor.server.sessions.get
 
 fun Application.configureAuthRouting() {
     routing {
@@ -109,9 +109,14 @@ fun Application.configureAuthRouting() {
         // Serves signup page
         get("/signup") {
             val fromTeacher = call.request.queryParameters["fromTeacher"] == "true"
-            call.respond(PebbleContent("signup.peb", mapOf(
-                "fromTeacher" to fromTeacher
-            )))
+            call.respond(
+                PebbleContent(
+                    "signup.peb",
+                    mapOf(
+                        "fromTeacher" to fromTeacher,
+                    ),
+                ),
+            )
         }
 
         // Validates signup form, creates user in database and redirects to dash
