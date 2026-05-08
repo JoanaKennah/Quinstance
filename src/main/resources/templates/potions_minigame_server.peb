@@ -417,6 +417,7 @@
 
                     const ghostColor = getGhostColor();
 
+                    // put usernames in column above potions
                     col1.innerHTML = data.column1.map(u =>
                         `<div class="username" style="${data.ghostUsers.includes(u) ? `color: ${ghostColor};` : ''}">${u}</div>`
                     ).join("");
