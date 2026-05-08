@@ -139,6 +139,7 @@
     </div>
 
     <script>
+        // poll for minigame end every 500ms
         const poll = setInterval(() => {
             fetch("/minigame-active/{{ gameId }}")
                 .then(r => r.json())

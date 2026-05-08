@@ -174,7 +174,7 @@
             .catch(err => console.log("Polling error: " + err));
         }, 500);
 
-    //polls to check if player kicked
+    // polls to check if player kicked
         const kickPoll = setInterval(() => {
             fetch("/is-kicked/{{ gameId }}")
                 .then(response => response.json())

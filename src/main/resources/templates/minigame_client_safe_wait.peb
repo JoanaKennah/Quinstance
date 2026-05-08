@@ -140,6 +140,7 @@
     </div>
 
     <script>
+        // poll for minigame start every 500ms
         const pollRedirect = setInterval(() => {
             fetch("/minigame-redirect/{{ gameId }}")
                 .then(r => r.json())

@@ -299,6 +299,7 @@
     const selectedPlayers = new Set();
     const kickedPlayers = new Set();
 
+    // remove kicked players from screen
     function toggleSelect(el) {
         const username = el.dataset.username;
         if (selectedPlayers.has(username)) {
