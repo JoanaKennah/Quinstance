@@ -14,6 +14,7 @@ import io.ktor.server.routing.routing
 import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
+import io.ktor.server.sessions.get
 
 fun Application.configureAuthRouting() {
     routing {
@@ -107,7 +108,10 @@ fun Application.configureAuthRouting() {
 
         // Serves signup page
         get("/signup") {
-            call.respond(PebbleContent("signup.peb", mapOf()))
+            val fromTeacher = call.request.queryParameters["fromTeacher"] == "true"
+            call.respond(PebbleContent("signup.peb", mapOf(
+                "fromTeacher" to fromTeacher
+            )))
         }
 
         // Validates signup form, creates user in database and redirects to dash
@@ -192,13 +196,19 @@ fun Application.configureAuthRouting() {
                     call.respond(PebbleContent("error.peb", mapOf("errorMessage" to "Username already exists")))
                 }
                 "student" -> {
-                    call.sessions.set(
-                        UserSession(
-                            username = createdUser!!.username,
-                            role = createdUser.role.lowercase(),
-                        ),
-                    )
-                    call.respondRedirect("/student-dashboard")
+                    val existingSession = call.sessions.get<UserSession>()
+                    if (existingSession?.role == "teacher" || existingSession?.role == "admin") {
+                        // if teacher created student account keep teacher session to redirect back
+                        call.respondRedirect("/teacher-dashboard?studentCreated=true")
+                    } else {
+                        call.sessions.set(
+                            UserSession(
+                                username = createdUser!!.username,
+                                role = createdUser.role.lowercase(),
+                            ),
+                        )
+                        call.respondRedirect("/student-dashboard")
+                    }
                 }
                 "teacher" -> {
                     call.sessions.set(

@@ -285,6 +285,19 @@
                 document.getElementById("word-form").submit();
             }
         }, 1000);
+
+        const pollMinigame = setInterval(() => {
+            fetch("/minigame-active/{{ gameId }}")
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.active) {
+                        clearInterval(pollMinigame);
+                        clearInterval(countdown);
+                        window.location.href = "/words-result/{{ gameId }}";
+                    }
+                })
+                .catch(err => console.log("Poll error: " + err));
+        }, 500);
     </script>
    
 </body>

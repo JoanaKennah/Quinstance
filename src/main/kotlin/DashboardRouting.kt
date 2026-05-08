@@ -26,10 +26,14 @@ fun Application.configureDashboardRouting() {
                 )
             }
 
+            val studentCreated = call.request.queryParameters["studentCreated"] == "true"
             call.respond(
                 PebbleContent(
                     "teacher_dashboard.peb",
-                    mapOf("username" to session.username),
+                    mapOf(
+                        "username" to session.username,
+                        "studentCreated" to studentCreated
+                    ),
                 ),
             )
         }

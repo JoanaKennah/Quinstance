@@ -195,11 +195,14 @@
         </div>
         <div class="field">
             <label for="role">Role:</label>
-            <select id="role" name="role">
+            <select id="role" name="role" {% if fromTeacher %}disabled{% endif %}>
                 <option value="">Select...</option>
-                <option value="student">Student</option>
+                <option value="student" {% if fromTeacher %}selected{% endif %}>Student</option>
                 <option value="teacher">Teacher</option>
             </select>
+            {% if fromTeacher %}
+            <input type="hidden" name="role" value="student">
+            {% endif %}
         </div>
     </div>
 
