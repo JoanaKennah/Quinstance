@@ -12,11 +12,6 @@ This is Games Night #10's group project, consisting of four members:
 * Joana Kennah   [ clhd4492@leeds.ac.uk ]
 * Ethan Harris   [ jzfl2265@leeds.ac.uk ]
 * Minghao Le     [ tgqj4326@leeds.ac.uk ] 
-### What is this
-Quinstance is a Quiz Hosting web application aimed towards teachers and students of all ages, but can also be enjoyed by
-non-students also. Quinstance offers quiz creation and customisation, hosting and minigames (if students are well-behaved enough!)
-
-TODO() finish this a bit more
 
 ## Running our Application
 To run the Quinstance application, enter this command into the terminal:
@@ -64,6 +59,10 @@ Playwright.
 To run our Kotest tests, please run `./gradlew check`. This will not only run all the Kotest tests but also run a **Ktlint
 check** also on our Main project files and Test files!
 
+If you want to just run the tests, please run `./gradlew test`
+
 ### Playwright
-To run our Playwright tests, please run `npx playwright test`
+To run our Playwright tests, please run `npx playwright test --workers=1`
+
+NOTE: You may need to install playwright before running the command above. If so, please run `npm install playwright`. 
 
