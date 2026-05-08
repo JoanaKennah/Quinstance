@@ -59,6 +59,8 @@ Playwright.
 To run our Kotest tests, please run `./gradlew check`. This will not only run all the Kotest tests but also run a **Ktlint
 check** also on our Main project files and Test files!
 
+If you want to just run the tests, please run `./gradlew test`
+
 ### Playwright
 To run our Playwright tests, please run `npx playwright test --workers=1`
 
