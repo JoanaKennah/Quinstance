@@ -174,7 +174,7 @@
 
     <div class="bottom-bar">
 
-        <a class="cancel" href='/view-quizzes'>Cancel</a>
+        <a class="cancel" onclick="window.location.href='{{ returnURL }}'">Cancel</a>
 
         <button type="submit">{% if isEdit %}Save{% else %}Next{% endif %}</button>
 

@@ -23,6 +23,20 @@
             text-decoration: none;
             font-weight: bold;
         }
+        .navbar a {
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .quiz-name {
+            margin-left: auto;
+        }
+        .quit-link {
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .quit-link:hover {
+            text-decoration: underline;
+        }
         .content {
             margin: 40px;
             text-align: center;
@@ -91,6 +105,19 @@
             color: white;
             text-decoration: none;
             font-weight: bold;
+        }
+      
+        .quiz-name {
+            margin-left: auto;
+        }
+      
+        .quit-link {
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .quit-link:hover {
+            text-decoration: underline;
         }
 
         .content {
@@ -177,9 +204,11 @@
   
 <div class="navbar">
     {% if not isHost %}
-    <a href="/quit-game" style="color: black; text-decoration: none; font-weight: bold;">Quit</a>
+    <a href="/quit-game" class="quit-link">Quit</a>
     {% endif %}
-    <a>{{ quizName }}</a>
+    <div class="quiz-name">
+        <a>{{ quizName }}</a>
+    </div>
 </div>
 
 <div class="content">
