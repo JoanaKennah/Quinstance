@@ -141,6 +141,7 @@ fun Application.configureWordsMinigameRouting() {
                         ),
                     )
 
+            val errorMessage = call.request.queryParameters["error"] ?: ""
             call.respond(
                 PebbleContent(
                     "words_minigame_client_pick.peb",
@@ -148,7 +149,7 @@ fun Application.configureWordsMinigameRouting() {
                         "gameId" to gameId,
                         "theme" to session.theme,
                         "grid" to wordsState.grid,
-                        "errorMessage" to "",
+                        "errorMessage" to errorMessage,
                     ),
                 ),
             )
@@ -180,17 +181,8 @@ fun Application.configureWordsMinigameRouting() {
 
             val parameters = call.receiveParameters()
             val word =
-                parameters["word"]?.uppercase()?.trim() ?: return@post call.respond(
-                    PebbleContent(
-                        "words_minigame_client_pick.peb",
-                        mapOf(
-                            "gameId" to gameId,
-                            "theme" to session.theme,
-                            "grid" to wordsState.grid,
-                            "errorMessage" to "Please enter a valid word",
-                        ),
-                    ),
-                )
+                parameters["word"]?.uppercase()?.trim() ?: return@post call.respondRedirect("/words-start/$gameId?error=Please+enter+a+valid+word")
+
 
             // Check letters in word against letters in grid
             val gridLetterCounts = wordsState.grid.groupingBy { it }.eachCount()
@@ -201,34 +193,14 @@ fun Application.configureWordsMinigameRouting() {
                 }
 
             if (!lettersValid) {
-                call.respond(
-                    PebbleContent(
-                        "words_minigame_client_pick.peb",
-                        mapOf(
-                            "gameId" to gameId,
-                            "theme" to session.theme,
-                            "grid" to wordsState.grid,
-                            "errorMessage" to "Please enter a valid word",
-                        ),
-                    ),
-                )
+                call.respondRedirect("/words-start/$gameId?error=Please+enter+a+valid+word")
                 return@post
             }
 
             // Check word against dictionary API
             val response = httpClient.get("https://api.dictionaryapi.dev/api/v2/entries/en/${word.lowercase()}")
             if (response.status != HttpStatusCode.OK) {
-                call.respond(
-                    PebbleContent(
-                        "words_minigame_client_pick.peb",
-                        mapOf(
-                            "gameId" to gameId,
-                            "theme" to session.theme,
-                            "grid" to wordsState.grid,
-                            "errorMessage" to "Please enter a valid word",
-                        ),
-                    ),
-                )
+                call.respondRedirect("/words-start/$gameId?error=Please+enter+a+valid+word")
                 return@post
             }
 
