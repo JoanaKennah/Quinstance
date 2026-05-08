@@ -87,12 +87,16 @@
 
 <h1>Hello {{ username }}!</h1>
 
-<div class="button-container"> <!--- NEED TO ADD ROUTING --->
+{% if studentCreated %}
+<p style="color: green; font-weight: bold; margin-top: 20px;">You have created a student account created successfully!</p>
+{% endif %}
+
+<div class="button-container"> 
 <button onclick="window.location.href='/join-lobby'">Join a Lobby</button>
 <button onclick="window.location.href='/create-quiz'">Create a Quiz</button>
 <button onclick="window.location.href='/view-quizzes'">View Quizzes</button>
 <button onclick="window.location.href='/user-stats'">View Statistics</button>
-<button onclick="window.location.href='/signup'">Create a Student Account</button>
+<button onclick="window.location.href='/signup?fromTeacher=true'">Create a Student Account</button>
 </div>
 
 </body>
